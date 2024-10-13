@@ -5,19 +5,51 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Add Recipe</title>
-    <!-- Bootstrap CSS -->
     <link href="{% static 'bootstrap/css/bootstrap.min.css' %}" rel="stylesheet">
 </head>
 <body>
     <div class="container">
-        <h1 class="mt-4">Add a New Recipe</h1>
-        <form method="post">
+        <h1 class="mt-4">Add Recipe</h1>
+        <form method="POST">
             {% csrf_token %}
-            {{ form.as_p }}
+            <div class="mb-3">
+                <label for="id_title" class="form-label">Title</label>
+                {{ form.title }}
+                {% if form.title.errors %}
+                    <div class="text-danger">{{ form.title.errors }}</div>
+                {% endif %}
+            </div>
+            <div class="mb-3">
+                <label for="id_description" class="form-label">Description</label>
+                {{ form.description }}
+                {% if form.description.errors %}
+                    <div class="text-danger">{{ form.description.errors }}</div>
+                {% endif %}
+            </div>
+            <div class="mb-3">
+                <label for="id_ingredients" class="form-label">Ingredients</label>
+                {{ form.ingredients }}
+                {% if form.ingredients.errors %}
+                    <div class="text-danger">{{ form.ingredients.errors }}</div>
+                {% endif %}
+            </div>
+            <div class="mb-3">
+                <label for="id_instructions" class="form-label">Instructions</label>
+                {{ form.instructions }}
+                {% if form.instructions.errors %}
+                    <div class="text-danger">{{ form.instructions.errors }}</div>
+                {% endif %}
+            </div>
+            <div class="mb-3">
+                <label for="id_category" class="form-label">Category</label>
+                {{ form.category }}
+                {% if form.category.errors %}
+                    <div class="text-danger">{{ form.category.errors }}</div>
+                {% endif %}
+            </div>
             <button type="submit" class="btn btn-primary">Add Recipe</button>
         </form>
     </div>
-    <!-- Bootstrap JS and dependencies -->
     <script src="{% static 'bootstrap/js/bootstrap.bundle.min.js' %}"></script>
 </body>
 </html>

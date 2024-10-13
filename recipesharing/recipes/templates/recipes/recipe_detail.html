@@ -14,10 +14,9 @@
         <p><strong>Description:</strong> {{ recipe.description }}</p>
         <p><strong>Ingredients:</strong> {{ recipe.ingredients }}</p>
         <p><strong>Instructions:</strong> {{ recipe.instructions }}</p>
-        <p><strong>Instructions:</strong> {{ recipe.instructions }}</p>
+        <p><strong>Category:</strong> {{ recipe.category.name }}</p> <!-- Added category display -->
         <a href="{% url 'edit_recipe' recipe.id %}">Edit Recipe</a> |
         <a href="{% url 'delete_recipe' recipe.id %}">Delete Recipe</a>
-  
     </div>
     <!-- Bootstrap JS and dependencies -->
     <script src="{% static 'bootstrap/js/bootstrap.bundle.min.js' %}"></script>

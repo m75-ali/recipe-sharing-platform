@@ -12,11 +12,21 @@
         <!-- Navigation goes here -->
     </header>
 
+    <!-- Messages Section -->
+    <div class="container mt-3">
+        {% if messages %}
+            <div class="alert alert-success">
+                {% for message in messages %}
+                    {{ message }}
+                {% endfor %}
+            </div>
+        {% endif %}
+    </div>
+
     <main>
         {% block content %}
         {% endblock %}
     </main>
 
-    <script src="{% static 'js/bootstrap.bundle.min.js' %}"></script>
-</body>
+    <script src="{% static 'js/bootstrap.bundle.min.js' %}"></script></body>
 </html>

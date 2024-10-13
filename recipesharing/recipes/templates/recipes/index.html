@@ -11,6 +11,16 @@
 <body>
     <div class="container">
         <h1 class="mt-4">Welcome to the Recipe List!</h1>
+
+        <!-- Messages Section -->
+        {% if messages %}
+            <div class="alert alert-success">
+                {% for message in messages %}
+                    {{ message }}
+                {% endfor %}
+            </div>
+        {% endif %}
+
         <ul class="list-group">
             {% for recipe in recipes %}
             <li class="list-group-item">
