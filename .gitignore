@@ -18,6 +18,7 @@ media/
 staticfiles/
 *.pot
 *.pyc
+*.egg-info/
 
 # IDEs
 .vscode/
@@ -26,3 +27,25 @@ staticfiles/
 # OS
 .DS_Store
 Thumbs.db
+
+# Ignore local environment files
+*.env
+*.env.local
+*.env.production
+*.env.development
+
+# Ignore Pytest cache
+.cache/
+
+# Ignore coverage reports
+.coverage
+coverage.xml
+htmlcov/
+
+# Ignore Jupyter Notebook checkpoints
+.ipynb_checkpoints/
+
+# Ignore other temporary files
+*.bak
+*.swp
+*~
