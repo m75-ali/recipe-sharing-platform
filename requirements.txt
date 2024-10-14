@@ -1,0 +1,4 @@
+Django>=4.2.16
+djangorestframework>=3.14.0  # In case you're using Django REST API
+Pillow>=9.1.0  # For handling image uploads (if applicable)
+django-crispy-forms>=1.14.0  # For better form rendering, if you use it
