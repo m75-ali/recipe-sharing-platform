@@ -125,3 +125,9 @@ STATICFILES_DIRS = [BASE_DIR / "static"]
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+
+# Login Redirects
+LOGIN_REDIRECT_URL = 'recipe_index'  # After login, redirect to recipes
+LOGOUT_REDIRECT_URL = 'recipe_index'  # After logout, redirect to recipes
+LOGIN_URL = '/login/'  # URL for login
