@@ -47,6 +47,9 @@
                     <div class="text-danger">{{ form.category.errors }}</div>
                 {% endif %}
             </div>
+            <div class="mt-4">
+                <a href="{% url 'recipe_index' %}" class="btn btn-secondary">Home</a>
+            </div>
             <button type="submit" class="btn btn-primary">Add Recipe</button>
         </form>
     </div>

@@ -12,6 +12,17 @@
     <div class="container">
         <h1 class="mt-4">Welcome to the Recipe List!</h1>
 
+        <!-- If the user is logged in, show Logout and Profile options -->
+        {% if user.is_authenticated %}
+            <p>Hello, {{ user.username }}!</p>
+            <a href="{% url 'logout' %}" class="btn btn-danger">Logout</a>
+            <a href="{% url 'profile' %}" class="btn btn-primary">View Profile</a>
+        {% else %}
+            <!-- If the user is not logged in, show Login and Register options -->
+            <a href="{% url 'login' %}" class="btn btn-primary">Login</a>
+            <a href="{% url 'register' %}" class="btn btn-secondary">Register</a>
+        {% endif %}
+
         <!-- Messages Section -->
         {% if messages %}
             <div class="alert alert-success">

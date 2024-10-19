@@ -1,9 +1,21 @@
-{% extends 'base.html' %}
+{% extends 'recipes/base.html' %}
 {% block content %}
-    <h2>Profile</h2>
-    <form method="post">
-        {% csrf_token %}
-        {{ form.as_p }}
-        <button type="submit" class="btn btn-primary">Update</button>
-    </form>
+<h2>Profile</h2>
+<form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit" class="btn btn-primary">Update</button>
+</form>
+<div class="mt-4">
+    <a href="{% url 'recipe_index' %}" class="btn btn-secondary">Home</a>
+</div>
+
+<h3>Your Favorite Recipes</h3>
+<ul>
+    {% for recipe in favorites %}
+    <li><a href="{% url 'recipe_detail' recipe.id %}">{{ recipe.title }}</a></li>
+    {% empty %}
+    <li>You haven't favorited any recipes yet.</li>
+    {% endfor %}
+</ul>
 {% endblock %}

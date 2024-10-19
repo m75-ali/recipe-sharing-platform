@@ -13,5 +13,8 @@
         <button type="submit">Confirm Delete</button>
     </form>
     <a href="{% url 'recipe_detail' recipe.id %}">Cancel</a>
+    <div class="mt-4">
+        <a href="{% url 'recipe_index' %}" class="btn btn-secondary">Home</a>
+    </div>
 </body>
 </html>

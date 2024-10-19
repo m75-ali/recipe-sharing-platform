@@ -14,10 +14,35 @@
         <p><strong>Description:</strong> {{ recipe.description }}</p>
         <p><strong>Ingredients:</strong> {{ recipe.ingredients }}</p>
         <p><strong>Instructions:</strong> {{ recipe.instructions }}</p>
-        <p><strong>Category:</strong> {{ recipe.category.name }}</p> <!-- Added category display -->
-        <a href="{% url 'edit_recipe' recipe.id %}">Edit Recipe</a> |
-        <a href="{% url 'delete_recipe' recipe.id %}">Delete Recipe</a>
+        <p><strong>Category:</strong> {{ recipe.category.name }}</p>
+
+        <!-- Favorite/Unfavorite button -->
+        {% if user.is_authenticated %}
+            {% if user in recipe.favorites.all %}
+                <form action="{% url 'favorite_recipe' recipe.id %}" method="POST">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-danger">Unfavorite</button>
+                </form>
+            {% else %}
+                <form action="{% url 'favorite_recipe' recipe.id %}" method="POST">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-primary">Favorite</button>
+                </form>
+            {% endif %}
+        {% endif %}
+
+        <p>Favorited by {{ recipe.total_favorites }} users</p>
+
+        <!-- Links to edit and delete -->
+        <a href="{% url 'edit_recipe' recipe.id %}" class="btn btn-warning">Edit Recipe</a> |
+        <a href="{% url 'delete_recipe' recipe.id %}" class="btn btn-danger">Delete Recipe</a>
+
+        <!-- Home button -->
+        <div class="mt-4">
+            <a href="{% url 'recipe_index' %}" class="btn btn-secondary">Home</a>
+        </div>
     </div>
+
     <!-- Bootstrap JS and dependencies -->
     <script src="{% static 'bootstrap/js/bootstrap.bundle.min.js' %}"></script>
 </body>
