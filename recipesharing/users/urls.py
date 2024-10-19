@@ -7,6 +7,8 @@ urlpatterns = [
     path('register/', views.register, name='register'),
     path('login/', auth_views.LoginView.as_view(template_name='users/login.html'), name='login'),
     path('logout/', auth_views.LogoutView.as_view(), name='users/logout'),
+    path('privacy-policy/', views.privacy_policy, name='privacy_policy'),  # Add this line
+
     
     
     # Password reset URLs

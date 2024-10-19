@@ -1,21 +1,24 @@
 {% extends 'recipes/base.html' %}
-{% block content %}
-<h2>Profile</h2>
-<form method="post">
-    {% csrf_token %}
-    {{ form.as_p }}
-    <button type="submit" class="btn btn-primary">Update</button>
-</form>
-<div class="mt-4">
-    <a href="{% url 'recipe_index' %}" class="btn btn-secondary">Home</a>
-</div>
 
-<h3>Your Favorite Recipes</h3>
-<ul>
-    {% for recipe in favorites %}
-    <li><a href="{% url 'recipe_detail' recipe.id %}">{{ recipe.title }}</a></li>
-    {% empty %}
-    <li>You haven't favorited any recipes yet.</li>
-    {% endfor %}
-</ul>
+{% block content %}
+    <div class="container">
+        <h1 class="mt-4">Profile</h1>
+        <form method="post">
+            {% csrf_token %}
+            {{ form.as_p }}  <!-- This will render fields without the add_class filter -->
+            <button type="submit" class="btn btn-primary">Update</button>
+        </form>
+        <div class="mt-4">
+            <a href="{% url 'recipe_index' %}" class="btn btn-secondary">Home</a>
+        </div>
+
+        <h3 class="mt-4">Your Favorite Recipes</h3>
+        <ul class="list-group">
+            {% for recipe in favorites %}
+            <li class="list-group-item"><a href="{% url 'recipe_detail' recipe.id %}">{{ recipe.title }}</a></li>
+            {% empty %}
+            <li class="list-group-item">You haven't favorited any recipes yet.</li>
+            {% endfor %}
+        </ul>
+    </div>
 {% endblock %}

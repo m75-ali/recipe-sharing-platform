@@ -1,0 +1,45 @@
+/* General styles */
+html, body {
+    height: 100%;
+    margin: 0;
+}
+
+/* Flexbox for the layout to push footer to the bottom */
+body {
+    display: flex;
+    flex-direction: column;
+}
+
+/* Ensure the main content area stretches to fill space */
+main {
+    flex: 1;
+}
+
+/* Footer stays at the bottom */
+footer {
+    background-color: #f8f9fa;
+    padding: 1rem 0;
+    text-align: center;
+}
+
+/* Navbar styles */
+.navbar-brand {
+    font-weight: bold;
+}
+
+.navbar-nav .nav-link {
+    font-size: 1.1rem;
+}
+
+.nav-item a {
+    color: #007bff;
+}
+
+.nav-item a:hover {
+    color: #0056b3;
+}
+
+/* Styling the buttons */
+.btn {
+    font-size: 1rem;
+}

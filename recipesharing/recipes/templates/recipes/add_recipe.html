@@ -1,58 +1,47 @@
-{% load static %}
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Add Recipe</title>
-    <link href="{% static 'bootstrap/css/bootstrap.min.css' %}" rel="stylesheet">
-</head>
-<body>
+{% extends 'recipes/base.html' %}
+
+{% block content %}
     <div class="container">
-        <h1 class="mt-4">Add Recipe</h1>
+        <h1 class="mt-4">Add a New Recipe</h1>
         <form method="POST">
             {% csrf_token %}
             <div class="mb-3">
                 <label for="id_title" class="form-label">Title</label>
-                {{ form.title }}
+                {{ form.title|add_class:"form-control" }}
                 {% if form.title.errors %}
                     <div class="text-danger">{{ form.title.errors }}</div>
                 {% endif %}
             </div>
             <div class="mb-3">
                 <label for="id_description" class="form-label">Description</label>
-                {{ form.description }}
+                {{ form.description|add_class:"form-control" }}
                 {% if form.description.errors %}
                     <div class="text-danger">{{ form.description.errors }}</div>
                 {% endif %}
             </div>
             <div class="mb-3">
                 <label for="id_ingredients" class="form-label">Ingredients</label>
-                {{ form.ingredients }}
+                {{ form.ingredients|add_class:"form-control" }}
                 {% if form.ingredients.errors %}
                     <div class="text-danger">{{ form.ingredients.errors }}</div>
                 {% endif %}
             </div>
             <div class="mb-3">
                 <label for="id_instructions" class="form-label">Instructions</label>
-                {{ form.instructions }}
+                {{ form.instructions|add_class:"form-control" }}
                 {% if form.instructions.errors %}
                     <div class="text-danger">{{ form.instructions.errors }}</div>
                 {% endif %}
             </div>
             <div class="mb-3">
                 <label for="id_category" class="form-label">Category</label>
-                {{ form.category }}
+                {{ form.category|add_class:"form-select" }}
                 {% if form.category.errors %}
                     <div class="text-danger">{{ form.category.errors }}</div>
                 {% endif %}
             </div>
-            <div class="mt-4">
-                <a href="{% url 'recipe_index' %}" class="btn btn-secondary">Home</a>
-            </div>
             <button type="submit" class="btn btn-primary">Add Recipe</button>
+            <a href="{% url 'recipe_index' %}" class="btn btn-secondary">Cancel</a>
         </form>
     </div>
-    <script src="{% static 'bootstrap/js/bootstrap.bundle.min.js' %}"></script>
-</body>
-</html>
+{% endblock %}

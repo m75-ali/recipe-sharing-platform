@@ -1,14 +1,6 @@
-{% load static %}
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ recipe.title }}</title>
-    <!-- Bootstrap CSS -->
-    <link href="{% static 'bootstrap/css/bootstrap.min.css' %}" rel="stylesheet">
-</head>
-<body>
+{% extends 'recipes/base.html' %}
+
+{% block content %}
     <div class="container">
         <h1 class="mt-4">{{ recipe.title }}</h1>
         <p><strong>Description:</strong> {{ recipe.description }}</p>
@@ -34,7 +26,7 @@
         <p>Favorited by {{ recipe.total_favorites }} users</p>
 
         <!-- Links to edit and delete -->
-        <a href="{% url 'edit_recipe' recipe.id %}" class="btn btn-warning">Edit Recipe</a> |
+        <a href="{% url 'edit_recipe' recipe.id %}" class="btn btn-warning">Edit Recipe</a>
         <a href="{% url 'delete_recipe' recipe.id %}" class="btn btn-danger">Delete Recipe</a>
 
         <!-- Home button -->
@@ -42,8 +34,4 @@
             <a href="{% url 'recipe_index' %}" class="btn btn-secondary">Home</a>
         </div>
     </div>
-
-    <!-- Bootstrap JS and dependencies -->
-    <script src="{% static 'bootstrap/js/bootstrap.bundle.min.js' %}"></script>
-</body>
-</html>
+{% endblock %}
