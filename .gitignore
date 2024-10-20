@@ -9,10 +9,11 @@ venv/
 ENV/
 env.bak/
 venv.bak/
+.pytest_cache/
 
 # Django
 *.log
-
+db.sqlite3
 
 media/
 staticfiles/
@@ -49,3 +50,14 @@ htmlcov/
 *.bak
 *.swp
 *~
+# Ignore Django migrations
+*/migrations/*
+
+# Ignore custom secrets or sensitive configuration files
+secrets.json
+
+media/uploads/
+
+# Ignore build and dist directories
+build/
+dist/
