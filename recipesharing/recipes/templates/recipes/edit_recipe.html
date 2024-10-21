@@ -1,35 +1,46 @@
 {% extends 'recipes/base.html' %}
 
 {% block content %}
+    <!-- Main container for the edit recipe form -->
     <div class="container">
+        <!-- Display the recipe title being edited -->
         <h1 class="mt-4">Edit Recipe: {{ recipe.title }}</h1>
+
+        <!-- Form for editing the recipe, using the POST method -->
         <form method="post">
-            {% csrf_token %}
+            {% csrf_token %}  <!-- CSRF token for protection against CSRF attacks -->
+
+            <!-- Title field with current value pre-filled -->
             <div class="form-group">
                 <label for="id_title">Title</label>
                 <input type="text" name="title" value="{{ form.title.value }}" class="form-control" id="id_title">
             </div>
 
+            <!-- Description field with current value pre-filled -->
             <div class="form-group">
                 <label for="id_description">Description</label>
                 <textarea name="description" class="form-control" id="id_description">{{ form.description.value }}</textarea>
             </div>
 
+            <!-- Ingredients field with current value pre-filled -->
             <div class="form-group">
                 <label for="id_ingredients">Ingredients</label>
                 <textarea name="ingredients" class="form-control" id="id_ingredients">{{ form.ingredients.value }}</textarea>
             </div>
 
+            <!-- Instructions field with current value pre-filled -->
             <div class="form-group">
                 <label for="id_instructions">Instructions</label>
                 <textarea name="instructions" class="form-control" id="id_instructions">{{ form.instructions.value }}</textarea>
             </div>
 
+            <!-- Category dropdown with the current selection pre-filled -->
             <div class="form-group">
                 <label for="id_category">Category</label>
                 {{ form.category }}
             </div>
 
+            <!-- Submit and Cancel buttons -->
             <button type="submit" class="btn btn-primary">Update Recipe</button>
             <a href="{% url 'recipe_detail' recipe.id %}" class="btn btn-secondary">Cancel</a>
         </form>

@@ -1,21 +1,27 @@
 {% extends 'recipes/base.html' %}
 
 {% block content %}
+    <!-- Main container for the recipe details -->
     <div class="container">
+        <!-- Recipe title -->
         <h1 class="mt-4">{{ recipe.title }}</h1>
+        
+        <!-- Recipe description, ingredients, instructions, and category -->
         <p><strong>Description:</strong> {{ recipe.description }}</p>
         <p><strong>Ingredients:</strong> {{ recipe.ingredients }}</p>
         <p><strong>Instructions:</strong> {{ recipe.instructions }}</p>
         <p><strong>Category:</strong> {{ recipe.category.name }}</p>
 
-        <!-- Favorite/Unfavorite button -->
+        <!-- Favorite/Unfavorite functionality for logged-in users -->
         {% if user.is_authenticated %}
             {% if user in recipe.favorites.all %}
+                <!-- If the user has favorited the recipe, show the Unfavorite button -->
                 <form action="{% url 'favorite_recipe' recipe.id %}" method="POST">
                     {% csrf_token %}
                     <button type="submit" class="btn btn-danger">Unfavorite</button>
                 </form>
             {% else %}
+                <!-- If the user has not favorited the recipe, show the Favorite button -->
                 <form action="{% url 'favorite_recipe' recipe.id %}" method="POST">
                     {% csrf_token %}
                     <button type="submit" class="btn btn-primary">Favorite</button>
@@ -23,15 +29,18 @@
             {% endif %}
         {% endif %}
 
+        <!-- Display how many users have favorited this recipe -->
         <p>Favorited by {{ recipe.total_favorites }} users</p>
 
-        <!-- Display average rating -->
+        <!-- Display the average rating -->
         <p>Average Rating: {{ average_rating|floatformat:1 }} / 5</p>
 
-        <!-- User's rating -->
+        <!-- Allow the logged-in user to submit or view their rating -->
         {% if user_rating %}
+            <!-- Show the user's current rating if they have already rated the recipe -->
             <p>Your Rating: {{ user_rating.rating }} / 5</p>
         {% else %}
+            <!-- If the user hasn't rated yet, provide a dropdown to rate the recipe -->
             <form method="POST" action="">
                 {% csrf_token %}
                 <label for="rating">Rate this recipe:</label>
@@ -46,11 +55,11 @@
             </form>
         {% endif %}
 
-        <!-- Links to edit and delete -->
+        <!-- Edit and delete links, allowing users to modify or delete the recipe -->
         <a href="{% url 'edit_recipe' recipe.id %}" class="btn btn-warning">Edit Recipe</a> |
         <a href="{% url 'delete_recipe' recipe.id %}" class="btn btn-danger">Delete Recipe</a>
 
-        <!-- Home button -->
+        <!-- Button to go back to the home page -->
         <div class="mt-4">
             <a href="{% url 'recipe_index' %}" class="btn btn-secondary">Home</a>
         </div>

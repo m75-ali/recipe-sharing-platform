@@ -1,8 +1,12 @@
 {% extends 'recipes/base.html' %}
 
 {% block content %}
+    <!-- Main container with top margin for spacing -->
     <div class="container mt-5">
+        <!-- Heading to inform the user they have been logged out -->
         <h1>You have been logged out.</h1>
+        
+        <!-- Button to allow the user to log in again, styled with Bootstrap's primary button -->
         <a href="{% url 'login' %}" class="btn btn-primary">Log in again</a>
     </div>
 {% endblock %}

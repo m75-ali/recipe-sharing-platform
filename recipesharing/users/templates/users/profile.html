@@ -1,23 +1,38 @@
 {% extends 'recipes/base.html' %}
 
 {% block content %}
+    <!-- Main container for the profile content -->
     <div class="container">
+        <!-- Heading for the profile page -->
         <h1 class="mt-4">Profile</h1>
+
+        <!-- Form for updating user profile (e.g., username, email) -->
         <form method="post">
-            {% csrf_token %}
-            {{ form.as_p }}  <!-- This will render fields without the add_class filter -->
+            {% csrf_token %}  <!-- Security token to prevent CSRF attacks -->
+            {{ form.as_p }}  <!-- Render form fields with <p> tags for each field -->
+            
+            <!-- Submit button to update the profile -->
             <button type="submit" class="btn btn-primary">Update</button>
         </form>
+
+        <!-- Button to navigate back to the home page -->
         <div class="mt-4">
             <a href="{% url 'recipe_index' %}" class="btn btn-secondary">Home</a>
         </div>
 
+        <!-- Section for displaying the user's favorite recipes -->
         <h3 class="mt-4">Your Favorite Recipes</h3>
+        
+        <!-- List group to display favorite recipes -->
         <ul class="list-group">
             {% for recipe in favorites %}
-            <li class="list-group-item"><a href="{% url 'recipe_detail' recipe.id %}">{{ recipe.title }}</a></li>
+                <!-- List each favorite recipe as a link to its detail page -->
+                <li class="list-group-item">
+                    <a href="{% url 'recipe_detail' recipe.id %}">{{ recipe.title }}</a>
+                </li>
             {% empty %}
-            <li class="list-group-item">You haven't favorited any recipes yet.</li>
+                <!-- Message shown if no favorite recipes exist -->
+                <li class="list-group-item">You haven't favorited any recipes yet.</li>
             {% endfor %}
         </ul>
     </div>
