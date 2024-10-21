@@ -7,9 +7,16 @@ from django.contrib import messages
 from django.http import HttpResponseRedirect
 from django.urls import reverse
 
-# Create your views here.
 def index(request):
-    recipes = Recipe.objects.all()  # Fetch all recipes from the database
+    # Fetch all recipes
+    recipes = Recipe.objects.all()
+
+    # Calculate the average rating for each recipe
+    for recipe in recipes:
+        average_rating = recipe.ratings.aggregate(Avg('rating'))['rating__avg']
+        # If there are no ratings, set average_rating to None
+        recipe.average_rating = average_rating if average_rating is not None else None
+
     return render(request, 'recipes/index.html', {'recipes': recipes})
 
 @login_required
@@ -62,23 +69,22 @@ def recipe_detail(request, recipe_id):
 @login_required
 def edit_recipe(request, recipe_id):
     recipe = get_object_or_404(Recipe, id=recipe_id)
-    
+
     # Check if the current user is the creator of the recipe
     if recipe.creator != request.user:
-        messages.error(request, 'You are not authorized to edit this recipe.')
-        return redirect('recipe_detail', recipe_id=recipe.id)
+        messages.error(request, "You cannot edit someone else's recipe.")
+        return redirect('recipe_detail', recipe_id=recipe_id)
 
     if request.method == 'POST':
         form = RecipeForm(request.POST, instance=recipe)
         if form.is_valid():
             form.save()
             messages.success(request, 'Recipe updated successfully.')
-            return redirect('recipe_detail', recipe_id=recipe.id)
+            return redirect('recipe_detail', recipe_id=recipe_id)
     else:
         form = RecipeForm(instance=recipe)
 
     return render(request, 'recipes/edit_recipe.html', {'form': form, 'recipe': recipe})
-
 
 @login_required
 def delete_recipe(request, recipe_id):

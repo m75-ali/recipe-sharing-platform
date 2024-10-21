@@ -39,6 +39,16 @@
         </nav>
     </header>
 
+<div class="container">
+    {% if messages %}
+        <div class="alert alert-info">
+            {% for message in messages %}
+                {{ message }}
+            {% endfor %}
+        </div>
+    {% endif %}
+</div>
+
     <main class="container mt-4">
         {% block content %}
         {% endblock %}
