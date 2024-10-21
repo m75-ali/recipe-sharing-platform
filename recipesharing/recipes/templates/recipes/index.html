@@ -2,28 +2,32 @@
 
 {% block content %}
   <div class="container">
-    <h1 class="mt-4">Welcome to the Recipe List!</h1>
+    <h1 class="mt-4 text-center">Discover Delicious Recipes</h1>
 
-    <!-- If the user is logged in, show Logout, Profile, and Add Recipe options -->
+    <!-- If the user is logged in, show options -->
     {% if user.is_authenticated %}
-      <p class="text-muted">Hello, {{ user.username }}!</p>
-      <a href="{% url 'add_recipe' %}" class="btn btn-success mt-2">Add New Recipe</a> <!-- Add New Recipe Button -->
+      <p class="text-muted text-center">Hello, {{ user.username }}!</p>
+      <div class="text-center mb-4">
+        <a href="{% url 'add_recipe' %}" class="btn btn-success">Add New Recipe</a>
+      </div>
     {% endif %}
 
     <div class="row mt-4">
       {% for recipe in recipes %}
         <div class="col-md-4">
-          <div class="card mb-4">
+          <div class="card mb-4 shadow-sm">
             <div class="card-body">
-              <h5 class="card-title"><a href="{% url 'recipe_detail' recipe.id %}">{{ recipe.title }}</a></h5>
+              <h5 class="card-title">
+                <a href="{% url 'recipe_detail' recipe.id %}" class="text-light">{{ recipe.title }}</a>
+              </h5>
               <p class="card-text">{{ recipe.description|truncatewords:20 }}</p>
 
-              <!-- Display the average rating or "No ratings yet" -->
+              <!-- Display the average rating or 'No ratings yet' -->
               <p class="card-text">
                 {% if recipe.average_rating %}
-                  Average Rating: {{ recipe.average_rating|floatformat:1 }} / 5
+                  ⭐ Average Rating: {{ recipe.average_rating|floatformat:1 }} / 5
                 {% else %}
-                  No ratings yet
+                  ⭐ No ratings yet
                 {% endif %}
               </p>
 

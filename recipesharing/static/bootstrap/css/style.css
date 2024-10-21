@@ -1,45 +1,68 @@
-/* General styles */
-html, body {
-    height: 100%;
-    margin: 0;
-}
-
-/* Flexbox for the layout to push footer to the bottom */
+/* General adjustments for text */
 body {
-    display: flex;
-    flex-direction: column;
+    color: #333333 !important; /* Dark gray text for good contrast */
 }
 
-/* Ensure the main content area stretches to fill space */
-main {
-    flex: 1;
+/* Custom Card Styles */
+.card {
+    border-radius: 10px !important; /* Softer rounded corners */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1) !important; /* Subtle shadow for depth */
+    transition: transform 0.2s ease-in-out !important; /* Smooth hover effect */
 }
 
-/* Footer stays at the bottom */
-footer {
-    background-color: #f8f9fa;
-    padding: 1rem 0;
-    text-align: center;
+.card:hover {
+    transform: scale(1.03) !important; /* Slight zoom on hover */
 }
 
-/* Navbar styles */
+/* Custom Button Styles */
+.btn {
+    border-radius: 5px !important; /* Rounded corners for buttons */
+    transition: background-color 0.3s ease, color 0.3s ease !important; /* Smooth color transition */
+}
+
+.btn-primary {
+    background-color: #007bff !important; /* Standard Bootstrap blue */
+    border: none !important;
+}
+
+.btn-primary:hover {
+    background-color: #0056b3 !important; /* Darker blue on hover */
+    color: #fff !important;
+}
+
+/* Custom Navbar */
+.navbar {
+    background-color: #007bff !important; /* Consistent with primary buttons */
+}
+
 .navbar-brand {
-    font-weight: bold;
+    font-weight: bold !important;
+    color: #ffffff !important; /* White text for visibility */
 }
 
 .navbar-nav .nav-link {
-    font-size: 1.1rem;
+    color: #ffffff !important; /* White links */
 }
 
-.nav-item a {
-    color: #007bff;
+.navbar-nav .nav-link:hover {
+    color: #f1f1f1 !important; /* Slightly lighter on hover */
 }
 
-.nav-item a:hover {
-    color: #0056b3;
+/* Footer Styles */
+footer {
+    background-color: #343a40 !important; /* Dark background for footer */
+    color: #f8f9fa !important; /* Light text for contrast */
+    padding: 1.5rem 0 !important;
+    text-align: center !important;
 }
 
-/* Styling the buttons */
-.btn {
-    font-size: 1rem;
+/* Responsive Tweaks for Mobile */
+@media (max-width: 768px) {
+    .card {
+        margin-bottom: 1rem !important;
+    }
+
+    .navbar-nav {
+        text-align: center !important;
+    }
 }
