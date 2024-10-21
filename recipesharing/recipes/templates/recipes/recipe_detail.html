@@ -25,8 +25,29 @@
 
         <p>Favorited by {{ recipe.total_favorites }} users</p>
 
+        <!-- Display average rating -->
+        <p>Average Rating: {{ average_rating|floatformat:1 }} / 5</p>
+
+        <!-- User's rating -->
+        {% if user_rating %}
+            <p>Your Rating: {{ user_rating.rating }} / 5</p>
+        {% else %}
+            <form method="POST" action="">
+                {% csrf_token %}
+                <label for="rating">Rate this recipe:</label>
+                <select name="rating" id="rating" class="form-select">
+                    <option value="1">1 - Poor</option>
+                    <option value="2">2 - Fair</option>
+                    <option value="3">3 - Good</option>
+                    <option value="4">4 - Very Good</option>
+                    <option value="5">5 - Excellent</option>
+                </select>
+                <button type="submit" class="btn btn-success mt-2">Submit Rating</button>
+            </form>
+        {% endif %}
+
         <!-- Links to edit and delete -->
-        <a href="{% url 'edit_recipe' recipe.id %}" class="btn btn-warning">Edit Recipe</a>
+        <a href="{% url 'edit_recipe' recipe.id %}" class="btn btn-warning">Edit Recipe</a> |
         <a href="{% url 'delete_recipe' recipe.id %}" class="btn btn-danger">Delete Recipe</a>
 
         <!-- Home button -->

@@ -1,7 +1,8 @@
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, get_object_or_404, redirect
 from .forms import RecipeForm
-from .models import Recipe
+from .models import Recipe, Rating
+from django.db.models import Avg
 from django.contrib import messages
 from django.http import HttpResponseRedirect
 from django.urls import reverse
@@ -25,11 +26,38 @@ def add_recipe(request):
         form = RecipeForm()
     return render(request, 'recipes/add_recipe.html', {'form': form})
 
+
 @login_required
 def recipe_detail(request, recipe_id):
-    recipe = get_object_or_404(Recipe, id=recipe_id)  # Fetch recipe using the 'recipe_id'
-    return render(request, 'recipes/recipe_detail.html', {'recipe': recipe})
+    recipe = get_object_or_404(Recipe, id=recipe_id)  # Fetch the recipe by ID
+    user_rating = None
 
+    # Handle rating submission
+    if request.method == 'POST' and 'rating' in request.POST:
+        rating_value = int(request.POST.get('rating'))
+        # Check if the user has already rated this recipe
+        rating, created = Rating.objects.get_or_create(user=request.user, recipe=recipe, defaults={'rating': rating_value})
+
+        if not created:
+            # Update existing rating
+            rating.rating = rating_value
+            rating.save()
+
+        messages.success(request, f'Thank you for rating {recipe.title}!')
+        return redirect('recipe_detail', recipe_id=recipe.id)
+
+    # Get the user's rating if it exists
+    if request.user.is_authenticated:
+        user_rating = Rating.objects.filter(user=request.user, recipe=recipe).first()
+
+    # Get the average rating for the recipe
+    average_rating = recipe.ratings.aggregate(Avg('rating'))['rating__avg'] or 0
+
+    return render(request, 'recipes/recipe_detail.html', {
+        'recipe': recipe,
+        'user_rating': user_rating,
+        'average_rating': average_rating
+    })
 
 @login_required
 def edit_recipe(request, recipe_id):

@@ -7,35 +7,35 @@
             {% csrf_token %}
             <div class="mb-3">
                 <label for="id_title" class="form-label">Title</label>
-                {{ form.title|add_class:"form-control" }}
+                {{ form.title }}
                 {% if form.title.errors %}
                     <div class="text-danger">{{ form.title.errors }}</div>
                 {% endif %}
             </div>
             <div class="mb-3">
                 <label for="id_description" class="form-label">Description</label>
-                {{ form.description|add_class:"form-control" }}
+                {{ form.description }}
                 {% if form.description.errors %}
                     <div class="text-danger">{{ form.description.errors }}</div>
                 {% endif %}
             </div>
             <div class="mb-3">
                 <label for="id_ingredients" class="form-label">Ingredients</label>
-                {{ form.ingredients|add_class:"form-control" }}
+                {{ form.ingredients }}
                 {% if form.ingredients.errors %}
                     <div class="text-danger">{{ form.ingredients.errors }}</div>
                 {% endif %}
             </div>
             <div class="mb-3">
                 <label for="id_instructions" class="form-label">Instructions</label>
-                {{ form.instructions|add_class:"form-control" }}
+                {{ form.instructions }}
                 {% if form.instructions.errors %}
                     <div class="text-danger">{{ form.instructions.errors }}</div>
                 {% endif %}
             </div>
             <div class="mb-3">
                 <label for="id_category" class="form-label">Category</label>
-                {{ form.category|add_class:"form-select" }}
+                {{ form.category }}
                 {% if form.category.errors %}
                     <div class="text-danger">{{ form.category.errors }}</div>
                 {% endif %}
