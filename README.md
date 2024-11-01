@@ -29,7 +29,7 @@ Welcome to the **Recipe Sharing Platform**, a web application designed for food 
 - **Bootstrap**: Frontend framework for responsive and mobile-first web development.
 - **HTML/CSS**: For rendering and styling the UI.
 - **JavaScript**: Enhances user interaction on the frontend.
-- **SQLite**: Database to store user data, recipes, and ratings.
+- **PostgreSQL**: Database to store user data, recipes, and ratings.
 
 ## ⚙️ Installation
 
