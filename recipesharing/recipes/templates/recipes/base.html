@@ -38,6 +38,13 @@
               {% if user.is_authenticated %}
                 <!-- Links visible if user is logged in -->
                 <li class="nav-item">
+                  <a class="nav-link" href="{% url 'ingredient_search' %}">
+                    <img src="{% static 'images/search.png' %}" alt="Search by Ingredients" style="height: 24px; width: 24px;">
+                  </a>
+                </li>
+                </li>
+                </li>
+                <li class="nav-item">
                   <a class="nav-link" href="{% url 'profile' %}">Profile</a>
                 </li>
                 <li class="nav-item">

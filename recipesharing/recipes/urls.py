@@ -27,4 +27,7 @@ urlpatterns = [
 
     # URL for the logout functionality, using Django's built-in LogoutView
     path('logout/', auth_views.LogoutView.as_view(), name='logout'),
+    
+    # URL for searching ingredients, handled by the ingredient_search view
+    path('search/', views.ingredient_search, name='ingredient_search'),
 ]

@@ -1,5 +1,8 @@
+import json
 from django.db import models
+from django.db.models import JSONField
 from django.contrib.auth.models import User
+from django.db.models import Q
 
 # Define a Category model to categorize recipes
 class Category(models.Model):
@@ -11,17 +14,21 @@ class Category(models.Model):
 
 # Define a Recipe model to store recipe details
 class Recipe(models.Model):
-    title = models.CharField(max_length=200)  # Title of the recipe
-    description = models.TextField()  # Short description of the recipe
-    ingredients = models.TextField()  # List of ingredients for the recipe
-    instructions = models.TextField()  # Step-by-step instructions for preparing the recipe
-    category = models.ForeignKey(Category, on_delete=models.CASCADE, related_name='recipes')  
-    # ForeignKey link to Category, with cascading delete (if the category is deleted, its recipes are too)
-    favorites = models.ManyToManyField(User, related_name='favorite_recipes', blank=True)  
-    # Many-to-many field to track users who have marked this recipe as a favorite
-    creator = models.ForeignKey(User, on_delete=models.CASCADE)  
-    # Link the recipe to the user who created it (if the user is deleted, the recipe is deleted too)
+    title = models.CharField(max_length=200)
+    description = models.TextField()
+    ingredients = JSONField()  # JSON-encoded list of ingredients
+    instructions = models.TextField()
+    category = models.ForeignKey(Category, on_delete=models.CASCADE, related_name='recipes')
+    favorites = models.ManyToManyField(User, related_name='favorite_recipes', blank=True)
+    creator = models.ForeignKey(User, on_delete=models.CASCADE)
 
+    def set_ingredients(self, ingredients_list):
+        """Convert a list of ingredients into JSON format for storage."""
+        self.ingredients = json.dumps(ingredients_list)
+
+    def get_ingredients(self):
+        """Retrieve the list of ingredients from JSON."""
+        return json.loads(self.ingredients)
     # Return the title of the recipe when referenced
     def __str__(self):
         return self.title
@@ -50,3 +57,23 @@ class Rating(models.Model):
     # Return a string representing the rating
     def __str__(self):
         return f'{self.recipe.title} rated {self.rating} by {self.user.username}'
+    
+
+
+def find_recipes_by_ingredients(user_ingredients):
+    results = []
+    all_recipes = Recipe.objects.all()
+
+    for recipe in all_recipes:
+        # Split ingredients in recipe, assuming they are comma-separated
+        recipe_ingredients = recipe.ingredients.lower().split(", ")
+        
+        # Calculate the match score based on the intersection
+        match_score = len(set(user_ingredients) & set(recipe_ingredients)) / len(user_ingredients)
+        
+        if match_score > 0:  # Only add recipes with a match
+            results.append((recipe, match_score))
+
+    # Sort by match score in descending order to show best matches first
+    results.sort(key=lambda x: x[1], reverse=True)
+    return results

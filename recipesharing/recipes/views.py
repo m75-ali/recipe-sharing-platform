@@ -6,6 +6,11 @@ from django.db.models import Avg
 from django.contrib import messages
 from django.http import HttpResponseRedirect
 from django.urls import reverse
+from django.shortcuts import render
+from .models import Recipe
+from .models import find_recipes_by_ingredients
+from .forms import IngredientSearchForm
+import json
 
 # View to list all recipes with their average ratings
 def index(request):
@@ -38,8 +43,6 @@ def add_recipe(request):
         form = RecipeForm()  # Show an empty form for GET request
     return render(request, 'recipes/add_recipe.html', {'form': form})
 
-# View to show recipe details and allow users to rate it (login required for rating)
-@login_required
 def recipe_detail(request, recipe_id):
     # Fetch the recipe by ID or return a 404 error if not found
     recipe = get_object_or_404(Recipe, id=recipe_id)
@@ -47,17 +50,21 @@ def recipe_detail(request, recipe_id):
 
     # Handle rating submission (if the POST request includes a rating)
     if request.method == 'POST' and 'rating' in request.POST:
-        rating_value = int(request.POST.get('rating'))  # Get the rating from the form
-        # Check if the user has already rated the recipe
-        rating, created = Rating.objects.get_or_create(user=request.user, recipe=recipe, defaults={'rating': rating_value})
+        if request.user.is_authenticated:  # Check if the user is logged in
+            rating_value = int(request.POST.get('rating'))  # Get the rating from the form
+            # Check if the user has already rated the recipe
+            rating, created = Rating.objects.get_or_create(user=request.user, recipe=recipe, defaults={'rating': rating_value})
 
-        if not created:
-            # Update the rating if the user already rated this recipe
-            rating.rating = rating_value
-            rating.save()
+            if not created:
+                # Update the rating if the user already rated this recipe
+                rating.rating = rating_value
+                rating.save()
 
-        messages.success(request, f'Thank you for rating {recipe.title}!')  # Success message
-        return redirect('recipe_detail', recipe_id=recipe.id)  # Redirect to the same page
+            messages.success(request, f'Thank you for rating {recipe.title}!')  # Success message
+            return redirect('recipe_detail', recipe_id=recipe.id)  # Redirect to the same page
+        else:
+            # If the user is not authenticated, show a message that they need to log in
+            messages.warning(request, 'You must be logged in to rate this recipe.')
 
     # Check if the user has already rated the recipe
     if request.user.is_authenticated:
@@ -128,3 +135,80 @@ def favorite_recipe(request, recipe_id):
         recipe.favorites.add(request.user)  # Favorite the recipe
     # Redirect to the recipe details page
     return HttpResponseRedirect(reverse('recipe_detail', args=[recipe_id]))
+
+@login_required
+# views.py
+def ingredient_search(request):
+    results = []
+    form = IngredientSearchForm()
+
+    if request.method == 'POST':
+        form = IngredientSearchForm(request.POST)
+        if form.is_valid():
+            user_ingredients = [ingredient.strip().lower() for ingredient in form.cleaned_data['ingredients'].split(",")]
+            print("Processed user ingredients for search:", user_ingredients)
+
+            for recipe in Recipe.objects.all():
+                print(f"Recipe '{recipe.title}' raw ingredients:", recipe.ingredients)
+
+                # Check if ingredients are JSON-encoded
+                if isinstance(recipe.ingredients, str) and recipe.ingredients.startswith("[") and recipe.ingredients.endswith("]"):
+                    try:
+                        recipe_ingredients = json.loads(recipe.ingredients)  # Parse JSON string to list
+                        recipe_ingredients = [ingredient.strip().lower() for ingredient in recipe_ingredients]
+                    except json.JSONDecodeError:
+                        # Fallback in case JSON decoding fails
+                        recipe_ingredients = recipe.ingredients.lower().replace(", ", ",").split(",")
+                elif isinstance(recipe.ingredients, list):
+                    recipe_ingredients = [ingredient.lower() for ingredient in recipe.ingredients]
+                else:
+                    recipe_ingredients = recipe.ingredients.lower().replace(", ", ",").split(",")
+
+                print(f"Processed ingredients for recipe '{recipe.title}':", recipe_ingredients)
+
+                missing_ingredients = [ingredient for ingredient in recipe_ingredients if ingredient not in user_ingredients]
+                if len(missing_ingredients) < len(recipe_ingredients):
+                    results.append({
+                        'recipe': recipe,
+                        'missing_ingredients': missing_ingredients
+                    })
+
+            print("Recipes matching ingredients and missing ingredients:", results)
+
+    return render(request, 'recipes/ingredient_search.html', {
+        'form': form,
+        'results': results,
+    })
+    
+def find_recipes_by_ingredients(user_ingredients):
+    matching_recipes = []
+
+    # Retrieve all recipes to check for matching ingredients
+    for recipe in Recipe.objects.all():
+        # Load the ingredients safely
+        recipe_ingredients = recipe.ingredients
+
+        # Check if it's a string or list
+        if isinstance(recipe_ingredients, str):
+            # Attempt to load as JSON if it's a string
+            try:
+                recipe_ingredients = json.loads(recipe_ingredients)
+            except json.JSONDecodeError:
+                # If JSON fails, treat as plain string (fallback)
+                recipe_ingredients = recipe_ingredients.lower().split(",")  # Splits by comma if stored as a string
+        elif isinstance(recipe_ingredients, list):
+            # If it's already a list, just ensure all are lowercased
+            recipe_ingredients = [ingredient.lower() for ingredient in recipe_ingredients]
+        else:
+            # Handle unexpected types (optional logging)
+            print(f"Unexpected type for recipe ingredients: {type(recipe_ingredients)}")
+            continue  # Skip this recipe if the type is unexpected
+
+        # Convert ingredients to lowercase for case-insensitive matching
+        recipe_ingredients = [ingredient.strip().lower() for ingredient in recipe_ingredients]
+
+        # Check if any of the user ingredients match ingredients in the recipe
+        if any(user_ingredient in recipe_ingredients for user_ingredient in user_ingredients):
+            matching_recipes.append(recipe)
+
+    return matching_recipes

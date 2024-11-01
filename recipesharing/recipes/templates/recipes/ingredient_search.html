@@ -1,0 +1,38 @@
+<!-- ingredient_search.html -->
+{% extends 'recipes/base.html' %}
+
+{% block content %}
+<div class="container">
+    <h1 class="mt-4">Enter the Ingredients You Already Have at Home</h1>
+    <form method="POST">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit" class="btn btn-primary">Search</button>
+    </form>
+
+    {% if results %}
+        <h2 class="mt-4">Matching Recipes:</h2>
+        <ul class="list-group mt-3">
+            {% for result in results %}
+                <li class="list-group-item">
+                    <a href="{% url 'recipe_detail' result.recipe.id %}">{{ result.recipe.title }}</a>
+                    <p>{{ result.recipe.description|truncatewords:20 }}</p>
+
+                    {% if result.missing_ingredients %}
+                        <strong>Shopping List:</strong>
+                        <ul>
+                            {% for ingredient in result.missing_ingredients %}
+                                <li>{{ ingredient }}</li>
+                            {% endfor %}
+                        </ul>
+                    {% else %}
+                        <p class="text-success">You have all the ingredients!</p>
+                    {% endif %}
+                </li>
+            {% endfor %}
+        </ul>
+    {% elif results is not None %}
+        <p class="mt-3 text-muted">No matching recipes found.</p>
+    {% endif %}
+</div>
+{% endblock %}
