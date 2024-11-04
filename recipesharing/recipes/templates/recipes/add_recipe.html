@@ -1,63 +1,69 @@
 {% extends 'recipes/base.html' %}
 
 {% block content %}
-    <!-- Main container for the add recipe form -->
-    <div class="container">
-        <!-- Heading for the add recipe page -->
-        <h1 class="mt-4">Add a New Recipe</h1>
+    <div class="container mt-5 p-4 bg-light shadow rounded">
+        <!-- Page Heading -->
+        <h1 class="mb-4 text-center">Add a New Recipe</h1>
 
-        <!-- Form to add a new recipe, using POST method -->
-        <form method="POST">
-            {% csrf_token %}  <!-- CSRF protection token for security -->
+        <!-- Form to add a new recipe -->
+        <form method="POST" class="needs-validation" novalidate>
+            {% csrf_token %}
 
-            <!-- Title field with label and error handling -->
-            <div class="mb-3">
-                <label for="id_title" class="form-label">Title</label>
-                {{ form.title }}  <!-- Renders the title field -->
-                {% if form.title.errors %}  <!-- Displays validation errors for title -->
+            <!-- Title Field -->
+            <div class="form-group mb-3">
+                <label for="id_title" class="form-label">Recipe Title</label>
+                <input type="text" class="form-control" id="id_title" name="title" value="{{ form.title.value|default_if_none:'' }}">
+                {% if form.title.errors %}
                     <div class="text-danger">{{ form.title.errors }}</div>
                 {% endif %}
             </div>
 
-            <!-- Description field with label and error handling -->
-            <div class="mb-3">
+            <!-- Description Field -->
+            <div class="form-group mb-3">
                 <label for="id_description" class="form-label">Description</label>
-                {{ form.description }}  <!-- Renders the description field -->
-                {% if form.description.errors %}  <!-- Displays validation errors for description -->
+                <textarea class="form-control" id="id_description" name="description">{{ form.description.value|default_if_none:'' }}</textarea>
+                {% if form.description.errors %}
                     <div class="text-danger">{{ form.description.errors }}</div>
                 {% endif %}
             </div>
 
-            <!-- Ingredients field with label and error handling -->
-            <div class="mb-3">
+            <!-- Ingredients Field -->
+            <div class="form-group mb-3">
                 <label for="id_ingredients" class="form-label">Ingredients</label>
-                {{ form.ingredients }}  <!-- Renders the ingredients field -->
-                {% if form.ingredients.errors %}  <!-- Displays validation errors for ingredients -->
+                <textarea class="form-control" id="id_ingredients" name="ingredients">{{ form.ingredients.value|default_if_none:'' }}</textarea>
+                <small class="form-text text-muted">Separate each ingredient with a comma.</small>
+                {% if form.ingredients.errors %}
                     <div class="text-danger">{{ form.ingredients.errors }}</div>
                 {% endif %}
             </div>
 
-            <!-- Instructions field with label and error handling -->
-            <div class="mb-3">
+            <!-- Instructions Field -->
+            <div class="form-group mb-3">
                 <label for="id_instructions" class="form-label">Instructions</label>
-                {{ form.instructions }}  <!-- Renders the instructions field -->
-                {% if form.instructions.errors %}  <!-- Displays validation errors for instructions -->
+                <textarea class="form-control" id="id_instructions" name="instructions">{{ form.instructions.value|default_if_none:'' }}</textarea>
+                {% if form.instructions.errors %}
                     <div class="text-danger">{{ form.instructions.errors }}</div>
                 {% endif %}
             </div>
 
-            <!-- Category field with label and error handling -->
-            <div class="mb-3">
+            <!-- Category Field -->
+            <div class="form-group mb-4">
                 <label for="id_category" class="form-label">Category</label>
-                {{ form.category }}  <!-- Renders the category field as a dropdown -->
-                {% if form.category.errors %}  <!-- Displays validation errors for category -->
+                <select class="form-select" id="id_category" name="category">
+                    {% for choice in form.category.field.choices %}
+                        <option value="{{ choice.0 }}" {% if choice.0 == form.category.value %}selected{% endif %}>{{ choice.1 }}</option>
+                    {% endfor %}
+                </select>
+                {% if form.category.errors %}
                     <div class="text-danger">{{ form.category.errors }}</div>
                 {% endif %}
             </div>
 
-            <!-- Submit and Cancel buttons -->
-            <button type="submit" class="btn btn-primary">Add Recipe</button>
-            <a href="{% url 'recipe_index' %}" class="btn btn-secondary">Cancel</a>  <!-- Link back to the index page -->
+            <!-- Submit and Cancel Buttons -->
+            <div class="d-flex justify-content-between">
+                <button type="submit" class="btn btn-primary">Add Recipe</button>
+                <a href="{% url 'recipe_index' %}" class="btn btn-outline-secondary">Cancel</a>
+            </div>
         </form>
     </div>
 {% endblock %}

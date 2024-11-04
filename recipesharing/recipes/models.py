@@ -23,8 +23,8 @@ class Recipe(models.Model):
     creator = models.ForeignKey(User, on_delete=models.CASCADE)
 
     def set_ingredients(self, ingredients_list):
-        """Convert a list of ingredients into JSON format for storage."""
-        self.ingredients = json.dumps(ingredients_list)
+        """Store ingredients list directly without JSON encoding."""
+        self.ingredients = ingredients_list
 
     def get_ingredients(self):
         """Retrieve the list of ingredients from JSON."""

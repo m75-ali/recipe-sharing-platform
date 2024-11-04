@@ -11,6 +11,7 @@ from .models import Recipe
 from .models import find_recipes_by_ingredients
 from .forms import IngredientSearchForm
 import json
+from difflib import get_close_matches
 
 # View to list all recipes with their average ratings
 def index(request):
@@ -141,6 +142,7 @@ def favorite_recipe(request, recipe_id):
 def ingredient_search(request):
     results = []
     form = IngredientSearchForm()
+    suggestions = []
 
     if request.method == 'POST':
         form = IngredientSearchForm(request.POST)
@@ -157,7 +159,6 @@ def ingredient_search(request):
                         recipe_ingredients = json.loads(recipe.ingredients)  # Parse JSON string to list
                         recipe_ingredients = [ingredient.strip().lower() for ingredient in recipe_ingredients]
                     except json.JSONDecodeError:
-                        # Fallback in case JSON decoding fails
                         recipe_ingredients = recipe.ingredients.lower().replace(", ", ",").split(",")
                 elif isinstance(recipe.ingredients, list):
                     recipe_ingredients = [ingredient.lower() for ingredient in recipe.ingredients]
@@ -166,18 +167,33 @@ def ingredient_search(request):
 
                 print(f"Processed ingredients for recipe '{recipe.title}':", recipe_ingredients)
 
-                missing_ingredients = [ingredient for ingredient in recipe_ingredients if ingredient not in user_ingredients]
-                if len(missing_ingredients) < len(recipe_ingredients):
+                # Exact or partial matches
+                matching_ingredients = [
+                    ingredient for ingredient in user_ingredients
+                    if any(ingredient in recipe_ing for recipe_ing in recipe_ingredients)
+                ]
+                
+                if matching_ingredients:
+                    missing_ingredients = [ingredient for ingredient in recipe_ingredients if ingredient not in user_ingredients]
                     results.append({
                         'recipe': recipe,
                         'missing_ingredients': missing_ingredients
                     })
 
+                # Collect suggestions for unmatched ingredients
+                else:
+                    for user_ingredient in user_ingredients:
+                        close_matches = get_close_matches(user_ingredient, recipe_ingredients, n=3, cutoff=0.6)
+                        if close_matches:
+                            suggestions.extend(close_matches)
+
             print("Recipes matching ingredients and missing ingredients:", results)
+            print("Suggested ingredients:", suggestions)
 
     return render(request, 'recipes/ingredient_search.html', {
         'form': form,
         'results': results,
+        'suggestions': set(suggestions),  # Unique suggestions
     })
     
 def find_recipes_by_ingredients(user_ingredients):

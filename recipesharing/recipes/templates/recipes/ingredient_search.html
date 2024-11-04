@@ -1,38 +1,66 @@
-<!-- ingredient_search.html -->
 {% extends 'recipes/base.html' %}
 
 {% block content %}
-<div class="container">
-    <h1 class="mt-4">Enter the Ingredients You Already Have at Home</h1>
-    <form method="POST">
+<div class="container mt-5">
+    <!-- Page Title -->
+    <h1 class="text-center mb-4">Enter the Ingredients You Already Have at Home</h1>
+
+    <!-- Search Form -->
+    <form method="POST" class="mb-4">
         {% csrf_token %}
-        {{ form.as_p }}
-        <button type="submit" class="btn btn-primary">Search</button>
+        <div class="mb-3">
+            {{ form.as_p }}
+        </div>
+        <button type="submit" class="btn btn-primary w-100">Search</button>
     </form>
 
-    {% if results %}
-        <h2 class="mt-4">Matching Recipes:</h2>
-        <ul class="list-group mt-3">
-            {% for result in results %}
-                <li class="list-group-item">
-                    <a href="{% url 'recipe_detail' result.recipe.id %}">{{ result.recipe.title }}</a>
-                    <p>{{ result.recipe.description|truncatewords:20 }}</p>
+    <!-- Display Suggested Ingredients if there are any -->
+    {% if suggestions %}
+        <div class="alert alert-info mt-4">
+            <strong>Did you mean:</strong>
+            <ul>
+                {% for suggestion in suggestions %}
+                    <li>{{ suggestion }}</li>
+                {% endfor %}
+            </ul>
+        </div>
+    {% endif %}
 
-                    {% if result.missing_ingredients %}
-                        <strong>Shopping List:</strong>
-                        <ul>
-                            {% for ingredient in result.missing_ingredients %}
-                                <li>{{ ingredient }}</li>
-                            {% endfor %}
-                        </ul>
-                    {% else %}
-                        <p class="text-success">You have all the ingredients!</p>
-                    {% endif %}
-                </li>
+    <!-- Display Results -->
+    {% if results %}
+        <h2 class="mt-5 text-center">Matching Recipes:</h2>
+        <div class="row mt-4">
+            {% for result in results %}
+                <div class="col-md-6 mb-4">
+                    <div class="card shadow-sm">
+                        <div class="card-body">
+                            <!-- Recipe Title and Link -->
+                            <h5 class="card-title">
+                                <a href="{% url 'recipe_detail' result.recipe.id %}" class="text-decoration-none">{{ result.recipe.title }}</a>
+                            </h5>
+                            
+                            <!-- Recipe Description -->
+                            <p class="card-text">{{ result.recipe.description|truncatewords:20 }}</p>
+
+                            <!-- Ingredients Needed Section -->
+                            {% if result.missing_ingredients %}
+                                <h6 class="text-primary">Shopping List:</h6>
+                                <ul class="list-unstyled ms-3">
+                                    {% for ingredient in result.missing_ingredients %}
+                                        <li><i class="bi bi-bag-fill"></i> {{ ingredient }}</li>
+                                    {% endfor %}
+                                </ul>
+                            {% else %}
+                                <p class="text-success"><strong>You have all the ingredients!</strong></p>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
             {% endfor %}
-        </ul>
+        </div>
     {% elif results is not None %}
-        <p class="mt-3 text-muted">No matching recipes found.</p>
+        <!-- No Results Message -->
+        <p class="text-muted text-center mt-5">No matching recipes found.</p>
     {% endif %}
 </div>
 {% endblock %}
