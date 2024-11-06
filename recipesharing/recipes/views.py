@@ -11,6 +11,7 @@ from .models import Recipe
 from .models import find_recipes_by_ingredients
 from .forms import IngredientSearchForm
 import json
+import re
 from difflib import get_close_matches
 
 # View to list all recipes with their average ratings
@@ -74,13 +75,17 @@ def recipe_detail(request, recipe_id):
     # Calculate the average rating for the recipe
     average_rating = recipe.ratings.aggregate(Avg('rating'))['rating__avg'] or 0
 
-    # Render the recipe details page with the user's rating and average rating
+    # Convert JSON string of ingredients back to Python list for display
+    ingredients = json.loads(recipe.ingredients) if recipe.ingredients else []
+
+    # Render the recipe details page with the user's rating, average rating, and ingredients
     return render(request, 'recipes/recipe_detail.html', {
         'recipe': recipe,
         'user_rating': user_rating,
-        'average_rating': average_rating
+        'average_rating': average_rating,
+        'ingredients': ingredients,  # Pass ingredients list to the template
     })
-
+    
 # View to edit a recipe (login required)
 @login_required
 def edit_recipe(request, recipe_id):
