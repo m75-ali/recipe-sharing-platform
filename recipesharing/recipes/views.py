@@ -11,7 +11,7 @@ from .models import Recipe
 from .models import find_recipes_by_ingredients
 from .forms import IngredientSearchForm
 import json
-import re
+import re 
 from difflib import get_close_matches
 
 # View to list all recipes with their average ratings
