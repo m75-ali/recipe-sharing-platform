@@ -30,8 +30,17 @@
             <!-- Ingredients Field -->
             <div class="form-group mb-3">
                 <label for="id_ingredients" class="form-label">Ingredients</label>
-                <textarea class="form-control" id="id_ingredients" name="ingredients">{{ form.ingredients.value|default_if_none:'' }}</textarea>
-                <small class="form-text text-muted">Separate each ingredient with a comma.</small>
+                <textarea 
+                    class="form-control" 
+                    id="id_ingredients" 
+                    name="ingredients" 
+                    placeholder="e.g.
+banana
+apple
+mango
+milk
+ice">{{ form.ingredients.value|default_if_none:'' }}</textarea>
+                <small class="form-text text-muted">Enter each ingredient on a new line.</small>
                 {% if form.ingredients.errors %}
                     <div class="text-danger">{{ form.ingredients.errors }}</div>
                 {% endif %}

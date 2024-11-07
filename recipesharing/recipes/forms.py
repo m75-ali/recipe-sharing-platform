@@ -6,7 +6,9 @@ import json
 # Define a form for the Recipe model using Django's ModelForm
 class RecipeForm(forms.ModelForm):
     ingredients = forms.CharField(
-        widget=forms.Textarea,
+        widget=forms.Textarea(attrs={
+            'placeholder': 'e.g.\nbanana\napple\nmango\nmilk\nice'
+        }),
         help_text="Enter each ingredient on a new line."
     )
 

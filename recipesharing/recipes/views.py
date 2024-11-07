@@ -75,8 +75,16 @@ def recipe_detail(request, recipe_id):
     # Calculate the average rating for the recipe
     average_rating = recipe.ratings.aggregate(Avg('rating'))['rating__avg'] or 0
 
-    # Convert JSON string of ingredients back to Python list for display
-    ingredients = json.loads(recipe.ingredients) if recipe.ingredients else []
+    # Handle the ingredients field to support JSON strings and lists
+    if isinstance(recipe.ingredients, str):  # JSON string
+        try:
+            ingredients = json.loads(recipe.ingredients)
+        except json.JSONDecodeError:
+            ingredients = []  # Fallback if the JSON string is invalid
+    elif isinstance(recipe.ingredients, list):  # Already a list
+        ingredients = recipe.ingredients
+    else:
+        ingredients = []  # Handle unexpected types
 
     # Render the recipe details page with the user's rating, average rating, and ingredients
     return render(request, 'recipes/recipe_detail.html', {
