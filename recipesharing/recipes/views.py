@@ -13,32 +13,36 @@ from .forms import IngredientSearchForm
 import json
 import re 
 from difflib import get_close_matches
+from django.http import JsonResponse
+from django.template.loader import render_to_string
 
-# View to list all recipes with their average ratings and category filtering
 def index(request):
     # Get the selected category from the query parameters
     selected_category = request.GET.get('category', None)
 
-    # Fetch recipes filtered by category, or all recipes if no category is selected
+    # Filter recipes by category or fetch all recipes
     if selected_category:
         recipes = Recipe.objects.filter(category__name=selected_category)
     else:
         recipes = Recipe.objects.all()
 
-    # Loop through each recipe to calculate its average rating
+    # Calculate average rating for each recipe
     for recipe in recipes:
         average_rating = recipe.ratings.aggregate(Avg('rating'))['rating__avg']
-        # Set the average rating, or None if there are no ratings
         recipe.average_rating = average_rating if average_rating is not None else None
 
-    # Fetch all categories for the filter dropdown
+    # Handle AJAX request
+    if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+        html = render_to_string('recipes/partials/recipe_list.html', {'recipes': recipes})
+        return JsonResponse({'html': html})
+
+    # Fetch all categories for the dropdown
     categories = Category.objects.all()
 
-    # Render the index page with the list of recipes and categories
     return render(request, 'recipes/index.html', {
         'recipes': recipes,
         'categories': categories,
-        'selected_category': selected_category
+        'selected_category': selected_category,
     })
 
 # View to add a new recipe (login required)

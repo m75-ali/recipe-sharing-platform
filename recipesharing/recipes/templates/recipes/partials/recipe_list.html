@@ -1,0 +1,26 @@
+<div class="row mt-4">
+    {% for recipe in recipes %}
+        <div class="col-lg-4 col-md-6 col-sm-12 mb-4">
+            <div class="card h-100 shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title">
+                        <a href="{% url 'recipe_detail' recipe.id %}" class="text-dark">{{ recipe.title }}</a>
+                    </h5>
+                    <p class="card-text">{{ recipe.description|truncatewords:20 }}</p>
+                    <p class="card-text">
+                        {% if recipe.average_rating %}
+                            ⭐ Average Rating: {{ recipe.average_rating|floatformat:1 }} / 5
+                        {% else %}
+                            ⭐ No ratings yet
+                        {% endif %}
+                    </p>
+                    <a href="{% url 'recipe_detail' recipe.id %}" class="btn btn-info">View Details</a>
+                </div>
+            </div>
+        </div>
+    {% empty %}
+        <div class="col-12 text-center">
+            <p class="text-muted">No recipes available for this category.</p>
+        </div>
+    {% endfor %}
+</div>

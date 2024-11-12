@@ -1,23 +1,21 @@
 {% extends 'recipes/base.html' %}
+{% load static %}
 
 {% block content %}
-  <!-- Main container for the recipes -->
   <div class="container">
-    <!-- Main heading for the recipe index page -->
     <h1 class="mt-4 text-center">Discover Delicious Recipes</h1>
 
-    <!-- Show options to add a new recipe if the user is logged in -->
     {% if user.is_authenticated %}
       <p class="text-muted text-center">Hello, {{ user.username }}!</p>
       <div class="text-center mb-4">
-        <a href="{% url 'add_recipe' %}" class="btn btn-success">Add New Recipe</a> <!-- Button to add a new recipe -->
+        <a href="{% url 'add_recipe' %}" class="btn btn-success">Add New Recipe</a>
       </div>
     {% endif %}
 
     <!-- Filter by Category Section -->
-    <form method="GET" class="mb-4">
+    <form id="filter-form" method="GET" class="mb-4">
       <div class="input-group">
-        <select name="category" class="form-select">
+        <select name="category" class="form-select" id="category-select">
           <option value="" {% if not selected_category %}selected{% endif %}>All Categories</option>
           {% for category in categories %}
             <option value="{{ category.name }}" {% if selected_category == category.name %}selected{% endif %}>
@@ -29,42 +27,12 @@
       </div>
     </form>
 
-    <!-- Responsive grid layout for displaying recipes -->
-    <div class="row mt-4">
-      {% for recipe in recipes %}
-        <!-- Bootstrap grid for responsive design: 3 columns on large screens, 2 on medium, and 1 on small -->
-        <div class="col-lg-4 col-md-6 col-sm-12 mb-4">
-          <!-- Recipe card with shadow effect -->
-          <div class="card h-100 shadow-sm">
-            <div class="card-body">
-              <!-- Recipe title with link to the recipe detail page -->
-              <h5 class="card-title">
-                <a href="{% url 'recipe_detail' recipe.id %}" class="text-dark">{{ recipe.title }}</a>
-              </h5>
-
-              <!-- Display the truncated description (up to 20 words) -->
-              <p class="card-text">{{ recipe.description|truncatewords:20 }}</p>
-
-              <!-- Display the average rating or 'No ratings yet' if no ratings exist -->
-              <p class="card-text">
-                {% if recipe.average_rating %}
-                  ⭐ Average Rating: {{ recipe.average_rating|floatformat:1 }} / 5
-                {% else %}
-                  ⭐ No ratings yet
-                {% endif %}
-              </p>
-
-              <!-- Button to view the full details of the recipe -->
-              <a href="{% url 'recipe_detail' recipe.id %}" class="btn btn-info">View Details</a>
-            </div>
-          </div>
-        </div>
-      {% empty %}
-        <!-- Message to display if no recipes are available -->
-        <div class="col-12 text-center">
-          <p class="text-muted">No recipes available.</p>
-        </div>
-      {% endfor %}
+    <!-- Recipes Container -->
+    <div id="recipes-container">
+      {% include 'recipes/partials/recipe_list.html' %}
     </div>
   </div>
+
+  <!-- Include JavaScript for AJAX Filtering -->
+  <script src="{% static 'recipes/js/filter.js' %}"></script>
 {% endblock %}
