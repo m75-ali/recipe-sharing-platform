@@ -24,7 +24,7 @@
                 <div class="col-md-6 mb-3">
                     <h5 class="text-muted">Ingredients</h5>
                     <ul class="list-group list-group-flush">
-                        {% for ingredient in recipe.ingredients.splitlines %}
+                        {% for ingredient in ingredients %}
                             <li class="list-group-item">{{ ingredient }}</li>
                         {% endfor %}
                     </ul>
@@ -32,7 +32,11 @@
                 <!-- Instructions Column -->
                 <div class="col-md-6 mb-3">
                     <h5 class="text-muted">Instructions</h5>
-                    <p>{{ recipe.instructions }}</p>
+                    <ol class="list-group list-group-numbered">
+                        {% for step in instructions %}
+                            <li class="list-group-item">{{ step }}</li>
+                        {% endfor %}
+                    </ol>
                 </div>
             </div>
 

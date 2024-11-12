@@ -45,6 +45,8 @@ def add_recipe(request):
         form = RecipeForm()  # Show an empty form for GET request
     return render(request, 'recipes/add_recipe.html', {'form': form})
 
+import re
+
 def recipe_detail(request, recipe_id):
     # Fetch the recipe by ID or return a 404 error if not found
     recipe = get_object_or_404(Recipe, id=recipe_id)
@@ -86,12 +88,21 @@ def recipe_detail(request, recipe_id):
     else:
         ingredients = []  # Handle unexpected types
 
-    # Render the recipe details page with the user's rating, average rating, and ingredients
+    # Process instructions
+    if recipe.instructions:
+        # Split by lines and remove pre-existing numbering like "1.", "2."
+        raw_steps = recipe.instructions.splitlines()
+        instructions = [re.sub(r'^\d+\.\s*|\d+\.\s*$', '', step).strip() for step in raw_steps]
+    else:
+        instructions = []
+
+    # Render the recipe details page
     return render(request, 'recipes/recipe_detail.html', {
         'recipe': recipe,
         'user_rating': user_rating,
         'average_rating': average_rating,
-        'ingredients': ingredients,  # Pass ingredients list to the template
+        'ingredients': ingredients,
+        'instructions': instructions,  # Pass cleaned instructions as a list
     })
     
 # View to edit a recipe (login required)
