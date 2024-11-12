@@ -12,6 +12,11 @@
     <!-- Recipe Main Content in a Card -->
     <div class="card shadow-sm">
         <div class="card-body">
+            <!-- Recipe Image -->
+            {% if recipe.image %}
+                <img src="{{ recipe.image.url }}" alt="{{ recipe.title }}" class="img-fluid mb-3">
+            {% endif %}
+
             <!-- Description Section -->
             <div class="mb-3">
                 <h4 class="text-muted">Description</h4>

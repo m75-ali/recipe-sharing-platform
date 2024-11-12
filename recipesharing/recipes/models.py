@@ -20,6 +20,7 @@ class Recipe(models.Model):
     instructions = models.TextField()
     category = models.ForeignKey(Category, on_delete=models.CASCADE, related_name='recipes')
     favorites = models.ManyToManyField(User, related_name='favorite_recipes', blank=True)
+    image = models.ImageField(upload_to='recipe_images/', null=True, blank=True)  # New image field
     creator = models.ForeignKey(User, on_delete=models.CASCADE)
 
     def set_ingredients(self, ingredients_list):

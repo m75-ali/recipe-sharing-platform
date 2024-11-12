@@ -7,7 +7,7 @@
         <h1 class="mt-4">Edit Recipe: {{ recipe.title }}</h1>
 
         <!-- Form for editing the recipe, using the POST method -->
-        <form method="post">
+        <form method="post" enctype="multipart/form-data">
             {% csrf_token %}  <!-- CSRF token for protection against CSRF attacks -->
 
             <!-- Title field with current value pre-filled -->
@@ -38,6 +38,22 @@
             <div class="form-group">
                 <label for="id_category">Category</label>
                 {{ form.category }}
+            </div>
+
+            <!-- Current Image Preview -->
+            {% if recipe.image %}
+                <div class="form-group">
+                    <label>Current Image:</label>
+                    <div class="mb-2">
+                        <img src="{{ recipe.image.url }}" alt="{{ recipe.title }}" class="img-fluid" style="max-width: 200px; max-height: 200px;">
+                    </div>
+                </div>
+            {% endif %}
+
+            <!-- Image Upload Field -->
+            <div class="form-group">
+                <label for="id_image">Change Recipe Image</label>
+                <input type="file" name="image" class="form-control" id="id_image">
             </div>
 
             <!-- Submit and Cancel buttons -->

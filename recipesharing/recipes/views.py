@@ -135,9 +135,9 @@ def edit_recipe(request, recipe_id):
 
     # Handle form submission
     if request.method == 'POST':
-        form = RecipeForm(request.POST, instance=recipe)
+        form = RecipeForm(request.POST, request.FILES, instance=recipe)  # Include request.FILES for file uploads
         if form.is_valid():
-            form.save()  # Save the updated recipe
+            form.save()  # Save the updated recipe with the new image if provided
             messages.success(request, 'Recipe updated successfully.')  # Success message
             return redirect('recipe_detail', recipe_id=recipe_id)  # Redirect to the recipe details page
     else:
