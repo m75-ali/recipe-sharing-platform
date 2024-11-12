@@ -10,9 +10,24 @@
     {% if user.is_authenticated %}
       <p class="text-muted text-center">Hello, {{ user.username }}!</p>
       <div class="text-center mb-4">
-        <a href="{% url 'add_recipe' %}" class="btn btn-success">Add New Recipe</a>  <!-- Button to add a new recipe -->
+        <a href="{% url 'add_recipe' %}" class="btn btn-success">Add New Recipe</a> <!-- Button to add a new recipe -->
       </div>
     {% endif %}
+
+    <!-- Filter by Category Section -->
+    <form method="GET" class="mb-4">
+      <div class="input-group">
+        <select name="category" class="form-select">
+          <option value="" {% if not selected_category %}selected{% endif %}>All Categories</option>
+          {% for category in categories %}
+            <option value="{{ category.name }}" {% if selected_category == category.name %}selected{% endif %}>
+              {{ category.name }}
+            </option>
+          {% endfor %}
+        </select>
+        <button type="submit" class="btn btn-primary">Filter</button>
+      </div>
+    </form>
 
     <!-- Responsive grid layout for displaying recipes -->
     <div class="row mt-4">

@@ -1,7 +1,7 @@
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, get_object_or_404, redirect
 from .forms import RecipeForm
-from .models import Recipe, Rating
+from .models import Recipe, Rating, Category
 from django.db.models import Avg
 from django.contrib import messages
 from django.http import HttpResponseRedirect
@@ -14,10 +14,16 @@ import json
 import re 
 from difflib import get_close_matches
 
-# View to list all recipes with their average ratings
+# View to list all recipes with their average ratings and category filtering
 def index(request):
-    # Fetch all recipes from the database
-    recipes = Recipe.objects.all()
+    # Get the selected category from the query parameters
+    selected_category = request.GET.get('category', None)
+
+    # Fetch recipes filtered by category, or all recipes if no category is selected
+    if selected_category:
+        recipes = Recipe.objects.filter(category__name=selected_category)
+    else:
+        recipes = Recipe.objects.all()
 
     # Loop through each recipe to calculate its average rating
     for recipe in recipes:
@@ -25,8 +31,15 @@ def index(request):
         # Set the average rating, or None if there are no ratings
         recipe.average_rating = average_rating if average_rating is not None else None
 
-    # Render the index page with the list of recipes
-    return render(request, 'recipes/index.html', {'recipes': recipes})
+    # Fetch all categories for the filter dropdown
+    categories = Category.objects.all()
+
+    # Render the index page with the list of recipes and categories
+    return render(request, 'recipes/index.html', {
+        'recipes': recipes,
+        'categories': categories,
+        'selected_category': selected_category
+    })
 
 # View to add a new recipe (login required)
 @login_required
