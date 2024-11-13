@@ -146,6 +146,7 @@ def edit_recipe(request, recipe_id):
     # Render the edit recipe page with the form
     return render(request, 'recipes/edit_recipe.html', {'form': form, 'recipe': recipe})
 
+ 
 # View to delete a recipe (login required)
 @login_required
 def delete_recipe(request, recipe_id):
