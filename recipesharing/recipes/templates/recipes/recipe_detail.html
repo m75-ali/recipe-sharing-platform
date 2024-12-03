@@ -1,99 +1,105 @@
 {% extends 'recipes/base.html' %}
 
 {% block content %}
-<div class="container my-4">
+  <div class="container my-4">
     <!-- Recipe Title Section -->
     <div class="row">
-        <div class="col">
-            <h1 class="text-center display-4 mb-4">{{ recipe.title }}</h1>
-        </div>
+      <div class="col">
+        <h1 class="text-center display-4 mb-4">{{ recipe.title }}</h1>
+      </div>
     </div>
 
     <!-- Recipe Main Content in a Card -->
     <div class="card shadow-sm">
-        <div class="card-body">
-            <!-- Recipe Image -->
-            {% if recipe.image %}
-                <img src="{{ recipe.image.url }}" alt="{{ recipe.title }}" class="img-fluid mb-3">
-            {% endif %}
+      <div class="card-body">
+        <!-- Recipe Image -->
+        {% if recipe.image %}
+          <div class="text-center mb-4">
+            <img src="{{ recipe.image.url }}" alt="{{ recipe.title }}" class="img-fluid rounded shadow-sm" style="max-height: 400px;" />
+          </div>
+        {% endif %}
 
-            <!-- Description Section -->
-            <div class="mb-3">
-                <h4 class="text-muted">Description</h4>
-                <p>{{ recipe.description }}</p>
-            </div>
-
-            <!-- Ingredients and Instructions Row -->
-            <div class="row">
-                <!-- Ingredients Column -->
-                <div class="col-md-6 mb-3">
-                    <h5 class="text-muted">Ingredients</h5>
-                    <ul class="list-group list-group-flush">
-                        {% for ingredient in ingredients %}
-                            <li class="list-group-item">{{ ingredient }}</li>
-                        {% endfor %}
-                    </ul>
-                </div>
-                <!-- Instructions Column -->
-                <div class="col-md-6 mb-3">
-                    <h5 class="text-muted">Instructions</h5>
-                    <ol class="list-group list-group-numbered">
-                        {% for step in instructions %}
-                            <li class="list-group-item">{{ step }}</li>
-                        {% endfor %}
-                    </ol>
-                </div>
-            </div>
-
-            <!-- Category -->
-            <p><strong>Category:</strong> {{ recipe.category.name }}</p>
-
-            <!-- Favorite Section -->
-            {% if user.is_authenticated %}
-                <div class="mb-3">
-                    {% if user in recipe.favorites.all %}
-                        <form action="{% url 'favorite_recipe' recipe.id %}" method="POST" class="d-inline">
-                            {% csrf_token %}
-                            <button type="submit" class="btn btn-outline-danger">Unfavourite</button>
-                        </form>
-                    {% else %}
-                        <form action="{% url 'favorite_recipe' recipe.id %}" method="POST" class="d-inline">
-                            {% csrf_token %}
-                            <button type="submit" class="btn btn-outline-primary">Favourite</button>
-                        </form>
-                    {% endif %}
-                    <span class="text-muted">Favourited by {{ recipe.total_favorites }} users</span>
-                </div>
-            {% endif %}
-
-            <!-- Rating Section -->
-            <p><strong>Average Rating:</strong> {{ average_rating|floatformat:1 }} / 5</p>
-            {% if user_rating %}
-                <p>Your Rating: {{ user_rating.rating }} / 5</p>
-            {% else %}
-                <form method="POST" action="">
-                    {% csrf_token %}
-                    <label for="rating">Rate this recipe:</label>
-                    <select name="rating" id="rating" class="form-select">
-                        <option value="1">1 - Poor</option>
-                        <option value="2">2 - Fair</option>
-                        <option value="3">3 - Good</option>
-                        <option value="4">4 - Very Good</option>
-                        <option value="5">5 - Excellent</option>
-                    </select>
-                    <button type="submit" class="btn btn-success mt-2">Submit Rating</button>
-                </form>
-            {% endif %}
+        <!-- Description Section -->
+        <div class="mb-3">
+          <h4 class="text-muted">Description</h4>
+          <p>{{ recipe.description }}</p>
         </div>
+
+        <!-- Ingredients and Instructions Row -->
+        <div class="row">
+          <!-- Ingredients Column -->
+          <div class="col-md-6 mb-3">
+            <h5 class="text-muted">Ingredients</h5>
+            <ul class="list-group list-group-flush">
+              {% for ingredient in ingredients %}
+                <li class="list-group-item">{{ ingredient }}</li>
+              {% endfor %}
+            </ul>
+          </div>
+          <!-- Instructions Column -->
+          <div class="col-md-6 mb-3">
+            <h5 class="text-muted">Instructions</h5>
+            <ol class="list-group list-group-numbered">
+              {% for step in instructions %}
+                <li class="list-group-item">{{ step }}</li>
+              {% endfor %}
+            </ol>
+          </div>
+        </div>
+
+        <!-- Category -->
+        <p>
+          <strong>Category:</strong> {{ recipe.category.name }}
+        </p>
+
+        <!-- Favorite Section -->
+        {% if user.is_authenticated %}
+          <div class="mb-3">
+            {% if user in recipe.favorites.all %}
+              <form action="{% url 'favorite_recipe' recipe.id %}" method="POST" class="d-inline">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-outline-danger">Unfavourite</button>
+              </form>
+            {% else %}
+              <form action="{% url 'favorite_recipe' recipe.id %}" method="POST" class="d-inline">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-outline-primary">Favourite</button>
+              </form>
+            {% endif %}
+            <span class="text-muted">Favourited by {{ recipe.total_favorites }} users</span>
+          </div>
+        {% endif %}
+
+        <!-- Rating Section -->
+        <p>
+          <strong>Average Rating:</strong> {{ average_rating|floatformat:1 }} / 5
+        </p>
+        {% if user_rating %}
+          <p>Your Rating: {{ user_rating.rating }} / 5</p>
+        {% else %}
+          <form method="POST" action="">
+            {% csrf_token %}
+            <label for="rating">Rate this recipe:</label>
+            <select name="rating" id="rating" class="form-select">
+              <option value="1">1 - Poor</option>
+              <option value="2">2 - Fair</option>
+              <option value="3">3 - Good</option>
+              <option value="4">4 - Very Good</option>
+              <option value="5">5 - Excellent</option>
+            </select>
+            <button type="submit" class="btn btn-success mt-2">Submit Rating</button>
+          </form>
+        {% endif %}
+      </div>
     </div>
 
     <!-- Edit, Delete, and Back Home Buttons -->
     <div class="d-flex justify-content-between mt-4">
-        <div>
-            <a href="{% url 'edit_recipe' recipe.id %}" class="btn btn-warning">Edit Recipe</a>
-            <a href="{% url 'delete_recipe' recipe.id %}" class="btn btn-danger">Delete Recipe</a>
-        </div>
-        <a href="{% url 'recipe_index' %}" class="btn btn-secondary">Back to Home</a>
+      <div>
+        <a href="{% url 'edit_recipe' recipe.id %}" class="btn btn-warning">Edit Recipe</a>
+        <a href="{% url 'delete_recipe' recipe.id %}" class="btn btn-danger">Delete Recipe</a>
+      </div>
+      <a href="{% url 'recipe_index' %}" class="btn btn-secondary">Back to Home</a>
     </div>
-</div>
+  </div>
 {% endblock %}
