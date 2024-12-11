@@ -14,17 +14,7 @@
         <button type="submit" class="btn btn-primary w-100">Search</button>
     </form>
 
-    <!-- Display Suggested Ingredients if there are any -->
-    {% if suggestions %}
-        <div class="alert alert-info mt-4">
-            <strong>Did you mean:</strong>
-            <ul>
-                {% for suggestion in suggestions %}
-                    <li>{{ suggestion }}</li>
-                {% endfor %}
-            </ul>
-        </div>
-    {% endif %}
+    
 
     <!-- Display Results -->
     {% if results %}

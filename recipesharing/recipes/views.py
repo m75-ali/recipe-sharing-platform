@@ -12,6 +12,7 @@ from .models import find_recipes_by_ingredients
 from .forms import IngredientSearchForm
 import json
 import re 
+from django.db.models import Q
 from difflib import get_close_matches
 from django.http import JsonResponse
 from django.template.loader import render_to_string
@@ -48,21 +49,24 @@ def index(request):
 # View to add a new recipe (login required)
 @login_required
 def add_recipe(request):
-    # If the form is submitted (POST request)
-    if request.method == 'POST':
-        form = RecipeForm(request.POST)
-        # If the form is valid, save the new recipe
-        if form.is_valid():
-            recipe = form.save(commit=False)
-            recipe.creator = request.user  # Assign the logged-in user as the creator
-            recipe.save()
-            messages.success(request, 'Recipe added successfully.')  # Success message
-            return redirect('recipe_index')  # Redirect to the index page
-    else:
-        form = RecipeForm()  # Show an empty form for GET request
-    return render(request, 'recipes/add_recipe.html', {'form': form})
+    if request.method == "POST":
+        post_data = request.POST.copy()
+        ingredients_list = post_data.getlist('ingredients[]')
+        post_data['ingredients'] = '\n'.join(ingredients_list)
 
-import re
+        form = RecipeForm(post_data, request.FILES)
+        if form.is_valid():
+            recipe = form.save(commit=False)  # Don't save to DB yet
+            recipe.creator = request.user    # Assign the current user as creator
+            recipe.save()                    # Save the recipe instance to the DB
+            messages.success(request, "Recipe added successfully!")
+            return redirect("recipe_index")
+        else:
+            messages.error(request, f"Form validation errors: {form.errors}")
+    else:
+        form = RecipeForm()
+
+    return render(request, "recipes/add_recipe.html", {"form": form})
 
 def recipe_detail(request, recipe_id):
     # Fetch the recipe by ID or return a 404 error if not found
@@ -181,61 +185,60 @@ def favorite_recipe(request, recipe_id):
 
 @login_required
 # views.py
+
+
 def ingredient_search(request):
     results = []
     form = IngredientSearchForm()
-    suggestions = []
+    suggestions = set()  # Use a set to avoid duplicate suggestions
 
     if request.method == 'POST':
         form = IngredientSearchForm(request.POST)
         if form.is_valid():
-            user_ingredients = [ingredient.strip().lower() for ingredient in form.cleaned_data['ingredients'].split(",")]
-            print("Processed user ingredients for search:", user_ingredients)
+            # Process user-provided ingredients (strip spaces and quotes)
+            user_ingredients = [
+                ingredient.strip().lower().strip('"') for ingredient in form.cleaned_data['ingredients'].split(",")
+            ]
+            print("User-provided ingredients:", user_ingredients)
 
+            # Iterate through all recipes
             for recipe in Recipe.objects.all():
-                print(f"Recipe '{recipe.title}' raw ingredients:", recipe.ingredients)
-
-                # Check if ingredients are JSON-encoded
-                if isinstance(recipe.ingredients, str) and recipe.ingredients.startswith("[") and recipe.ingredients.endswith("]"):
-                    try:
-                        recipe_ingredients = json.loads(recipe.ingredients)  # Parse JSON string to list
-                        recipe_ingredients = [ingredient.strip().lower() for ingredient in recipe_ingredients]
-                    except json.JSONDecodeError:
-                        recipe_ingredients = recipe.ingredients.lower().replace(", ", ",").split(",")
-                elif isinstance(recipe.ingredients, list):
-                    recipe_ingredients = [ingredient.lower() for ingredient in recipe.ingredients]
-                else:
+                if isinstance(recipe.ingredients, str):
+                    # Parse ingredients from the string
                     recipe_ingredients = recipe.ingredients.lower().replace(", ", ",").split(",")
+                else:
+                    recipe_ingredients = []
 
-                print(f"Processed ingredients for recipe '{recipe.title}':", recipe_ingredients)
+                print(f"Checking recipe '{recipe.title}' with ingredients:", recipe_ingredients)
 
-                # Exact or partial matches
+                # Find matching ingredients
                 matching_ingredients = [
-                    ingredient for ingredient in user_ingredients
-                    if any(ingredient in recipe_ing for recipe_ing in recipe_ingredients)
+                    ingredient for ingredient in user_ingredients if ingredient in recipe_ingredients
                 ]
-                
+
                 if matching_ingredients:
-                    missing_ingredients = [ingredient for ingredient in recipe_ingredients if ingredient not in user_ingredients]
+                    # Find missing ingredients
+                    missing_ingredients = [
+                        ingredient for ingredient in recipe_ingredients if ingredient not in user_ingredients
+                    ]
                     results.append({
                         'recipe': recipe,
-                        'missing_ingredients': missing_ingredients
+                        'missing_ingredients': missing_ingredients,
                     })
-
-                # Collect suggestions for unmatched ingredients
                 else:
+                    # Suggest corrections for unmatched ingredients
                     for user_ingredient in user_ingredients:
                         close_matches = get_close_matches(user_ingredient, recipe_ingredients, n=3, cutoff=0.6)
                         if close_matches:
-                            suggestions.extend(close_matches)
+                            suggestions.update(close_matches)
 
-            print("Recipes matching ingredients and missing ingredients:", results)
-            print("Suggested ingredients:", suggestions)
+            print("Matching recipes:", results)
+            print("Suggestions for user:", suggestions)
 
     return render(request, 'recipes/ingredient_search.html', {
         'form': form,
         'results': results,
-        'suggestions': set(suggestions),  # Unique suggestions
+        'suggestions': suggestions,
     })
     
 def find_recipes_by_ingredients(user_ingredients):
@@ -244,26 +247,7 @@ def find_recipes_by_ingredients(user_ingredients):
     # Retrieve all recipes to check for matching ingredients
     for recipe in Recipe.objects.all():
         # Load the ingredients safely
-        recipe_ingredients = recipe.ingredients
-
-        # Check if it's a string or list
-        if isinstance(recipe_ingredients, str):
-            # Attempt to load as JSON if it's a string
-            try:
-                recipe_ingredients = json.loads(recipe_ingredients)
-            except json.JSONDecodeError:
-                # If JSON fails, treat as plain string (fallback)
-                recipe_ingredients = recipe_ingredients.lower().split(",")  # Splits by comma if stored as a string
-        elif isinstance(recipe_ingredients, list):
-            # If it's already a list, just ensure all are lowercased
-            recipe_ingredients = [ingredient.lower() for ingredient in recipe_ingredients]
-        else:
-            # Handle unexpected types (optional logging)
-            print(f"Unexpected type for recipe ingredients: {type(recipe_ingredients)}")
-            continue  # Skip this recipe if the type is unexpected
-
-        # Convert ingredients to lowercase for case-insensitive matching
-        recipe_ingredients = [ingredient.strip().lower() for ingredient in recipe_ingredients]
+        recipe_ingredients = recipe.get_ingredients()  # Get deserialized ingredients
 
         # Check if any of the user ingredients match ingredients in the recipe
         if any(user_ingredient in recipe_ingredients for user_ingredient in user_ingredients):
