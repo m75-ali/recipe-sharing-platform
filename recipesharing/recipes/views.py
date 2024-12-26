@@ -129,12 +129,13 @@ def edit_recipe(request, recipe_id):
     if request.method == 'POST':
         form = RecipeForm(request.POST, instance=recipe)
         if form.is_valid():
-            form.save()  # Save the form, which processes the ingredients and saves the Recipe instance
+            form.save()
             return redirect('recipe_detail', recipe_id=recipe.id)
     else:
         form = RecipeForm(instance=recipe)
 
-    return render(request, 'recipes/edit_recipe.html', {'form': form})
+    # Pass 'recipe' to the template for use in the cancel link
+    return render(request, 'recipes/edit_recipe.html', {'form': form, 'recipe': recipe})
     
 # View to delete a recipe (login required)
 @login_required
