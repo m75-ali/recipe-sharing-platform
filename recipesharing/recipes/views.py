@@ -174,9 +174,6 @@ def favorite_recipe(request, recipe_id):
     return HttpResponseRedirect(reverse('recipe_detail', args=[recipe_id]))
 
 @login_required
-# views.py
-
-
 def ingredient_search(request):
     results = []
     form = IngredientSearchForm()
@@ -193,11 +190,14 @@ def ingredient_search(request):
 
             # Iterate through all recipes
             for recipe in Recipe.objects.all():
+                # Clean and split the ingredients list properly
                 if isinstance(recipe.ingredients, str):
-                    # Parse ingredients from the string
-                    recipe_ingredients = recipe.ingredients.lower().replace(", ", ",").split(",")
+                    recipe_ingredients = recipe.ingredients.replace('[', '').replace(']', '').replace('"', '').split(",")
                 else:
                     recipe_ingredients = []
+
+                # Normalize ingredients by stripping spaces and lowercasing
+                recipe_ingredients = [ingredient.strip().lower() for ingredient in recipe_ingredients]
 
                 print(f"Checking recipe '{recipe.title}' with ingredients:", recipe_ingredients)
 
@@ -230,17 +230,3 @@ def ingredient_search(request):
         'results': results,
         'suggestions': suggestions,
     })
-    
-def find_recipes_by_ingredients(user_ingredients):
-    matching_recipes = []
-
-    # Retrieve all recipes to check for matching ingredients
-    for recipe in Recipe.objects.all():
-        # Load the ingredients safely
-        recipe_ingredients = recipe.get_ingredients()  # Get deserialized ingredients
-
-        # Check if any of the user ingredients match ingredients in the recipe
-        if any(user_ingredient in recipe_ingredients for user_ingredient in user_ingredients):
-            matching_recipes.append(recipe)
-
-    return matching_recipes
