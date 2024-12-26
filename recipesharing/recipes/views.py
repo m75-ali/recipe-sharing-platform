@@ -47,18 +47,17 @@ def index(request):
     })
 
 # View to add a new recipe (login required)
+
 @login_required
 def add_recipe(request):
     if request.method == "POST":
-        post_data = request.POST.copy()
-        ingredients_list = post_data.getlist('ingredients[]')
-        post_data['ingredients'] = '\n'.join(ingredients_list)
-
-        form = RecipeForm(post_data, request.FILES)
+        form = RecipeForm(request.POST, request.FILES)
         if form.is_valid():
-            recipe = form.save(commit=False)  # Don't save to DB yet
-            recipe.creator = request.user    # Assign the current user as creator
-            recipe.save()                    # Save the recipe instance to the DB
+            recipe = form.save(commit=False)
+            recipe.creator = request.user
+            # Process ingredients: split by commas and save as newline-separated
+            recipe.ingredients = "\n".join([ingredient.strip() for ingredient in request.POST['ingredients'].split(",")])
+            recipe.save()
             messages.success(request, "Recipe added successfully!")
             return redirect("recipe_index")
         else:
@@ -66,7 +65,8 @@ def add_recipe(request):
     else:
         form = RecipeForm()
 
-    return render(request, "recipes/add_recipe.html", {"form": form})
+    categories = Category.objects.all()
+    return render(request, "recipes/add_recipe.html", {"form": form, "categories": categories})
 
 def recipe_detail(request, recipe_id):
     # Fetch the recipe by ID or return a 404 error if not found
@@ -98,16 +98,11 @@ def recipe_detail(request, recipe_id):
     # Calculate the average rating for the recipe
     average_rating = recipe.ratings.aggregate(Avg('rating'))['rating__avg'] or 0
 
-    # Handle the ingredients field to support JSON strings and lists
-    if isinstance(recipe.ingredients, str):  # JSON string
-        try:
-            ingredients = json.loads(recipe.ingredients)
-        except json.JSONDecodeError:
-            ingredients = []  # Fallback if the JSON string is invalid
-    elif isinstance(recipe.ingredients, list):  # Already a list
-        ingredients = recipe.ingredients
+    # Handle the ingredients field as a comma-separated string
+    if isinstance(recipe.ingredients, str):  # If it's a comma-separated string
+        ingredients = [ingredient.strip() for ingredient in recipe.ingredients.split(',')]
     else:
-        ingredients = []  # Handle unexpected types
+        ingredients = []  # In case the ingredients are empty or not in string format
 
     # Process instructions
     if recipe.instructions:

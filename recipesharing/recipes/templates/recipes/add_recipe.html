@@ -1,104 +1,40 @@
-{% extends 'recipes/base.html' %}
+{% extends "recipes/base.html" %}
 
 {% block content %}
-<div class="container mt-5 p-4 bg-light shadow rounded">
-    <h1 class="mb-4 text-center">Add a New Recipe</h1>
-
-    {% if form.errors %}
-        <div class="alert alert-danger">
-            <strong>There were errors with your submission:</strong>
-            <ul>
-                {% for field, errors in form.errors.items %}
-                    <li>{{ field|capfirst }}: {{ errors|join:", " }}</li>
-                {% endfor %}
-            </ul>
-        </div>
-    {% endif %}
-
-    <form method="POST" enctype="multipart/form-data" class="needs-validation" novalidate>
+<div class="container mt-5">
+    <h2>Add a Recipe</h2>
+    <form method="POST" enctype="multipart/form-data">
         {% csrf_token %}
-        
-        <div class="form-group mb-3">
-            <label for="id_title" class="form-label">Recipe Title</label>
-            <input type="text" class="form-control" id="id_title" name="title" value="{{ form.title.value|default_if_none:'' }}">
-            {% if form.title.errors %}
-                <div class="text-danger">{{ form.title.errors|join:', ' }}</div>
-            {% endif %}
+        <div class="mb-3">
+            <label for="title" class="form-label">Title</label>
+            <input type="text" class="form-control" id="title" name="title" placeholder="Recipe Title" required>
         </div>
-
-        <div class="form-group mb-3">
-            <label for="id_description" class="form-label">Description</label>
-            <textarea class="form-control" id="id_description" name="description">{{ form.description.value|default_if_none:'' }}</textarea>
-            {% if form.description.errors %}
-                <div class="text-danger">{{ form.description.errors|join:', ' }}</div>
-            {% endif %}
+        <div class="mb-3">
+            <label for="description" class="form-label">Description</label>
+            <textarea class="form-control" id="description" name="description" rows="3" placeholder="Short description of the recipe" required></textarea>
         </div>
-
-        <div class="form-group mb-3">
-            <label class="form-label">Ingredients</label>
-            <div id="ingredients-list">
-                <div class="input-group mb-2">
-                    <input type="text" class="form-control" name="ingredients[]" placeholder="e.g. Banana">
-                    <button type="button" class="btn btn-danger remove-ingredient">Remove</button>
-                </div>
-            </div>
-            <button type="button" class="btn btn-primary" id="add-ingredient">Add Ingredient</button>
-            <small class="form-text text-muted">Add each ingredient separately.</small>
+        <div class="mb-3">
+            <label for="ingredients" class="form-label">Ingredients</label>
+            <input type="text" class="form-control" id="ingredients" name="ingredients" placeholder="Enter ingredients separated by commas" required>
         </div>
-
-        <div class="form-group mb-3">
-            <label for="id_instructions" class="form-label">Instructions</label>
-            <textarea class="form-control" id="id_instructions" name="instructions">{{ form.instructions.value|default_if_none:'' }}</textarea>
-            {% if form.instructions.errors %}
-                <div class="text-danger">{{ form.instructions.errors|join:', ' }}</div>
-            {% endif %}
+        <div class="mb-3">
+            <label for="instructions" class="form-label">Instructions</label>
+            <textarea class="form-control" id="instructions" name="instructions" rows="5" placeholder="Step-by-step instructions" required></textarea>
         </div>
-
-        <div class="form-group mb-3">
-            <label for="id_category" class="form-label">Category</label>
-            <select class="form-select" id="id_category" name="category">
-                {% for choice in form.category.field.choices %}
-                    <option value="{{ choice.0 }}" {% if choice.0 == form.category.value %}selected{% endif %}>{{ choice.1 }}</option>
+        <div class="mb-3">
+            <label for="category" class="form-label">Category</label>
+            <select class="form-select" id="category" name="category" required>
+                <option value="" disabled selected>Select a category</option>
+                {% for category in categories %}
+                <option value="{{ category.id }}">{{ category.name }}</option>
                 {% endfor %}
             </select>
-            {% if form.category.errors %}
-                <div class="text-danger">{{ form.category.errors|join:', ' }}</div>
-            {% endif %}
         </div>
-
-        <div class="form-group mb-3">
-            <label for="id_image" class="form-label">Upload an Image</label>
-            <input type="file" class="form-control" id="id_image" name="image">
-            {% if form.image.errors %}
-                <div class="text-danger">{{ form.image.errors|join:', ' }}</div>
-            {% endif %}
+        <div class="mb-3">
+            <label for="image" class="form-label">Image</label>
+            <input type="file" class="form-control" id="image" name="image">
         </div>
-
-        <div class="d-flex justify-content-between">
-            <button type="submit" class="btn btn-primary">Add Recipe</button>
-            <a href="{% url 'recipe_index' %}" class="btn btn-outline-secondary">Cancel</a>
-        </div>
+        <button type="submit" class="btn btn-primary">Add Recipe</button>
     </form>
 </div>
-
-<script>
-    document.getElementById('add-ingredient').addEventListener('click', function() {
-        const ingredientsList = document.getElementById('ingredients-list');
-        const ingredientRow = document.createElement('div');
-        ingredientRow.className = 'input-group mb-2';
-
-        ingredientRow.innerHTML = `
-            <input type="text" class="form-control" name="ingredients[]" placeholder="e.g. Banana">
-            <button type="button" class="btn btn-danger remove-ingredient">Remove</button>
-        `;
-
-        ingredientsList.appendChild(ingredientRow);
-    });
-
-    document.getElementById('ingredients-list').addEventListener('click', function(event) {
-        if (event.target.classList.contains('remove-ingredient')) {
-            event.target.parentElement.remove();
-        }
-    });
-</script>
 {% endblock %}

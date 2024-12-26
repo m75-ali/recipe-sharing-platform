@@ -39,7 +39,7 @@ class Recipe(models.Model):
     def save(self, *args, **kwargs):
         instance = super().save(*args, **kwargs)
         
-
+    
 
 class Rating(models.Model):
     recipe = models.ForeignKey(Recipe, related_name='ratings', on_delete=models.CASCADE)
