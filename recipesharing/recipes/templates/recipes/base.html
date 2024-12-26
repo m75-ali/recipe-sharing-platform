@@ -15,41 +15,92 @@
     <!-- Linking Bootstrap CSS and custom stylesheets -->
     <link rel="stylesheet" href="{% static 'bootstrap/css/bootstrap.min.css' %}" />
     <link rel="stylesheet" href="{% static 'bootstrap/css/style.css' %}" />
+    <style>
+      /* Custom Color Scheme */
+      body {
+        background-color:rgba(146, 146, 146, 0.69); /* Light blue background */
+        color: #212121; /* Dark gray text */
+      }
+
+      .navbar {
+        background-color: #009688; /* Teal navbar background */
+      }
+
+      .navbar-brand, .nav-link {
+        color: #ffffff !important; /* White text for navbar */
+      }
+
+      .navbar-toggler {
+        border-color: #ffffff;
+      }
+
+      .navbar-toggler-icon {
+        background-color: #ffffff;
+      }
+
+      .navbar .nav-link:hover {
+        color: #4CAF50 !important; /* Green hover effect */
+      }
+
+      footer {
+        background-color: #009688; /* Teal footer background */
+        color: #ffffff;
+        padding: 1rem 0;
+        position: relative; /* Ensure footer stays below content */
+      }
+
+      footer p {
+        margin: 0;
+        font-size: 0.9rem;
+      }
+
+      main {
+        margin-bottom: 2rem; /* Prevent overlap with footer */
+      }
+
+      /* Prevent hover effects from changing element size */
+      .nav-link:hover {
+        text-decoration: none;
+      }
+    </style>
   </head>
 
-  <!-- Ensure the body stretches to fill the entire viewport -->
   <body class="d-flex flex-column min-vh-100">
-    
-    <!-- Header section with navigation bar -->
+    <!-- Header with navigation bar -->
     <header>
-      <nav class="navbar navbar-expand-lg navbar-light bg-light">
+      <nav class="navbar navbar-expand-lg navbar-dark">
         <div class="container">
-          <!-- Brand name linking to the home page -->
           <a class="navbar-brand" href="{% url 'recipe_index' %}">TastyShare</a>
-
-          <!-- Navbar toggler for mobile devices -->
-          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+          <button
+            class="navbar-toggler"
+            type="button"
+            data-bs-toggle="collapse"
+            data-bs-target="#navbarNav"
+            aria-controls="navbarNav"
+            aria-expanded="false"
+            aria-label="Toggle navigation"
+          >
             <span class="navbar-toggler-icon"></span>
           </button>
-
-          <!-- Collapsible section for navigation links -->
           <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
             <ul class="navbar-nav">
               {% if user.is_authenticated %}
-                <!-- Links visible if user is logged in -->
                 <li class="nav-item">
                   <a class="nav-link" href="{% url 'ingredient_search' %}">
-                    <img src="{% static 'images/search.png' %}" alt="Search by Ingredients" style="height: 24px; width: 24px;">
+                    <img
+                      src="{% static 'images/search.png' %}"
+                      alt="Search by Ingredients"
+                      style="height: 24px; width: 24px;"
+                    />
                   </a>
+                </li>
                 <li class="nav-item">
                   <a class="nav-link" href="{% url 'profile' %}">Profile</a>
-                </li>
                 </li>
                 <li class="nav-item">
                   <a class="nav-link" href="{% url 'logout' %}">Logout</a>
                 </li>
               {% else %}
-                <!-- Links visible if user is not logged in -->
                 <li class="nav-item">
                   <a class="nav-link" href="{% url 'login' %}">Login</a>
                 </li>
@@ -63,8 +114,8 @@
       </nav>
     </header>
 
-    <!-- Flash messages (e.g., login success, errors) -->
-    <div class="container">
+    <!-- Flash messages -->
+    <div class="container mt-2">
       {% if messages %}
         <div class="alert alert-info">
           {% for message in messages %}
@@ -74,20 +125,20 @@
       {% endif %}
     </div>
 
-    <!-- Main content area for each page, with space for dynamic content blocks -->
+    <!-- Main content block -->
     <main class="container mt-4">
       {% block content %}
       {% endblock %}
     </main>
 
-    <!-- Footer section -->
-    <footer class="mt-auto bg-light py-3 text-center">
+    <!-- Footer -->
+    <footer class="mt-auto text-center">
       <div class="container">
-        <p class="mb-0">© 2024 Recipe Sharing Platform</p>
+        <p>© 2024 Recipe Sharing Platform</p>
       </div>
     </footer>
 
-    <!-- Bootstrap JS for interactive components like modals, dropdowns -->
+    <!-- Bootstrap JS -->
     <script src="{% static 'bootstrap/js/bootstrap.bundle.min.js' %}"></script>
   </body>
 </html>

@@ -2,39 +2,81 @@
 
 {% block content %}
 <div class="container mt-5">
-    <h2>Add a Recipe</h2>
-    <form method="POST" enctype="multipart/form-data">
-        {% csrf_token %}
-        <div class="mb-3">
-            <label for="title" class="form-label">Title</label>
-            <input type="text" class="form-control" id="title" name="title" placeholder="Recipe Title" required>
+    <div class="card shadow-sm">
+        <!-- Updated Card Header to match teal theme -->
+        <div class="card-header" style="background-color: #009688; color: white;">
+            <h3 class="card-title mb-0">Add a Recipe</h3>
         </div>
-        <div class="mb-3">
-            <label for="description" class="form-label">Description</label>
-            <textarea class="form-control" id="description" name="description" rows="3" placeholder="Short description of the recipe" required></textarea>
+        
+        <div class="card-body" style="background-color: rgba(146, 146, 146, 0.1);">
+            <form method="POST" enctype="multipart/form-data">
+                {% csrf_token %}
+                
+                <!-- Recipe Title -->
+                <div class="mb-4">
+                    <label for="title" class="form-label" style="color: #009688;">Title</label>
+                    <input type="text" class="form-control border-teal" id="title" name="title" placeholder="Recipe Title" required>
+                </div>
+                
+                <!-- Description -->
+                <div class="mb-4">
+                    <label for="description" class="form-label" style="color: #009688;">Description</label>
+                    <textarea class="form-control border-teal" id="description" name="description" rows="3" placeholder="Short description of the recipe" required></textarea>
+                </div>
+                
+                <!-- Ingredients -->
+                <div class="mb-4">
+                    <label for="ingredients" class="form-label" style="color: #009688;">Ingredients</label>
+                    <textarea class="form-control border-teal" id="ingredients" name="ingredients" rows="3" placeholder="Enter ingredients separated by commas" required></textarea>
+                </div>
+                
+                <!-- Instructions -->
+                <div class="mb-4">
+                    <label for="instructions" class="form-label" style="color: #009688;">Instructions</label>
+                    <textarea class="form-control border-teal" id="instructions" name="instructions" rows="5" placeholder="Step-by-step instructions" required></textarea>
+                </div>
+                
+                <!-- Category -->
+                <div class="mb-4">
+                    <label for="category" class="form-label" style="color: #009688;">Category</label>
+                    <select class="form-select border-teal" id="category" name="category" required>
+                        <option value="" disabled selected>Select a category</option>
+                        {% for category in categories %}
+                        <option value="{{ category.id }}">{{ category.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                
+                <!-- Image -->
+                <div class="mb-4">
+                    <label for="image" class="form-label" style="color: #009688;">Image</label>
+                    <input type="file" class="form-control border-teal" id="image" name="image">
+                </div>
+                
+                <!-- Buttons -->
+                <div class="d-flex justify-content-end">
+                    <button type="reset" class="btn btn-outline-secondary me-2">Cancel</button>
+                    <button type="submit" class="btn" style="background-color: #009688; color: white;">Add Recipe</button>
+                </div>
+            </form>
         </div>
-        <div class="mb-3">
-            <label for="ingredients" class="form-label">Ingredients</label>
-            <input type="text" class="form-control" id="ingredients" name="ingredients" placeholder="Enter ingredients separated by commas" required>
-        </div>
-        <div class="mb-3">
-            <label for="instructions" class="form-label">Instructions</label>
-            <textarea class="form-control" id="instructions" name="instructions" rows="5" placeholder="Step-by-step instructions" required></textarea>
-        </div>
-        <div class="mb-3">
-            <label for="category" class="form-label">Category</label>
-            <select class="form-select" id="category" name="category" required>
-                <option value="" disabled selected>Select a category</option>
-                {% for category in categories %}
-                <option value="{{ category.id }}">{{ category.name }}</option>
-                {% endfor %}
-            </select>
-        </div>
-        <div class="mb-3">
-            <label for="image" class="form-label">Image</label>
-            <input type="file" class="form-control" id="image" name="image">
-        </div>
-        <button type="submit" class="btn btn-primary">Add Recipe</button>
-    </form>
+    </div>
 </div>
+
+<style>
+    .border-teal {
+        border-color: #009688;
+    }
+    
+    .border-teal:focus {
+        border-color: #009688;
+        box-shadow: 0 0 0 0.25rem rgba(0, 150, 136, 0.25);
+    }
+
+    .btn-outline-secondary:hover {
+        background-color: #4CAF50;
+        border-color: #4CAF50;
+        color: white;
+    }
+</style>
 {% endblock %}
