@@ -58,7 +58,9 @@
 
             <!-- Submit and Cancel buttons -->
             <button type="submit" class="btn btn-primary">Update Recipe</button>
-            <a href="{% url 'recipe_detail' recipe.id %}" class="btn btn-secondary">Cancel</a>
+
+            <!-- Cancel button with conditional link -->
+            <a href="{% if recipe.id %}{% url 'recipe_detail' recipe.id %}{% else %}#{% endif %}" class="btn btn-secondary">Cancel</a>
         </form>
     </div>
 {% endblock %}

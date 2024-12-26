@@ -3,6 +3,10 @@ from django.core.serializers.json import DjangoJSONEncoder
 from .models import Recipe, Category
 import json
 
+
+from django import forms
+from .models import Recipe
+
 class RecipeForm(forms.ModelForm):
     ingredients = forms.CharField(
         widget=forms.Textarea(attrs={
@@ -16,18 +20,23 @@ class RecipeForm(forms.ModelForm):
         fields = ['title', 'description', 'ingredients', 'instructions', 'category', 'image']
 
     def save(self, commit=True):
-        instance = super(RecipeForm, self).save(commit=False)
-        try:
-            ingredients_list = [
-                line.strip()
-                for line in self.cleaned_data['ingredients'].splitlines()
-                if line.strip()
-            ]
-            instance.ingredients = json.dumps(ingredients_list, cls=DjangoJSONEncoder)
-        except Exception as e:
-            raise forms.ValidationError(f"Error processing ingredients: {e}")
+        # Create the instance but don't save it yet
+        instance = super().save(commit=False)
+
+        # Process the ingredients field: split by lines and strip unnecessary spaces
+        ingredients_list = [
+            line.strip()
+            for line in self.cleaned_data['ingredients'].splitlines()
+            if line.strip()
+        ]
+        
+        # Store the ingredients as plain-text string
+        instance.ingredients = "\n".join(ingredients_list)
+        
+        # Save the instance if commit=True
         if commit:
             instance.save()
+        
         return instance
 
     def clean_ingredients(self):

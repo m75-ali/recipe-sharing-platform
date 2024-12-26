@@ -12,7 +12,7 @@ class Category(models.Model):
 class Recipe(models.Model):
     title = models.CharField(max_length=200)
     description = models.TextField()
-    ingredients = models.TextField()  # Stored as a JSON string
+    ingredients = models.TextField()  # Stored as a plain string, each ingredient on a new line
     instructions = models.TextField()
     category = models.ForeignKey(
         Category, on_delete=models.CASCADE, related_name='recipes'
@@ -23,11 +23,9 @@ class Recipe(models.Model):
     image = models.ImageField(upload_to='recipe_images/', null=True, blank=True)
     creator = models.ForeignKey(User, on_delete=models.CASCADE)
 
-    def set_ingredients(self, ingredients_list):
-        self.ingredients = json.dumps(ingredients_list)
-
-    def get_ingredients(self):
-        return json.loads(self.ingredients) if self.ingredients else []
+    def get_ingredients_list(self):
+        # Split the ingredients by newline and return them as a list
+        return self.ingredients.splitlines() if self.ingredients else []
 
     def __str__(self):
         return self.title
@@ -39,9 +37,8 @@ class Recipe(models.Model):
         return self.ratings.aggregate(models.Avg('rating'))['rating__avg'] or 0
 
     def save(self, *args, **kwargs):
-        if isinstance(self.ingredients, list):
-            self.ingredients = json.dumps(self.ingredients)
-        super().save(*args, **kwargs)
+        instance = super().save(*args, **kwargs)
+        
 
 
 class Rating(models.Model):
