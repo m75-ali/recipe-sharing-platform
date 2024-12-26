@@ -1,24 +1,103 @@
 {% extends 'recipes/base.html' %}
 
 {% block content %}
-    <!-- Main container for the delete confirmation -->
-    <div class="container">
-        <!-- Display the recipe title and ask for confirmation -->
-        <h1 class="mt-4">Delete Recipe: {{ recipe.title }}</h1>
-        <p>Are you sure you want to delete this recipe?</p>
+<div class="container mt-5">
+    <div class="card shadow-lg mx-auto" style="max-width: 600px;">
+        <!-- Card Header -->
+        <div class="card-header" style="background-color: #009688;">
+            <h2 class="text-white mb-0">Delete Recipe</h2>
+        </div>
 
-        <!-- Form to confirm deletion, using POST method to handle the form submission securely -->
-        <form method="post">
-            {% csrf_token %}  <!-- CSRF token to protect against Cross-Site Request Forgery attacks -->
-            <button type="submit" class="btn btn-danger">Confirm Delete</button>  <!-- Confirm delete button -->
-        </form>
+        <!-- Card Body -->
+        <div class="card-body" style="background-color: rgba(255, 255, 255, 0.9);">
+            <!-- Recipe Preview -->
+            <div class="recipe-preview mb-4 p-3 border rounded">
+                <div class="row align-items-center">
+                    {% if recipe.image %}
+                    <div class="col-md-4 text-center">
+                        <img src="{{ recipe.image.url }}" alt="{{ recipe.title }}" 
+                             class="img-fluid rounded" style="max-height: 120px;">
+                    </div>
+                    {% endif %}
+                    <div class="{% if recipe.image %}col-md-8{% else %}col-12{% endif %}">
+                        <h3 class="mb-2" style="color: #009688;">{{ recipe.title }}</h3>
+                        <p class="text-muted mb-0">{{ recipe.description|truncatechars:100 }}</p>
+                    </div>
+                </div>
+            </div>
 
-        <!-- Cancel button that redirects to the recipe detail page -->
-        <a href="{% url 'recipe_detail' recipe.id %}" class="btn btn-secondary">Cancel</a>
-        
-        <!-- Optional button to go back to the home page, commented out for now -->
-        <!--- <div class="mt-4">
-            <a href="{% url 'recipe_index' %}" class="btn btn-secondary">Home</a>
-        </div> -->
+            <!-- Warning Message -->
+            <div class="alert alert-warning">
+                <i class="fas fa-exclamation-triangle me-2"></i>
+                <strong>Warning:</strong> This action cannot be undone. Are you sure you want to delete this recipe?
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="d-flex justify-content-end gap-3 mt-4">
+                <a href="{% url 'recipe_detail' recipe.id %}" 
+                   class="btn btn-outline-secondary">
+                    Cancel
+                </a>
+                <form method="post" class="d-inline">
+                    {% csrf_token %}
+                    <button type="submit" class="btn text-white delete-btn"
+                            style="background-color: #dc3545;"
+                            onclick="return confirm('Are you absolutely sure you want to delete this recipe?');">
+                        Delete Recipe
+                    </button>
+                </form>
+            </div>
+        </div>
     </div>
+</div>
+
+<style>
+    .card {
+        border: none;
+        transition: transform 0.2s;
+    }
+
+    .recipe-preview {
+        background-color: #f8f9fa;
+        transition: background-color 0.3s;
+    }
+
+    .recipe-preview:hover {
+        background-color: #e9ecef;
+    }
+
+    .btn-outline-secondary {
+        border-color: #009688;
+        color: #009688;
+    }
+
+    .btn-outline-secondary:hover {
+        background-color: #4CAF50;
+        border-color: #4CAF50;
+        color: white;
+    }
+
+    .delete-btn {
+        transition: all 0.3s;
+    }
+
+    .delete-btn:hover {
+        background-color: #c82333 !important;
+        transform: scale(1.05);
+    }
+
+    .alert {
+        border-left: 4px solid #ffc107;
+    }
+
+    /* Animation for the warning message */
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(-10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    .alert {
+        animation: fadeIn 0.3s ease-out;
+    }
+</style>
 {% endblock %}

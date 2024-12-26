@@ -1,66 +1,127 @@
 {% extends 'recipes/base.html' %}
 
 {% block content %}
-    <!-- Main container for the edit recipe form -->
-    <div class="container">
-        <!-- Display the recipe title being edited -->
-        <h1 class="mt-4">Edit Recipe: {{ recipe.title }}</h1>
+<div class="container mt-5">
+    <div class="card shadow-lg">
+        <!-- Card Header -->
+        <div class="card-header" style="background-color: #009688;">
+            <h2 class="text-white mb-0">Edit Recipe: {{ recipe.title }}</h2>
+        </div>
 
-        <!-- Form for editing the recipe, using the POST method -->
-        <form method="post" enctype="multipart/form-data">
-            {% csrf_token %}  <!-- CSRF token for protection against CSRF attacks -->
+        <!-- Card Body -->
+        <div class="card-body" style="background-color: rgba(255, 255, 255, 0.9);">
+            <form method="post" enctype="multipart/form-data">
+                {% csrf_token %}
 
-            <!-- Title field with current value pre-filled -->
-            <div class="form-group">
-                <label for="id_title">Title</label>
-                <input type="text" name="title" value="{{ form.title.value }}" class="form-control" id="id_title">
-            </div>
+                <div class="row">
+                    <!-- Left Column -->
+                    <div class="col-md-8">
+                        <!-- Title field -->
+                        <div class="mb-4">
+                            <label for="id_title" class="form-label fw-bold" style="color: #009688;">Title</label>
+                            <input type="text" name="title" value="{{ form.title.value }}" 
+                                   class="form-control border-teal" id="id_title">
+                        </div>
 
-            <!-- Description field with current value pre-filled -->
-            <div class="form-group">
-                <label for="id_description">Description</label>
-                <textarea name="description" class="form-control" id="id_description">{{ form.description.value }}</textarea>
-            </div>
+                        <!-- Description field -->
+                        <div class="mb-4">
+                            <label for="id_description" class="form-label fw-bold" style="color: #009688;">Description</label>
+                            <textarea name="description" class="form-control border-teal" 
+                                    id="id_description" rows="3">{{ form.description.value }}</textarea>
+                        </div>
 
-            <!-- Ingredients field with current value pre-filled -->
-            <div class="form-group">
-                <label for="id_ingredients">Ingredients</label>
-                <textarea name="ingredients" class="form-control" id="id_ingredients">{{ form.ingredients.value }}</textarea>
-            </div>
+                        <!-- Instructions field -->
+                        <div class="mb-4">
+                            <label for="id_instructions" class="form-label fw-bold" style="color: #009688;">Instructions</label>
+                            <textarea name="instructions" class="form-control border-teal" 
+                                    id="id_instructions" rows="6">{{ form.instructions.value }}</textarea>
+                        </div>
+                    </div>
 
-            <!-- Instructions field with current value pre-filled -->
-            <div class="form-group">
-                <label for="id_instructions">Instructions</label>
-                <textarea name="instructions" class="form-control" id="id_instructions">{{ form.instructions.value }}</textarea>
-            </div>
+                    <!-- Right Column -->
+                    <div class="col-md-4">
+                        <!-- Current Image Preview -->
+                        {% if recipe.image %}
+                        <div class="mb-4">
+                            <label class="form-label fw-bold" style="color: #009688;">Current Image</label>
+                            <div class="image-container border rounded p-2 text-center">
+                                <img src="{{ recipe.image.url }}" alt="{{ recipe.title }}" 
+                                     class="img-fluid rounded" style="max-height: 200px;">
+                            </div>
+                        </div>
+                        {% endif %}
 
-            <!-- Category dropdown with the current selection pre-filled -->
-            <div class="form-group">
-                <label for="id_category">Category</label>
-                {{ form.category }}
-            </div>
+                        <!-- Image Upload Field -->
+                        <div class="mb-4">
+                            <label for="id_image" class="form-label fw-bold" style="color: #009688;">Change Image</label>
+                            <input type="file" name="image" class="form-control border-teal" id="id_image">
+                        </div>
 
-            <!-- Current Image Preview -->
-            {% if recipe.image %}
-                <div class="form-group">
-                    <label>Current Image:</label>
-                    <div class="mb-2">
-                        <img src="{{ recipe.image.url }}" alt="{{ recipe.title }}" class="img-fluid" style="max-width: 200px; max-height: 200px;">
+                        <!-- Category dropdown -->
+                        <div class="mb-4">
+                            <label for="id_category" class="form-label fw-bold" style="color: #009688;">Category</label>
+                            {{ form.category }}
+                        </div>
+
+                        <!-- Ingredients field -->
+                        <div class="mb-4">
+                            <label for="id_ingredients" class="form-label fw-bold" style="color: #009688;">Ingredients</label>
+                            <textarea name="ingredients" class="form-control border-teal" 
+                                    id="id_ingredients" rows="6">{{ form.ingredients.value }}</textarea>
+                        </div>
                     </div>
                 </div>
-            {% endif %}
 
-            <!-- Image Upload Field -->
-            <div class="form-group">
-                <label for="id_image">Change Recipe Image</label>
-                <input type="file" name="image" class="form-control" id="id_image">
-            </div>
-
-            <!-- Submit and Cancel buttons -->
-            <button type="submit" class="btn btn-primary">Update Recipe</button>
-
-            <!-- Cancel button with conditional link -->
-            <a href="{% if recipe.id %}{% url 'recipe_detail' recipe.id %}{% else %}#{% endif %}" class="btn btn-secondary">Cancel</a>
-        </form>
+                <!-- Action Buttons -->
+                <div class="d-flex justify-content-end gap-2 mt-4">
+                    <a href="{% if recipe.id %}{% url 'recipe_detail' recipe.id %}{% else %}#{% endif %}" 
+                       class="btn btn-outline-secondary">Cancel</a>
+                    <button type="submit" class="btn text-white" 
+                            style="background-color: #009688;">Update Recipe</button>
+                </div>
+            </form>
+        </div>
     </div>
+</div>
+
+<style>
+    .border-teal {
+        border-color: #009688;
+    }
+
+    .form-control:focus, .form-select:focus {
+        border-color: #009688;
+        box-shadow: 0 0 0 0.25rem rgba(0, 150, 136, 0.25);
+    }
+
+    .btn-outline-secondary:hover {
+        background-color: #4CAF50;
+        border-color: #4CAF50;
+        color: white;
+    }
+
+    .btn[type="submit"]:hover {
+        background-color: #4CAF50 !important;
+        border-color: #4CAF50;
+    }
+
+    .image-container {
+        background-color: #f8f9fa;
+        border: 1px solid #dee2e6;
+    }
+
+    .card {
+        border: none;
+    }
+
+    /* Style for the category select */
+    select {
+        border-color: #009688 !important;
+        width: 100%;
+        padding: 0.375rem 0.75rem;
+        font-size: 1rem;
+        line-height: 1.5;
+        border-radius: 0.25rem;
+    }
+</style>
 {% endblock %}

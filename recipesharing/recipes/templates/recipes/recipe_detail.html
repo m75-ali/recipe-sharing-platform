@@ -1,109 +1,193 @@
 {% extends 'recipes/base.html' %}
 
 {% block content %}
-  <div class="container my-4">
+<div class="container my-5">
     <!-- Recipe Title Section -->
-    <div class="row">
-      <div class="col">
-        <h1 class="text-center display-4 mb-4">{{ recipe.title }}</h1>
-      </div>
-    </div>
-
-    <!-- Recipe Main Content in a Card -->
-    <div class="card shadow-sm">
-      <div class="card-body">
-        <!-- Recipe Image -->
-        {% if recipe.image %}
-          <div class="text-center mb-4">
-            <img src="{{ recipe.image.url }}" alt="{{ recipe.title }}" class="img-fluid rounded shadow-sm" style="max-height: 400px;" />
-          </div>
-        {% endif %}
-
-        <!-- Description Section -->
-        <div class="mb-3">
-          <h4 class="text-muted">Description</h4>
-          <p>{{ recipe.description }}</p>
+    <div class="card shadow-lg">
+        <div class="card-header text-white" style="background-color: #009688;">
+            <h1 class="display-5 mb-0 text-center">{{ recipe.title }}</h1>
         </div>
 
-        <!-- Ingredients and Instructions Row -->
-        <div class="row">
-          <!-- Ingredients Column -->
-          <div class="col-md-6 mb-3">
-            <h5 class="text-muted">Ingredients</h5>
-            <ul class="list-group list-group-flush">
-              {% for ingredient in ingredients %}
-                <li class="list-group-item">{{ ingredient }}</li>
-              {% empty %}
-                <li class="list-group-item">No ingredients available.</li>
-              {% endfor %}
-            </ul>
-          </div>
-          <!-- Instructions Column -->
-          <div class="col-md-6 mb-3">
-            <h5 class="text-muted">Instructions</h5>
-            <ol class="list-group list-group-numbered">
-              {% for step in instructions %}
-                <li class="list-group-item">{{ step }}</li>
-              {% empty %}
-                <li class="list-group-item">No instructions available.</li>
-              {% endfor %}
-            </ol>
-          </div>
-        </div>
-
-        <!-- Category -->
-        <p>
-          <strong>Category:</strong> {{ recipe.category.name }}
-        </p>
-
-        <!-- Favorite Section -->
-        {% if user.is_authenticated %}
-          <div class="mb-3">
-            {% if user in recipe.favorites.all %}
-              <form action="{% url 'favorite_recipe' recipe.id %}" method="POST" class="d-inline">
-                {% csrf_token %}
-                <button type="submit" class="btn btn-outline-danger">Unfavourite</button>
-              </form>
-            {% else %}
-              <form action="{% url 'favorite_recipe' recipe.id %}" method="POST" class="d-inline">
-                {% csrf_token %}
-                <button type="submit" class="btn btn-outline-primary">Favourite</button>
-              </form>
+        <div class="card-body" style="background-color: rgba(255, 255, 255, 0.9);">
+            <!-- Recipe Image -->
+            {% if recipe.image %}
+            <div class="text-center mb-4">
+                <img src="{{ recipe.image.url }}" alt="{{ recipe.title }}" 
+                     class="img-fluid rounded shadow" style="max-height: 400px; object-fit: cover;" />
+            </div>
             {% endif %}
-            <span class="text-muted">Favourited by {{ recipe.total_favorites }} users</span>
-          </div>
-        {% endif %}
 
-        <!-- Rating Section -->
-        <p>
-          <strong>Average Rating:</strong> {{ average_rating|floatformat:1 }} / 5
-        </p>
-        {% if user_rating %}
-          <p>Your Rating: {{ user_rating.rating }} / 5</p>
-        {% else %}
-          <form method="POST" action="">
-            {% csrf_token %}
-            <label for="rating">Rate this recipe:</label>
-            <select name="rating" id="rating" class="form-select">
-              <option value="1">1 - Poor</option>
-              <option value="2">2 - Fair</option>
-              <option value="3">3 - Good</option>
-              <option value="4">4 - Very Good</option>
-              <option value="5">5 - Excellent</option>
-            </select>
-            <button type="submit" class="btn btn-success mt-2">Submit Rating</button>
-          </form>
-        {% endif %}
-      </div>
+            <!-- Quick Info Bar -->
+            <div class="d-flex justify-content-between align-items-center mb-4 p-3 rounded" 
+                 style="background-color: rgba(0, 150, 136, 0.1);">
+                <span><i class="fas fa-folder me-2"></i>Category: {{ recipe.category.name }}</span>
+                <span><i class="fas fa-star me-2"></i>Rating: {{ average_rating|floatformat:1 }} / 5</span>
+                <span><i class="fas fa-heart me-2"></i>Favorites: {{ recipe.total_favorites }}</span>
+            </div>
+
+            <!-- Description Section -->
+            <div class="mb-4">
+                <h4 style="color: #009688;">Description</h4>
+                <p class="lead">{{ recipe.description }}</p>
+            </div>
+
+            <!-- Ingredients and Instructions -->
+            <div class="row g-4">
+                <!-- Ingredients Column -->
+                <div class="col-md-6">
+                    <div class="h-100 p-4 rounded" style="background-color: rgba(0, 150, 136, 0.05);">
+                        <h4 style="color: #009688;">Ingredients</h4>
+                        <ul class="list-group list-group-flush">
+                            {% for ingredient in ingredients %}
+                            <li class="list-group-item bg-transparent">{{ ingredient }}</li>
+                            {% empty %}
+                            <li class="list-group-item bg-transparent">No ingredients available.</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Instructions Column -->
+                <div class="col-md-6">
+                    <div class="h-100 p-4 rounded" style="background-color: rgba(0, 150, 136, 0.05);">
+                        <h4 style="color: #009688;">Instructions</h4>
+                        <ol class="list-group list-group-numbered">
+                            {% for step in instructions %}
+                            <li class="list-group-item bg-transparent">{{ step }}</li>
+                            {% empty %}
+                            <li class="list-group-item bg-transparent">No instructions available.</li>
+                            {% endfor %}
+                        </ol>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Interactive Section (Favorites & Rating) -->
+            <div class="mt-4 p-4 rounded" style="background-color: rgba(0, 150, 136, 0.05);">
+                {% if user.is_authenticated %}
+                <!-- Favorite Button -->
+                <div class="mb-3">
+                    <form action="{% url 'favorite_recipe' recipe.id %}" method="POST" class="d-inline">
+                        {% csrf_token %}
+                        {% if user in recipe.favorites.all %}
+                        <button type="submit" class="btn btn-outline-danger">
+                            <i class="fas fa-heart-broken me-2"></i>Unfavorite
+                        </button>
+                        {% else %}
+                        <button type="submit" class="btn favorite-btn">
+                            <i class="fas fa-heart me-2"></i>Favorite
+                        </button>
+                        {% endif %}
+                    </form>
+                </div>
+
+                <!-- Rating Section -->
+                {% if user_rating %}
+                <div class="mb-3">
+                    <h5 style="color: #009688;">Your Rating: {{ user_rating.rating }} / 5</h5>
+                </div>
+                {% else %}
+                <form method="POST" action="" class="rating-form">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label for="rating" class="form-label" style="color: #009688;">Rate this recipe:</label>
+                        <select name="rating" id="rating" class="form-select border-teal">
+                            <option value="1">1 - Poor</option>
+                            <option value="2">2 - Fair</option>
+                            <option value="3">3 - Good</option>
+                            <option value="4">4 - Very Good</option>
+                            <option value="5">5 - Excellent</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="btn" style="background-color: #009688; color: white;">
+                        Submit Rating
+                    </button>
+                </form>
+                {% endif %}
+                {% endif %}
+            </div>
+        </div>
     </div>
 
-    <!-- Edit, Delete, and Back Home Buttons -->
+    <!-- Action Buttons -->
     <div class="d-flex justify-content-between mt-4">
-      <div>
-        <a href="{% url 'edit_recipe' recipe.id %}" class="btn btn-warning">Edit Recipe</a>
-        <a href="{% url 'delete_recipe' recipe.id %}" class="btn btn-danger">Delete Recipe</a>
-      </div>
-      <a href="{% url 'recipe_index' %}" class="btn btn-secondary">Back to Home</a>
+        <div class="btn-group">
+            <a href="{% url 'edit_recipe' recipe.id %}" class="btn edit-btn">
+                <i class="fas fa-edit me-2"></i>Edit
+            </a>
+            <a href="{% url 'delete_recipe' recipe.id %}" class="btn delete-btn">
+                <i class="fas fa-trash me-2"></i>Delete
+            </a>
+        </div>
+        <a href="{% url 'recipe_index' %}" class="btn back-btn">
+            <i class="fas fa-home me-2"></i>Back to Home
+        </a>
     </div>
-  </div>
+</div>
+
+<style>
+    .border-teal {
+        border-color: #009688;
+    }
+
+    .btn {
+        transition: all 0.3s ease;
+    }
+
+    .favorite-btn {
+        background-color: #009688;
+        color: white;
+        border: none;
+    }
+
+    .favorite-btn:hover {
+        background-color: #4CAF50;
+        transform: scale(1.05);
+    }
+
+    .edit-btn {
+        background-color: #009688;
+        color: white;
+        border: none;
+    }
+
+    .edit-btn:hover {
+        background-color: #4CAF50;
+        color: white;
+    }
+
+    .delete-btn {
+        background-color: #dc3545;
+        color: white;
+        border: none;
+    }
+
+    .delete-btn:hover {
+        background-color: #c82333;
+        transform: scale(1.05);
+    }
+
+    .back-btn {
+        background-color: #009688;
+        color: white;
+        border: none;
+    }
+
+    .back-btn:hover {
+        background-color: #4CAF50;
+    }
+
+    .form-select:focus {
+        border-color: #009688;
+        box-shadow: 0 0 0 0.25rem rgba(0, 150, 136, 0.25);
+    }
+
+    .list-group-item {
+        border-color: rgba(0, 150, 136, 0.2);
+    }
+    
+    .card {
+        border: none;
+    }
+</style>
 {% endblock %}

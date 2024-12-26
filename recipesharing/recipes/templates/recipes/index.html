@@ -3,19 +3,19 @@
 
 {% block content %}
   <div class="container">
-    <h1 class="mt-4 text-center">Discover Delicious Recipes</h1>
+    <h1 class="mt-4 text-center" style="color: #009688;">Discover Delicious Recipes</h1>
 
     {% if user.is_authenticated %}
       <p class="text-muted text-center">Hello, {{ user.username }}!</p>
       <div class="text-center mb-4">
-        <a href="{% url 'add_recipe' %}" class="btn btn-success">Add New Recipe</a>
+        <a href="{% url 'add_recipe' %}" class="btn" style="background-color: #009688; color: white;">Add New Recipe</a>
       </div>
     {% endif %}
 
     <!-- Filter by Category Section -->
     <form id="filter-form" method="GET" class="mb-4">
       <div class="input-group">
-        <select name="category" class="form-select" id="category-select">
+        <select name="category" class="form-select border-teal" id="category-select">
           <option value="" {% if not selected_category %}selected{% endif %}>All Categories</option>
           {% for category in categories %}
             <option value="{{ category.name }}" {% if selected_category == category.name %}selected{% endif %}>
@@ -23,7 +23,7 @@
             </option>
           {% endfor %}
         </select>
-        <button type="submit" class="btn btn-primary">Filter</button>
+        <button type="submit" class="btn" style="background-color: #009688; color: white; border: 1px solid #009688;">Filter</button>
       </div>
     </form>
 
@@ -32,6 +32,36 @@
       {% include 'recipes/partials/recipe_list.html' %}
     </div>
   </div>
+
+  <!-- Custom Styles -->
+  <style>
+    .border-teal {
+      border-color: #009688;
+    }
+
+    .border-teal:focus {
+      border-color: #009688;
+      box-shadow: 0 0 0 0.25rem rgba(0, 150, 136, 0.25);
+    }
+
+    .form-select:focus {
+      border-color: #009688;
+      box-shadow: 0 0 0 0.25rem rgba(0, 150, 136, 0.25);
+    }
+
+    .btn:hover {
+      background-color: #4CAF50 !important;
+      border-color: #4CAF50 !important;
+      color: white !important;
+    }
+
+    #recipes-container {
+      background-color: rgba(255, 255, 255, 0.9);
+      border-radius: 8px;
+      padding: 20px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+  </style>
 
   <!-- Include JavaScript for AJAX Filtering -->
   <script src="{% static 'recipes/js/filter.js' %}"></script>

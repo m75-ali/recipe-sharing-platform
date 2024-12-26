@@ -9,48 +9,94 @@
     <form method="POST" class="mb-4">
         {% csrf_token %}
         <div class="mb-3">
-            {{ form.as_p }}
+            <label for="ingredients" class="form-label" style="color: #009688; font-size: 1.25rem;">Ingredients</label>
+            <input type="text" name="ingredients" id="ingredients" class="form-control border-teal p-3" placeholder="Enter ingredients separated by commas" value="{{ form.ingredients.value|default:'' }}">
         </div>
         <button type="submit" class="btn btn-primary w-100">Search</button>
     </form>
 
-    
-
     <!-- Display Results -->
-    {% if results %}
-        <h2 class="mt-5 text-center">Matching Recipes:</h2>
-        <div class="row mt-4">
-            {% for result in results %}
-                <div class="col-md-6 mb-4">
-                    <div class="card shadow-sm">
-                        <div class="card-body">
-                            <!-- Recipe Title and Link -->
-                            <h5 class="card-title">
-                                <a href="{% url 'recipe_detail' result.recipe.id %}" class="text-decoration-none">{{ result.recipe.title }}</a>
-                            </h5>
-                            
-                            <!-- Recipe Description -->
-                            <p class="card-text">{{ result.recipe.description|truncatewords:20 }}</p>
+    {% if search_done %}
+        {% if results %}
+            <h2 class="mt-5 text-center">Matching Recipes:</h2>
+            <div class="row mt-4">
+                {% for result in results %}
+                    <div class="col-md-6 mb-4">
+                        <div class="card shadow-sm">
+                            <div class="card-body">
+                                <!-- Recipe Title and Link -->
+                                <h5 class="card-title">
+                                    <a href="{% url 'recipe_detail' result.recipe.id %}" class="text-decoration-none">{{ result.recipe.title }}</a>
+                                </h5>
+                                
+                                <!-- Recipe Description -->
+                                <p class="card-text">{{ result.recipe.description|truncatewords:20 }}</p>
 
-                            <!-- Ingredients Needed Section -->
-                            {% if result.missing_ingredients %}
-                                <h6 class="text-primary">Shopping List:</h6>
-                                <ul class="list-unstyled ms-3">
-                                    {% for ingredient in result.missing_ingredients %}
-                                        <li><i class="bi bi-bag-fill"></i> {{ ingredient }}</li>
-                                    {% endfor %}
-                                </ul>
-                            {% else %}
-                                <p class="text-success"><strong>You have all the ingredients!</strong></p>
-                            {% endif %}
+                                <!-- Ingredients Needed Section -->
+                                {% if result.missing_ingredients %}
+                                    <h6 class="text-primary">Shopping List:</h6>
+                                    <ul class="list-unstyled ms-3">
+                                        {% for ingredient in result.missing_ingredients %}
+                                            <li><i class="bi bi-bag-fill"></i> {{ ingredient }}</li>
+                                        {% endfor %}
+                                    </ul>
+                                {% else %}
+                                    <p class="text-success"><strong>You have all the ingredients!</strong></p>
+                                {% endif %}
+                            </div>
                         </div>
                     </div>
-                </div>
-            {% endfor %}
-        </div>
-    {% elif results is not None %}
-        <!-- No Results Message -->
-        <p class="text-muted text-center mt-5">No matching recipes found.</p>
+                {% endfor %}
+            </div>
+        {% else %}
+            <p class="text-muted text-center mt-5">No matching recipes found.</p>
+        {% endif %}
     {% endif %}
 </div>
+
+<style>
+    .border-teal {
+        border-color: #009688;
+    }
+
+    .form-control {
+        transition: all 0.3s ease;
+        padding: 15px; /* Increase padding for better spacing */
+        font-size: 1.1rem; /* Better font size */
+    }
+
+    .form-control:focus {
+        border-color: #009688;
+        box-shadow: 0 0 0 0.25rem rgba(0, 150, 136, 0.25);
+    }
+
+    .btn {
+        transition: all 0.3s ease;
+        padding: 12px; /* Increase padding for the button */
+        font-size: 1.1rem; /* Button text size */
+    }
+
+    .btn-primary {
+        background-color: #009688;
+        border: none;
+    }
+
+    .btn-primary:hover {
+        background-color: #4CAF50;
+    }
+
+    /* Additional spacing adjustments for a clean layout */
+    .mb-4 {
+        margin-bottom: 30px !important;
+    }
+
+    h2, .card-body {
+        font-family: 'Arial', sans-serif;
+    }
+
+    .text-muted {
+        font-size: 1.2rem; /* Adjusted font size */
+    }
+</style>
+
 {% endblock %}
