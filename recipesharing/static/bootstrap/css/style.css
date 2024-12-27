@@ -25,20 +25,20 @@ body {
 }
 
 .btn-primary {
-    background-color:rgb(3, 132, 231) !important; /* Fresh green for primary action buttons */
+    background-color:#009688 !important; /* Fresh green for primary action buttons */
     color: #ffffff !important; /* White text for better contrast */
     border: none !important;
 }
 
 .btn-primary:hover {
-    background-color: #388e3c !important; /* Darker green on hover */
-    color: #ffffff !important;
+    background-color: #009688 !important; /* Darker green on hover */
+    color: #009688 !important;
 }
 
 /* Custom Navbar */
 .navbar {
-    background-color: #212121 !important; /* Dark gray for a sleek navbar */
-    border-bottom: 2px solid #4caf50 !important; /* Green underline for emphasis */
+    background-color: #009688 !important; /* Ensure teal background everywhere */
+    border-bottom: 2px solid #4caf50 !important; /* Green underline for consistency */
 }
 
 .navbar-brand {
@@ -48,14 +48,15 @@ body {
 }
 
 .navbar-nav .nav-link {
-    color: #e0e0e0 !important; /* Light gray for links */
+    color: #ffffff !important; /* Light gray for links */
     font-size: 1rem !important; /* Comfortable size for readability */
 }
 
 .navbar-nav .nav-link:hover {
-    color: #4caf50 !important; /* Green for hover effect */
+    color: #009688 !important; /* Green for hover effect */
     font-weight: bold !important;
 }
+
 
 /* Footer Styles */
 footer {
