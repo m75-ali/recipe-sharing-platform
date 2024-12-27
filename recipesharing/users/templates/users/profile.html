@@ -1,39 +1,129 @@
 {% extends 'recipes/base.html' %}
 
 {% block content %}
-    <!-- Main container for the profile content -->
-    <div class="container">
-        <!-- Heading for the profile page -->
-        <h1 class="mt-4">Profile</h1>
-
-        <!-- Form for updating user profile (e.g., username, email) -->
-        <form method="post">
-            {% csrf_token %}  <!-- Security token to prevent CSRF attacks -->
-            {{ form.as_p }}  <!-- Render form fields with <p> tags for each field -->
-            
-            <!-- Submit button to update the profile -->
-            <button type="submit" class="btn btn-primary">Update</button>
-        </form>
-
-        <!-- Button to navigate back to the home page -->
-        <div class="mt-4">
-            <a href="{% url 'recipe_index' %}" class="btn btn-secondary">Home</a>
+<div class="container my-5">
+    <!-- Profile Heading -->
+    <div class="card shadow-lg">
+        <div class="card-header text-white" style="background-color: #009688;">
+            <h1 class="display-4 text-center mb-0">Your Profile</h1>
         </div>
 
-        <!-- Section for displaying the user's favorite recipes -->
-        <h3 class="mt-4">Your Favourite Recipes</h3>
-        
-        <!-- List group to display favorite recipes -->
-        <ul class="list-group">
-            {% for recipe in favorites %}
-                <!-- List each favorite recipe as a link to its detail page -->
-                <li class="list-group-item">
-                    <a href="{% url 'recipe_detail' recipe.id %}">{{ recipe.title }}</a>
-                </li>
-            {% empty %}
-                <!-- Message shown if no favorite recipes exist -->
-                <li class="list-group-item">You haven't favourited any recipes yet.</li>
-            {% endfor %}
-        </ul>
+        <div class="card-body" style="background-color: rgba(255, 255, 255, 0.9);">
+            <!-- Profile Form Section -->
+            <form method="post" class="mb-4">
+                {% csrf_token %}
+                
+                <!-- Render form fields with custom styling -->
+                <div class="form-group">
+                    {{ form.as_p }}
+                </div>
+
+                <!-- Submit Button to Update Profile -->
+                <div class="d-flex justify-content-center">
+                    <button type="submit" class="btn btn-lg" style="background-color: #009688; color: white;">
+                        Update Profile
+                    </button>
+                </div>
+            </form>
+        </div>
     </div>
+
+    <!-- Favorite Recipes Section -->
+    <div class="card shadow-lg mt-5">
+        <div class="card-header text-white" style="background-color: #009688;">
+            <h3 class="text-center mb-0">Your Favourite Recipes</h3>
+        </div>
+        <div class="card-body" style="background-color: rgba(255, 255, 255, 0.9);">
+            <!-- List of Favorite Recipes -->
+            <ul class="list-group list-group-flush">
+                {% for recipe in favorites %}
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        <a href="{% url 'recipe_detail' recipe.id %}" class="text-decoration-none text-primary">
+                            {{ recipe.title }}
+                        </a>
+                        <span><i class="fas fa-heart me-2" style="color: #ff6347;"></i>Favourite</span>
+                    </li>
+                {% empty %}
+                    <li class="list-group-item text-center text-muted">You haven't favourited any recipes yet.</li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+
+    <!-- Back to Recipes Button (Moved Below the Favourite Recipes Section with More Space) -->
+    <div class="d-flex justify-content-center mb-4 mt-4">
+        <a href="{% url 'recipe_index' %}" class="btn back-btn">
+            <i class="fas fa-home me-2"></i>Back to Recipes
+        </a>
+    </div>
+
+</div>
+
+<style>
+    .btn {
+        transition: all 0.3s ease;
+    }
+
+    .back-btn {
+        background-color: #009688;
+        color: white;
+        border: none;
+    }
+
+    .back-btn:hover {
+        background-color: #4CAF50;
+    }
+
+    .form-select:focus {
+        border-color: #009688;
+        box-shadow: 0 0 0 0.25rem rgba(0, 150, 136, 0.25);
+    }
+
+    .list-group-item {
+        border-color: rgba(0, 150, 136, 0.2);
+    }
+    
+    .card {
+        border: none;
+    }
+
+    .card-header {
+        background-color: #009688;
+    }
+
+    .card-body {
+        background-color: rgba(255, 255, 255, 0.9);
+    }
+
+    .favorite-btn:hover {
+        background-color: #4CAF50;
+        transform: scale(1.05);
+    }
+
+    .edit-btn {
+        background-color: #009688;
+        color: white;
+        border: none;
+    }
+
+    .edit-btn:hover {
+        background-color: #4CAF50;
+        color: white;
+    }
+
+    .delete-btn {
+        background-color: #dc3545;
+        color: white;
+        border: none;
+    }
+
+    .delete-btn:hover {
+        background-color: #c82333;
+        transform: scale(1.05);
+    }
+
+    .back-btn:hover {
+        background-color: #4CAF50;
+    }
+</style>
 {% endblock %}

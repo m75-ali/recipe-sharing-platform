@@ -1,7 +1,42 @@
 {% extends 'recipes/base.html' %}
 
 {% block content %}
-    <div class="container">
-        <h1 class="mt-4">Welcome to the User Index Page!</h1>
+    <div class="container mt-5">
+        <!-- Heading for the user index page with improved styling -->
+        <h1 class="text-center mb-4" style="color: #009688;">Welcome to the User Index Page!</h1>
+        
+        <!-- Optional content or section for user-related actions or details can go here -->
+        <div class="alert alert-info text-center">
+            <p>Manage your recipes, view your profile, and access other features from the navigation bar.</p>
+        </div>
     </div>
+
+    <!-- Custom CSS for additional styling -->
+    <style>
+        /* Centered heading with custom color scheme */
+        h1 {
+            font-family: 'Arial', sans-serif;
+            font-weight: 700;
+            color: #009688; /* Consistent color scheme */
+        }
+
+        /* Alert box for user message */
+        .alert-info {
+            background-color: #e0f7fa;
+            border-color: #00bcd4;
+            color: #00695c;
+            border-radius: 8px; /* Rounded corners */
+            padding: 15px;
+            font-size: 1.1rem;
+        }
+
+        .alert-info p {
+            margin: 0;
+        }
+
+        /* Padding adjustments for better spacing */
+        .mb-4 {
+            margin-bottom: 2rem !important;
+        }
+    </style>
 {% endblock %}

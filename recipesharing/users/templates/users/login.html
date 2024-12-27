@@ -3,23 +3,78 @@
 {% block content %}
     <!-- Main container with top margin for spacing -->
     <div class="container mt-5">
-        <!-- Heading for the login page -->
-        <h1>Login</h1>
+        <!-- Heading for the login page with improved styling -->
+        <h1 class="text-center mb-4" style="color: #009688;">Login</h1>
         
         <!-- Form for user login, method="post" to send form data securely -->
-        <form method="post">
+        <form method="post" class="shadow-lg p-4 rounded border" style="background-color: #f8f9fa;">
             {% csrf_token %}  <!-- Security token to prevent CSRF attacks -->
             
-            <!-- Render the form fields automatically, with each field wrapped in a <p> tag -->
-            {{ form.as_p }}
+            <!-- Render the form fields automatically with custom styling -->
+            <div class="mb-3">
+                {{ form.as_p }}
+            </div>
             
-            <!-- Submit button for the login form, styled with Bootstrap's primary button -->
-            <button type="submit" class="btn btn-primary">Login</button>
+            <!-- Submit button for the login form, styled with a modern primary button -->
+            <button type="submit" class="btn btn-teal w-100 p-3 mb-3" style="background-color: #009688; color: white; border: none;">Login</button>
+            
+            <!-- Link to the password reset page in case the user forgot their password, styled for clarity -->
+            <p class="text-center">
+                <a href="{% url 'password_reset' %}" style="color: #009688;">Forgot password?</a>
+            </p>
         </form>
-        
-        <!-- Link to the password reset page in case the user forgot their password -->
-        <p class="mt-3">
-            <a href="{% url 'password_reset' %}">Forgot password?</a>
-        </p>
     </div>
+
+    <!-- Custom CSS for styling -->
+    <style>
+        /* Center text and adjust the font style */
+        h1 {
+            font-family: 'Arial', sans-serif;
+            font-weight: 700;
+            color: #009688; /* Consistent color scheme */
+        }
+
+        /* Form enhancements: rounded corners, shadow, background */
+        form {
+            background-color: #ffffff; /* White background */
+            border-radius: 8px;  /* Rounded corners */
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);  /* Subtle shadow for depth */
+        }
+
+        /* Input fields - improving visual appeal and focus state */
+        .form-control {
+            border-color: #009688;
+            font-size: 1rem;
+            padding: 12px;
+        }
+
+        .form-control:focus {
+            border-color: #4CAF50;  /* Highlight color on focus */
+            box-shadow: 0 0 0 0.2rem rgba(76, 175, 80, 0.25);
+        }
+
+        /* Button styling for a modern look */
+        .btn-teal {
+            background-color: #009688;
+            color: white;
+            border-radius: 8px; /* Rounded corners for button */
+            font-size: 1.2rem;
+        }
+
+        /* Link style for password reset */
+        a {
+            font-size: 1rem;
+            text-decoration: none;
+        }
+
+        a:hover {
+            text-decoration: underline;
+            color: #4CAF50;  /* Slightly lighter green for hover effect */
+        }
+
+        /* Padding adjustments for better spacing */
+        .mb-3 {
+            margin-bottom: 1.5rem !important;
+        }
+    </style>
 {% endblock %}
