@@ -1,53 +1,67 @@
 {% extends 'recipes/base.html' %}
 
 {% block content %}
-<div class="container my-5">
-    <div class="row">
-        <div class="col-12 text-center">
-            <h1 class="mb-4">Find Recipes by Ingredients</h1>
-        </div>
-    </div>
+<div class="container mt-5">
+    <!-- Page Title -->
+    <h1 class="text-center mb-4 text-primary">Ingredient-Based Recipe Finder</h1>
+    <p class="text-center text-muted">Input the ingredients you have, and we'll suggest recipes you can make along with a shopping list!</p>
 
-    <div class="row justify-content-center">
-        <div class="col-md-8 col-lg-6">
-            <form method="POST" class="d-flex align-items-center">
+   
+    <!-- Search Form -->
+    <div class="card shadow-sm mb-4">
+        <div class="card-body">
+            <form method="POST" class="d-flex flex-column align-items-center">
                 {% csrf_token %}
-                <div class="flex-grow-1 me-2">
-                    {{ form.ingredients }}
+                <div class="mb-3 w-100">
+                    <label for="ingredients" class="form-label fw-bold">Ingredients:</label>
+                    <textarea 
+                        id="ingredients" 
+                        name="ingredients" 
+                        class="form-control rounded-3" 
+                        rows="3" 
+                        placeholder="Enter ingredients, separated by commas">{{ request.POST.ingredients }}</textarea>
                 </div>
-                <button type="submit" class="btn btn-primary">Search</button>
+                <button type="submit" class="btn btn-primary w-50 mt-2">
+                    <i class="bi bi-search"></i> Search
+                </button>
             </form>
         </div>
     </div>
-
+    <!-- Display Results -->
     {% if results %}
-    <div class="row mt-5">
-        <div class="col-12">
-            <h2 class="text-center">Matching Recipes</h2>
-            <ul class="list-group mt-3">
-                {% for result in results %}
-                <li class="list-group-item">
-                    <h5>{{ result.recipe.title }}</h5>
-                    <p class="mb-1">
-                        Missing Ingredients: 
-                        <span class="text-danger">{{ result.missing_ingredients|join:", " }}</span>
-                    </p>
-                </li>
-                {% endfor %}
-            </ul>
+        <h2 class="mt-5 text-center text-success">Matching Recipes:</h2>
+        <div class="row mt-4">
+            {% for result in results %}
+                <div class="col-md-6 mb-4">
+                    <div class="card shadow-sm h-100">
+                        <div class="card-body">
+                            <!-- Recipe Title and Link -->
+                            <h5 class="card-title text-dark">
+                                <a href="{% url 'recipe_detail' result.recipe.id %}" class="text-decoration-none">{{ result.recipe.title }}</a>
+                            </h5>
+                            
+                            <!-- Recipe Description -->
+                            <p class="card-text text-muted">{{ result.recipe.description|truncatewords:20 }}</p>
+
+                            <!-- Ingredients Needed Section -->
+                            {% if result.missing_ingredients %}
+                                <h6 class="text-primary">Shopping List:</h6>
+                                <ul class="list-unstyled ms-3">
+                                    {% for ingredient in result.missing_ingredients %}
+                                        <li><i class="bi bi-cart-plus"></i> {{ ingredient }}</li>
+                                    {% endfor %}
+                                </ul>
+                            {% else %}
+                                <p class="text-success"><strong>You have all the ingredients!</strong></p>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
         </div>
-    </div>
-    {% elif suggestions %}
-    <div class="row mt-5">
-        <div class="col-12">
-            <h2 class="text-center">Suggestions</h2>
-            <ul class="list-group mt-3">
-                {% for suggestion in suggestions %}
-                <li class="list-group-item">{{ suggestion }}</li>
-                {% endfor %}
-            </ul>
-        </div>
-    </div>
+    {% elif results is not None %}
+        <!-- No Results Message -->
+        <p class="text-muted text-center mt-5"><i class="bi bi-emoji-frown"></i> No matching recipes found. Try adding more ingredients!</p>
     {% endif %}
 </div>
 {% endblock %}
