@@ -84,14 +84,10 @@
           </button>
           <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
             <ul class="navbar-nav">
-              {% if user.is_authenticated %}
+                {% if user.is_authenticated %}
                 <li class="nav-item">
                   <a class="nav-link" href="{% url 'ingredient_search' %}">
-                    <img
-                      src="{% static 'images/search.png' %}"
-                      alt="Search by Ingredients"
-                      style="height: 24px; width: 24px;"
-                    />
+                  Ingredient Search
                   </a>
                 </li>
                 <li class="nav-item">
