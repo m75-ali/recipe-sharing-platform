@@ -63,51 +63,67 @@
             </div>
 
             <!-- Interactive Section (Favorites & Rating) -->
-            <div class="mt-4 p-4 rounded" style="background-color: rgba(0, 150, 136, 0.05);">
-                {% if user.is_authenticated %}
-                <!-- Favorite Button -->
-                <div class="mb-3">
-                    <form action="{% url 'favorite_recipe' recipe.id %}" method="POST" class="d-inline">
-                        {% csrf_token %}
-                        {% if user in recipe.favorites.all %}
-                        <button type="submit" class="btn btn-outline-danger">
-                            <i class="fas fa-heart-broken me-2"></i>Unfavorite
-                        </button>
-                        {% else %}
-                        <button type="submit" class="btn favorite-btn">
-                            <i class="fas fa-heart me-2"></i>Favorite
-                        </button>
-                        {% endif %}
-                    </form>
-                </div>
-
-                <!-- Rating Section -->
-                {% if user_rating %}
-                <div class="mb-3">
-                    <h5 style="color: #009688;">Your Rating: {{ user_rating.rating }} / 5</h5>
-                </div>
+<div class="mt-4 p-4 rounded" style="background-color: rgba(0, 150, 136, 0.05);">
+    {% if user.is_authenticated %}
+        <!-- Favorite Button -->
+        <div class="mb-3">
+            <form action="{% url 'favorite_recipe' recipe.id %}" method="POST" class="d-inline">
+                {% csrf_token %}
+                {% if user in recipe.favorites.all %}
+                    <button type="submit" class="btn btn-outline-danger">
+                        <i class="fas fa-heart-broken me-2"></i>Unfavorite
+                    </button>
                 {% else %}
+                    <button type="submit" class="btn favorite-btn">
+                        <i class="fas fa-heart me-2"></i>Favorite
+                    </button>
+                {% endif %}
+            </form>
+        </div>
+
+        <!-- Rating Section -->
+        {% if user_rating %}
+            <div class="mb-3">
+                <h5 style="color: #009688;">Your Rating: {{ user_rating.rating }} / 5</h5>
                 <form method="POST" action="" class="rating-form">
                     {% csrf_token %}
                     <div class="mb-3">
-                        <label for="rating" class="form-label" style="color: #009688;">Rate this recipe:</label>
+                        <label for="rating" class="form-label" style="color: #009688;">Update Your Rating:</label>
                         <select name="rating" id="rating" class="form-select border-teal">
-                            <option value="1">1 - Poor</option>
-                            <option value="2">2 - Fair</option>
-                            <option value="3">3 - Good</option>
-                            <option value="4">4 - Very Good</option>
-                            <option value="5">5 - Excellent</option>
+                            {% for value in "12345"|make_list %}
+                                <option value="{{ value }}" {% if user_rating.rating|stringformat:"d" == value %}selected{% endif %}>
+                                    {{ value }} - {{ value|yesno:"Poor,Fair,Good,Very Good,Excellent" }}
+                                </option>
+                            {% endfor %}
                         </select>
                     </div>
                     <button type="submit" class="btn" style="background-color: #009688; color: white;">
-                        Submit Rating
+                        Update Rating
                     </button>
                 </form>
-                {% endif %}
-                {% endif %}
             </div>
-        </div>
-    </div>
+        {% else %}
+            <form method="POST" action="" class="rating-form">
+                {% csrf_token %}
+                <div class="mb-3">
+                    <label for="rating" class="form-label" style="color: #009688;">Rate this recipe:</label>
+                    <select name="rating" id="rating" class="form-select border-teal">
+                        <option value="1">1 - Poor</option>
+                        <option value="2">2 - Fair</option>
+                        <option value="3">3 - Good</option>
+                        <option value="4">4 - Very Good</option>
+                        <option value="5">5 - Excellent</option>
+                    </select>
+                </div>
+                <button type="submit" class="btn" style="background-color: #009688; color: white;">
+                    Submit Rating
+                </button>
+            </form>
+        {% endif %}
+    {% else %}
+        <p>Please <a href="{% url 'login' %}" style="color: #009688;">log in</a> to rate or favorite this recipe.</p>
+    {% endif %}
+</div>
 
     <!-- Action Buttons -->
     <div class="d-flex justify-content-between mt-4">
