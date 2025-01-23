@@ -3,7 +3,7 @@
 {% block content %}
 <div class="container mt-5">
     <!-- Page Title -->
-    <h1 class="text-center mb-4 text-primary">Ingredient-Based Recipe Finder</h1>
+    <h1 class="text-center mb-4" style="color: #009688;">Ingredient-Based Recipe Finder</h1>
     <p class="text-center text-muted">Input the ingredients you have, and we'll suggest recipes you can make along with a shopping list!</p>
 
    
@@ -29,7 +29,7 @@
     </div>
     <!-- Display Results -->
     {% if results %}
-        <h2 class="mt-5 text-center text-success">Matching Recipes:</h2>
+        <h2 class="mt-5 text-center" style="color: #009688;">Matching Recipes:</h2>
         <div class="row mt-4">
             {% for result in results %}
                 <div class="col-md-6 mb-4">

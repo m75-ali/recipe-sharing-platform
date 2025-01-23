@@ -105,6 +105,7 @@
                 </li>
               {% endif %}
             </ul>
+            <button id="theme-toggle" class="btn btn-light ms-2">☀️</button>
           </div>
         </div>
       </nav>
@@ -136,5 +137,28 @@
 
     <!-- Bootstrap JS -->
     <script src="{% static 'bootstrap/js/bootstrap.bundle.min.js' %}"></script>
+    <script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const themeToggle = document.getElementById("theme-toggle");
+        const currentTheme = localStorage.getItem("theme") || "light";
+
+        // Set the initial theme
+        document.body.classList.add(`${currentTheme}-theme`);
+        themeToggle.textContent = currentTheme === "light" ? "☀️" : "🌙";
+
+        // Add click event to toggle theme
+        themeToggle.addEventListener("click", function () {
+            const isLight = document.body.classList.contains("light-theme");
+            document.body.classList.toggle("light-theme", !isLight);
+            document.body.classList.toggle("dark-theme", isLight);
+
+            // Update button text
+            themeToggle.textContent = isLight ? "☀️" : "🌙";
+
+            // Save the theme in localStorage
+            localStorage.setItem("theme", isLight ? "dark" : "light");
+        });
+    });
+</script>
   </body>
 </html>

@@ -3,6 +3,62 @@ body {
     color: #2c2c2c !important; /* Dark gray for comfortable reading */
     background-color: #f7f7f7 !important; /* Light gray for subtle contrast */
     font-family: 'Arial', sans-serif; /* Clean and modern font */
+    transition: background-color 0.3s ease, color 0.3s ease !important; /* Smooth transitions for theme toggle */
+}
+
+/* Custom Text Color for Dark Mode */
+body.dark-theme .text-muted {
+    color: #e0e0e0 !important; /* Light gray text for dark mode */
+}
+
+/* Light Mode Styles for #recipes-container */
+#recipes-container {
+    background-color: rgba(255, 255, 255, 0.9); /* Light background with transparency */
+    border-radius: 8px;
+    padding: 20px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Dark Mode Styles for #recipes-container */
+body.dark-theme #recipes-container {
+    background-color: rgba(54, 54, 54, 0.9) !important; /* Dark background with transparency */
+    box-shadow: 0 2px 4px rgba(255, 255, 255, 0.1) !important; /* Lighter shadow for dark mode */
+}
+
+/* Light and Dark Themes */
+body.light-theme {
+    color: #2c2c2c !important;
+    background-color: #f7f7f7 !important; /* Light background */
+}
+
+body.dark-theme {
+    color: #e0e0e0 !important; /* Light text for dark theme */
+    background-color: #121212 !important; /* Dark background */
+}
+
+/* Theme Toggle Button */
+#theme-toggle {
+    position: fixed !important; /* Stay visible even on scroll */
+    bottom: 20px !important;
+    right: 20px !important;
+    z-index: 1000 !important;
+    background-color: #009688 !important; /* Teal button */
+    color: #ffffff !important;
+    border: none !important;
+    border-radius: 50% !important;
+    width: 50px !important;
+    height: 50px !important;
+    font-size: 1.5rem !important; /* Larger icon */
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3) !important;
+    transition: background-color 0.3s ease, transform 0.2s ease !important;
+}
+
+#theme-toggle:hover {
+    background-color: #4caf50 !important; /* Lighter green on hover */
+    transform: scale(1.1) !important; /* Slightly larger on hover */
 }
 
 /* Custom Card Styles */
@@ -31,14 +87,14 @@ body {
 }
 
 .btn-primary:hover {
-    background-color: #009688 !important; /* Darker green on hover */
-    color: #009688 !important;
+    background-color: #4caf50 !important; /* Lighter green on hover */
+    color: #ffffff !important;
 }
 
 /* Custom Navbar */
 .navbar {
     background-color: #009688 !important; /* Ensure teal background everywhere */
-    border-bottom: 2px solid #4caf50 !important; /* Green underline for consistency */
+    border-bottom: 2px solid #009688 !important; /* Green underline for consistency */
 }
 
 .navbar-brand {
@@ -53,10 +109,9 @@ body {
 }
 
 .navbar-nav .nav-link:hover {
-    color: #009688 !important; /* Green for hover effect */
+    color: #4caf50 !important; /* Green for hover effect */
     font-weight: bold !important;
 }
-
 
 /* Footer Styles */
 footer {
@@ -64,7 +119,7 @@ footer {
     color: #e0e0e0 !important; /* Light gray for text */
     padding: 1.5rem 0 !important;
     text-align: center !important;
-    border-top: 2px solid #4caf50 !important; /* Green border for consistency */
+    border-top: 2px solid #009688 !important; /* Green border for consistency */
 }
 
 /* Responsive Tweaks for Mobile */
@@ -80,4 +135,171 @@ footer {
     .navbar {
         border-bottom: 1px solid #4caf50 !important; /* Adjust border for smaller screens */
     }
+
+    #theme-toggle {
+        bottom: 10px !important; /* Adjust placement for smaller screens */
+        right: 10px !important;
+    }
 }
+
+/* Light Mode Styles */
+body {
+    background-color: #f8f9fa; /* Light background */
+}
+
+.card {
+    background-color: rgba(255, 255, 255, 0.9);
+    color: #2c2c2c; /* Dark text for light mode */
+}
+
+.card-header {
+    background-color: #009688;
+    color: white;
+}
+
+.card-body {
+    background-color: rgba(255, 255, 255, 0.9);
+    color: #2c2c2c; /* Dark text for light mode */
+}
+
+.card-body h4 {
+    color: #009688;
+}
+
+.list-group-item {
+    border-color: rgba(0, 150, 136, 0.2);
+}
+
+.favorite-btn {
+    background-color: #009688;
+    color: white;
+}
+
+.favorite-btn:hover {
+    background-color: #4CAF50;
+    transform: scale(1.05);
+}
+
+.edit-btn {
+    background-color: #009688;
+    color: white;
+}
+
+.edit-btn:hover {
+    background-color: #4CAF50;
+}
+
+.delete-btn {
+    background-color: #dc3545;
+    color: white;
+}
+
+.delete-btn:hover {
+    background-color: #c82333;
+    transform: scale(1.05);
+}
+
+.back-btn {
+    background-color: #009688;
+    color: white;
+}
+
+.back-btn:hover {
+    background-color: #4CAF50;
+}
+
+.form-select:focus {
+    border-color: #009688;
+    box-shadow: 0 0 0 0.25rem rgba(0, 150, 136, 0.25);
+}
+
+.list-group-item {
+    border-color: rgba(0, 150, 136, 0.2);
+}
+
+/* Dark Mode Styles */
+body.dark-theme {
+    background-color: #121212; /* Dark background */
+}
+
+body.dark-theme .card {
+    background-color: rgba(18, 18, 18, 0.9);
+    color: #e0e0e0; /* Light text for dark mode */
+}
+
+body.dark-theme .card-header {
+    background-color: #00796b; /* Darker teal for header */
+    color: white;
+}
+
+body.dark-theme .card-body {
+    background-color: rgba(18, 18, 18, 0.9);
+    color: #e0e0e0; /* Light text for dark mode */
+}
+
+body.dark-theme .card-body h4 {
+    color: #4caf50; /* Light color for headings in dark mode */
+}
+
+body.dark-theme .list-group-item {
+    border-color: rgba(0, 150, 136, 0.5);
+}
+
+body.dark-theme .favorite-btn {
+    background-color: #00796b;
+    color: white;
+}
+
+body.dark-theme .favorite-btn:hover {
+    background-color: #4CAF50;
+}
+
+body.dark-theme .edit-btn {
+    background-color: #00796b;
+    color: white;
+}
+
+body.dark-theme .edit-btn:hover {
+    background-color: #4CAF50;
+}
+
+body.dark-theme .delete-btn {
+    background-color: #c82333;
+    color: white;
+}
+
+body.dark-theme .delete-btn:hover {
+    background-color: #b52d2e;
+}
+
+body.dark-theme .back-btn {
+    background-color: #00796b;
+    color: white;
+}
+
+body.dark-theme .back-btn:hover {
+    background-color: #4CAF50;
+}
+
+body.dark-theme .form-select:focus {
+    border-color: #00796b;
+    box-shadow: 0 0 0 0.25rem rgba(0, 150, 136, 0.25);
+}
+
+body.dark-theme .list-group-item {
+    background-color: rgba(18, 18, 18, 0.8);
+}
+a.text-dark {
+    color: #009688 !important;
+}
+a.btn-info {
+    background-color: #009688;
+    color: white; /* To ensure the text color is white */
+    border: none;
+}
+
+a.btn-info:hover {
+    background-color: #00796b; /* Slightly darker shade for hover effect */
+    color: white;
+}
+
