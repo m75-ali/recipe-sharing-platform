@@ -91,10 +91,17 @@
                         <label for="rating" class="form-label" style="color: #009688;">Update Your Rating:</label>
                         <select name="rating" id="rating" class="form-select border-teal">
                             {% for value in "12345"|make_list %}
-                                <option value="{{ value }}" {% if user_rating.rating|stringformat:"d" == value %}selected{% endif %}>
-                                    {{ value }} - {{ value|yesno:"Poor,Fair,Good,Very Good,Excellent" }}
+                                <option value="{{ value }}" {% if user_rating.rating == value|add:"0" %}selected{% endif %}>
+                                    {{ value }} - 
+                                    {% if value == "1" %}Poor
+                                    {% elif value == "2" %}Fair
+                                    {% elif value == "3" %}Good
+                                    {% elif value == "4" %}Very Good
+                                    {% elif value == "5" %}Excellent
+                                    {% endif %}
                                 </option>
                             {% endfor %}
+                    
                         </select>
                     </div>
                     <button type="submit" class="btn" style="background-color: #009688; color: white;">
