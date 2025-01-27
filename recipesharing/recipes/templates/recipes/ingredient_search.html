@@ -5,8 +5,17 @@
     <!-- Page Title -->
     <h1 class="text-center mb-4" style="color: #009688;">Ingredient-Based Recipe Finder</h1>
     <p class="text-center text-muted">Input the ingredients you have, and we'll suggest recipes you can make along with a shopping list!</p>
+    
+    <!-- Navigation Buttons -->
+    <div class="d-flex justify-content-between mb-4">
+        <a href="{{ request.META.HTTP_REFERER|default:'#' }}" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left"></i> Back
+        </a>
+        <a href="{% url 'recipe_index' %}" class="btn btn-outline-success">
+            <i class="bi bi-house"></i> Home
+        </a>
+    </div>
 
-   
     <!-- Search Form -->
     <div class="card shadow-sm mb-4">
         <div class="card-body">
@@ -27,6 +36,7 @@
             </form>
         </div>
     </div>
+
     <!-- Display Results -->
     {% if results %}
         <h2 class="mt-5 text-center" style="color: #009688;">Matching Recipes:</h2>
