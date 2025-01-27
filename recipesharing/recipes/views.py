@@ -181,53 +181,45 @@ def favorite_recipe(request, recipe_id):
 def ingredient_search(request):
     results = []
     form = IngredientSearchForm()
-    suggestions = set()  # Use a set to avoid duplicate suggestions
+    suggestions = set()
 
     if request.method == 'POST':
         form = IngredientSearchForm(request.POST)
         if form.is_valid():
-            # Process user-provided ingredients (strip spaces and quotes)
             user_ingredients = [
                 ingredient.strip().lower().strip('"') for ingredient in form.cleaned_data['ingredients'].split(",")
             ]
-            print("User-provided ingredients:", user_ingredients)
 
-            # Iterate through all recipes
+            # Require a minimum match threshold (e.g., 50% of searched ingredients)
+            min_matches_required = max(1, len(user_ingredients) // 2)
+
             for recipe in Recipe.objects.all():
-                # Clean and split the ingredients list properly
                 if isinstance(recipe.ingredients, str):
                     recipe_ingredients = recipe.ingredients.replace('[', '').replace(']', '').replace('"', '').split(",")
                 else:
                     recipe_ingredients = []
 
-                # Normalize ingredients by stripping spaces and lowercasing
                 recipe_ingredients = [ingredient.strip().lower() for ingredient in recipe_ingredients]
 
-                print(f"Checking recipe '{recipe.title}' with ingredients:", recipe_ingredients)
-
-                # Find matching ingredients
                 matching_ingredients = [
                     ingredient for ingredient in user_ingredients if ingredient in recipe_ingredients
                 ]
 
-                if matching_ingredients:
-                    # Find missing ingredients
+                # Only include recipes that match the minimum threshold
+                if len(matching_ingredients) >= min_matches_required:
                     missing_ingredients = [
                         ingredient for ingredient in recipe_ingredients if ingredient not in user_ingredients
                     ]
                     results.append({
                         'recipe': recipe,
+                        'matching_ingredients': matching_ingredients,
                         'missing_ingredients': missing_ingredients,
                     })
                 else:
-                    # Suggest corrections for unmatched ingredients
                     for user_ingredient in user_ingredients:
                         close_matches = get_close_matches(user_ingredient, recipe_ingredients, n=3, cutoff=0.6)
                         if close_matches:
                             suggestions.update(close_matches)
-
-            print("Matching recipes:", results)
-            print("Suggestions for user:", suggestions)
 
     return render(request, 'recipes/ingredient_search.html', {
         'form': form,

@@ -2,11 +2,9 @@
 
 {% block content %}
 <div class="container mt-5">
-    <!-- Page Title -->
     <h1 class="text-center mb-4" style="color: #009688;">Ingredient-Based Recipe Finder</h1>
     <p class="text-center text-muted">Input the ingredients you have, and we'll suggest recipes you can make along with a shopping list!</p>
     
-    <!-- Navigation Buttons -->
     <div class="d-flex justify-content-between mb-4">
         <a href="{{ request.META.HTTP_REFERER|default:'#' }}" class="btn btn-outline-secondary">
             <i class="bi bi-arrow-left"></i> Back
@@ -16,7 +14,6 @@
         </a>
     </div>
 
-    <!-- Search Form -->
     <div class="card shadow-sm mb-4">
         <div class="card-body">
             <form method="POST" class="d-flex flex-column align-items-center">
@@ -37,7 +34,6 @@
         </div>
     </div>
 
-    <!-- Display Results -->
     {% if results %}
         <h2 class="mt-5 text-center" style="color: #009688;">Matching Recipes:</h2>
         <div class="row mt-4">
@@ -45,15 +41,20 @@
                 <div class="col-md-6 mb-4">
                     <div class="card shadow-sm h-100">
                         <div class="card-body">
-                            <!-- Recipe Title and Link -->
                             <h5 class="card-title text-dark">
                                 <a href="{% url 'recipe_detail' result.recipe.id %}" class="text-decoration-none custom-link">{{ result.recipe.title }}</a>
                             </h5>
                             
-                            <!-- Recipe Description -->
                             <p class="card-text text-muted">{{ result.recipe.description|truncatewords:20 }}</p>
 
-                            <!-- Ingredients Needed Section -->
+                            <!-- Matching Ingredients Section -->
+                            <h6 class="matching-ingredients-title" style="color: #009688;">Matching Ingredients:</h6>
+                            <ul class="list-unstyled ms-3 mb-3">
+                                {% for ingredient in result.matching_ingredients %}
+                                    <li><i class="bi bi-check-circle-fill text-success"></i> {{ ingredient }}</li>
+                                {% endfor %}
+                            </ul>
+
                             {% if result.missing_ingredients %}
                                 <h6 class="shopping-list-title">Shopping List:</h6>
                                 <ul class="list-unstyled ms-3">
@@ -70,7 +71,6 @@
             {% endfor %}
         </div>
     {% elif results is not None %}
-        <!-- No Results Message -->
         <p class="text-muted text-center mt-5"><i class="bi bi-emoji-frown"></i> No matching recipes found. Try adding more ingredients!</p>
     {% endif %}
 </div>
