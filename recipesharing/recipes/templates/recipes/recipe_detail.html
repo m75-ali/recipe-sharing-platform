@@ -32,30 +32,30 @@
 
             <!-- Ingredients and Instructions -->
             <div class="row g-4">
-    <!-- Ingredients Column -->
-    <div class="col-md-6 recipe-column">
-        <h4>Ingredients</h4>
-        <ul class="list-group list-group-flush ingredients-list">
-            {% for ingredient in ingredients %}
-            <li class="list-group-item list-text">{{ ingredient }}</li>
-            {% empty %}
-            <li class="list-group-item list-text">No ingredients available.</li>
-            {% endfor %}
-        </ul>
-    </div>
+                <!-- Ingredients Column -->
+                <div class="col-md-6 recipe-column">
+                    <h4>Ingredients</h4>
+                    <ul class="list-group list-group-flush ingredients-list">
+                        {% for ingredient in ingredients %}
+                        <li class="list-group-item list-text">{{ ingredient }}</li>
+                        {% empty %}
+                        <li class="list-group-item list-text">No ingredients available.</li>
+                        {% endfor %}
+                    </ul>
+                </div>
 
-    <!-- Instructions Column -->
-    <div class="col-md-6 recipe-column">
-        <h4>Instructions</h4>
-        <ol class="list-group list-group-numbered">
-            {% for step in instructions %}
-            <li class="list-group-item list-text">{{ step }}</li>
-            {% empty %}
-            <li class="list-group-item list-text">No instructions available.</li>
-            {% endfor %}
-        </ol>
-    </div>
-</div>
+                <!-- Instructions Column -->
+                <div class="col-md-6 recipe-column">
+                    <h4>Instructions</h4>
+                    <ol class="list-group list-group-numbered">
+                        {% for step in instructions %}
+                        <li class="list-group-item list-text">{{ step }}</li>
+                        {% empty %}
+                        <li class="list-group-item list-text">No instructions available.</li>
+                        {% endfor %}
+                    </ol>
+                </div>
+            </div>
         </div>
     </div>
 </div>
