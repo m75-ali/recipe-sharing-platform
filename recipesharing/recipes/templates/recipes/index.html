@@ -11,6 +11,11 @@
         <a href="{% url 'add_recipe' %}" class="btn" style="background-color: #009688; color: white;">Add New Recipe</a>
       </div>
     {% endif %}
+  
+  <!-- Floating "Surprise Me" Button -->
+    <a href="{% url 'random_recipe' %}" id="surpriseMeBtn" class="float-btn">
+       Surprise Me
+    </a>
 
     <!-- Filter by Category Section -->
     <form id="filter-form" method="GET" class="mb-4">
@@ -62,7 +67,13 @@
       box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     }
   </style>
-
+  
   <!-- Include JavaScript for AJAX Filtering -->
   <script src="{% static 'recipes/js/filter.js' %}"></script>
+  <script>
+    document.getElementById('surpriseMeBtn').addEventListener('click', function (e) {
+        // Optional: Scroll to the top when clicked
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+</script>
 {% endblock %}

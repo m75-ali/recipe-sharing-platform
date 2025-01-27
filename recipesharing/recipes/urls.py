@@ -30,4 +30,7 @@ urlpatterns = [
     
     # URL for searching ingredients, handled by the ingredient_search view
     path('search/', views.ingredient_search, name='ingredient_search'),
+    
+    # URL for generating random recipes, handled by the random_recipe view
+    path('random-recipe/', views.random_recipe, name='random_recipe'),
 ]

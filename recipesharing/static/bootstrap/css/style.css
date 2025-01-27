@@ -446,3 +446,27 @@ body.dark-theme .recipe-description h4 {
 .shopping-list-title {
     color: #009688;  /* Set any color you prefer */
 }
+
+/* Floating Button Styles */
+.float-btn {
+    position: fixed;
+    bottom: 80px; /* Adjusted to move it above the dark mode button */
+    right: 20px;
+    background-color: #009688;
+    color: white;
+    border: none;
+    border-radius: 50px;
+    padding: 10px 20px;
+    text-align: center;
+    text-decoration: none;
+    font-size: 16px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    transition: all 0.3s ease-in-out;
+    z-index: 1000;
+}
+
+.float-btn:hover {
+    background-color:rgb(44, 122, 57);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+    transform: translateY(-2px);
+}
