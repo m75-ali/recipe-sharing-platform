@@ -10,6 +10,7 @@ from django.shortcuts import render
 from .models import Recipe
 from .models import find_recipes_by_ingredients
 from .forms import IngredientSearchForm
+import random
 import json
 import re 
 from django.db.models import Q
@@ -226,3 +227,13 @@ def ingredient_search(request):
         'results': results,
         'suggestions': suggestions,
     })
+    
+    
+def random_recipe(request):
+    # Get all recipe IDs
+    recipe_ids = Recipe.objects.values_list('id', flat=True)
+    if recipe_ids:
+        random_id = random.choice(recipe_ids)
+        recipe = get_object_or_404(Recipe, id=random_id)
+        return render(request, 'recipes/recipe_detail.html', {'recipe': recipe})  # Adjust template name
+    return render(request, 'index.html', {'error': 'No recipes available'})  # Fallback if no recipes exist
