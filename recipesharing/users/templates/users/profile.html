@@ -38,7 +38,7 @@
             <ul class="list-group list-group-flush">
                 {% for recipe in favorites %}
                     <li class="list-group-item d-flex justify-content-between align-items-center">
-                        <a href="{% url 'recipe_detail' recipe.id %}" class="text-decoration-none text-primary">
+                        <a href="{% url 'recipe_detail' recipe.id %}" class="text-decoration-none custom-link">
                             {{ recipe.title }}
                         </a>
                         <span><i class="fas fa-heart me-2" style="color: #ff6347;"></i>Favourite</span>

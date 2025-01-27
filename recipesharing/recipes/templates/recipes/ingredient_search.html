@@ -47,7 +47,7 @@
                         <div class="card-body">
                             <!-- Recipe Title and Link -->
                             <h5 class="card-title text-dark">
-                                <a href="{% url 'recipe_detail' result.recipe.id %}" class="text-decoration-none">{{ result.recipe.title }}</a>
+                                <a href="{% url 'recipe_detail' result.recipe.id %}" class="text-decoration-none custom-link">{{ result.recipe.title }}</a>
                             </h5>
                             
                             <!-- Recipe Description -->
@@ -55,7 +55,7 @@
 
                             <!-- Ingredients Needed Section -->
                             {% if result.missing_ingredients %}
-                                <h6 class="text-primary">Shopping List:</h6>
+                                <h6 class="shopping-list-title">Shopping List:</h6>
                                 <ul class="list-unstyled ms-3">
                                     {% for ingredient in result.missing_ingredients %}
                                         <li><i class="bi bi-cart-plus"></i> {{ ingredient }}</li>
