@@ -1,67 +1,66 @@
 {% extends 'recipes/base.html' %}
 
 {% block content %}
-<div class="container my-5">
+<div class="container my-5 recipe-container">
     <!-- Recipe Title Section -->
     <div class="card shadow-lg">
-        <div class="card-header text-white" style="background-color: #009688;">
+        <div class="card-header text-white recipe-header">
             <h1 class="display-5 mb-0 text-center">{{ recipe.title }}</h1>
         </div>
 
-        <div class="card-body" style="background-color: rgba(255, 255, 255, 0.9);">
+        <div class="card-body recipe-body">
             <!-- Recipe Image -->
             {% if recipe.image %}
             <div class="text-center mb-4">
                 <img src="{{ recipe.image.url }}" alt="{{ recipe.title }}" 
-                     class="img-fluid rounded shadow" style="max-height: 400px; object-fit: cover;" />
+                     class="img-fluid rounded shadow recipe-image" />
             </div>
             {% endif %}
 
             <!-- Quick Info Bar -->
-            <div class="d-flex justify-content-between align-items-center mb-4 p-3 rounded" 
-                 style="background-color: rgba(0, 150, 136, 0.1);">
+            <div class="recipe-info-bar">
                 <span><i class="fas fa-folder me-2"></i>Category: {{ recipe.category.name }}</span>
                 <span><i class="fas fa-star me-2"></i>Rating: {{ average_rating|floatformat:1 }} / 5</span>
                 <span><i class="fas fa-heart me-2"></i>Favorites: {{ recipe.total_favorites }}</span>
             </div>
 
             <!-- Description Section -->
-            <div class="mb-4">
-                <h4 style="color: #009688;">Description</h4>
+            <div class="recipe-description">
+                <h4>Description</h4>
                 <p class="lead">{{ recipe.description }}</p>
             </div>
 
             <!-- Ingredients and Instructions -->
             <div class="row g-4">
-                <!-- Ingredients Column -->
-                <div class="col-md-6">
-                    <div class="h-100 p-4 rounded" style="background-color: rgba(0, 150, 136, 0.05);">
-                        <h4 style="color: #009688;">Ingredients</h4>
-                        <ul class="list-group list-group-flush">
-                            {% for ingredient in ingredients %}
-                            <li class="list-group-item bg-transparent">{{ ingredient }}</li>
-                            {% empty %}
-                            <li class="list-group-item bg-transparent">No ingredients available.</li>
-                            {% endfor %}
-                        </ul>
-                    </div>
-                </div>
+    <!-- Ingredients Column -->
+    <div class="col-md-6 recipe-column">
+        <h4>Ingredients</h4>
+        <ul class="list-group list-group-flush ingredients-list">
+            {% for ingredient in ingredients %}
+            <li class="list-group-item list-text">{{ ingredient }}</li>
+            {% empty %}
+            <li class="list-group-item list-text">No ingredients available.</li>
+            {% endfor %}
+        </ul>
+    </div>
 
-                <!-- Instructions Column -->
-                <div class="col-md-6">
-                    <div class="h-100 p-4 rounded" style="background-color: rgba(0, 150, 136, 0.05);">
-                        <h4 style="color: #009688;">Instructions</h4>
-                        <ol class="list-group list-group-numbered">
-                            {% for step in instructions %}
-                            <li class="list-group-item bg-transparent">{{ step }}</li>
-                            {% empty %}
-                            <li class="list-group-item bg-transparent">No instructions available.</li>
-                            {% endfor %}
-                        </ol>
-                    </div>
-                </div>
-            </div>
+    <!-- Instructions Column -->
+    <div class="col-md-6 recipe-column">
+        <h4>Instructions</h4>
+        <ol class="list-group list-group-numbered">
+            {% for step in instructions %}
+            <li class="list-group-item list-text">{{ step }}</li>
+            {% empty %}
+            <li class="list-group-item list-text">No instructions available.</li>
+            {% endfor %}
+        </ol>
+    </div>
+</div>
+        </div>
+    </div>
+</div>
 
+        
             <!-- Interactive Section (Favorites & Rating) -->
 <div class="mt-4 p-4 rounded" style="background-color: rgba(0, 150, 136, 0.05);">
     {% if user.is_authenticated %}
