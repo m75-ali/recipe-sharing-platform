@@ -12,8 +12,15 @@
             <!-- Recipe Image -->
             {% if recipe.image %}
             <div class="text-center mb-4">
-                <img src="{{ recipe.image.url }}" alt="{{ recipe.title }}" 
-                     class="img-fluid rounded shadow recipe-image" />
+                <a href="{{ recipe.image.url }}" data-lightbox="recipe" data-title="{{ recipe.title }}">
+                    <img src="{{ recipe.image.url }}" alt="{{ recipe.title }}" 
+                         class="img-fluid rounded shadow recipe-image" 
+                         style="width: 100%; height: 400px; object-fit: cover;" />
+                </a>
+            </div>
+            {% else %}
+            <div class="text-center mb-4 p-4 bg-light rounded shadow">
+            <p class="text-muted mb-0">No image available for this recipe</p>
             </div>
             {% endif %}
 
