@@ -56,8 +56,7 @@ def add_recipe(request):
         if form.is_valid():
             recipe = form.save(commit=False)
             recipe.creator = request.user
-            # Process ingredients: split by commas and save as newline-separated
-            recipe.ingredients = "\n".join([ingredient.strip() for ingredient in request.POST['ingredients'].split(",")])
+            # No need to manually process ingredients here
             recipe.save()
             messages.success(request, "Recipe added successfully!")
             return redirect("recipe_index")
