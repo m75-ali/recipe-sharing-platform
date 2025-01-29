@@ -495,3 +495,40 @@ body.dark-theme .recipe-description h4 {
 .float-btn[data-tooltip]:hover:after {
     opacity: 1; /* Make tooltip visible */
 }
+
+/* General Styling */
+.social-share-buttons ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+}
+
+.social-share-buttons li {
+    display: inline-block;
+    margin-right: 10px;
+}
+
+/* Icon Styling */
+.social-share-buttons a {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    text-decoration: none;
+    font-size: 16px;
+    color: white;
+    transition: all 0.3s ease-in-out;
+}
+
+/* Social Media Colors */
+.facebook { background-color: #1877F2; } /* Facebook Blue */
+.x-twitter { background-color: black; } /* X (formerly Twitter) */
+.tumblr { background-color: #36465D; } /* Tumblr Blue */
+
+/* Hover Effects */
+.social-share-buttons a:hover {
+    opacity: 0.8;
+}
