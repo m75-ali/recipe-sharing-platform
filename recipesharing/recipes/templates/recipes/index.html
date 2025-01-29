@@ -17,20 +17,22 @@
       Surprise Me
     </a>
 
-    <!-- Filter by Category Section -->
-    <form id="filter-form" method="GET" class="mb-4">
-      <div class="input-group">
-        <select name="category" class="form-select border-teal" id="category-select">
-          <option value="" {% if not selected_category %}selected{% endif %}>All Categories</option>
-          {% for category in categories %}
-            <option value="{{ category.name }}" {% if selected_category == category.name %}selected{% endif %}>
-              {{ category.name }}
-            </option>
-          {% endfor %}
-        </select>
-        <button type="submit" class="btn" style="background-color: #009688; color: white; border: 1px solid #009688;">Filter</button>
-      </div>
-    </form>
+  <!-- Filter by Category Section -->
+  <form id="filter-form" method="GET" class="mb-4">
+    <div class="d-flex gap-3">
+    <div class="input-group" style="width: 200px;">
+      <select name="category" class="form-select border-teal" id="category-select">
+      <option value="" {% if not selected_category %}selected{% endif %}>All Categories</option>
+      {% for category in categories %}
+        <option value="{{ category.name }}" {% if selected_category == category.name %}selected{% endif %}>
+        {{ category.name }}
+        </option>
+      {% endfor %}
+      </select>
+    </div>
+    <button type="submit" class="btn" style="background-color: #009688; color: white; border: 1px solid #009688;">Sort</button>
+    </div>
+  </form>
 
     <!-- Recipes Container -->
     <div id="recipes-container">
