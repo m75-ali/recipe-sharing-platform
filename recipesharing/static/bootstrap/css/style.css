@@ -532,3 +532,261 @@ body.dark-theme .recipe-description h4 {
 .social-share-buttons a:hover {
     opacity: 0.8;
 }
+/* Light mode styles */
+.allergen-checklist {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 15px;
+    padding: 20px;
+    background-color: white;
+    border: 1px solid #009688;
+    border-radius: 8px;
+    margin-top: 8px;
+}
+
+.allergen-item {
+    display: flex;
+    align-items: center;
+    padding: 5px;
+    transition: transform 0.2s ease;
+}
+
+.allergen-label {
+    display: flex;
+    align-items: center;
+    position: relative;
+    padding-left: 35px;
+    cursor: pointer;
+    width: 100%;
+    margin: 0;
+}
+
+.allergen-checkbox {
+    position: absolute;
+    opacity: 0;
+    cursor: pointer;
+    height: 0;
+    width: 0;
+}
+
+.checkmark {
+    position: absolute;
+    left: 0;
+    height: 20px;
+    width: 20px;
+    background-color: white;
+    border: 2px solid #009688;
+    border-radius: 4px;
+}
+
+.allergen-checkbox:checked ~ .checkmark {
+    background-color: #009688;
+}
+
+.checkmark:after {
+    content: "";
+    position: absolute;
+    display: none;
+}
+
+.allergen-checkbox:checked ~ .checkmark:after {
+    display: block;
+    left: 6px;
+    top: 2px;
+    width: 5px;
+    height: 10px;
+    border: solid white;
+    border-width: 0 2px 2px 0;
+    transform: rotate(45deg);
+}
+
+.allergen-text {
+    color: #333;
+    font-size: 0.95rem;
+    margin-left: 5px;
+}
+
+.allergen-item:hover {
+    transform: translateX(5px);
+}
+
+/* Dark mode styles */
+.dark-theme .allergen-checklist {
+    background-color: #2d2d2d;
+    border-color: #00bfa5;
+}
+
+.dark-theme .allergen-text {
+    color: #f5f5f5;
+}
+
+.dark-theme .checkmark {
+    background-color: #2d2d2d;
+    border-color: #00bfa5;
+}
+
+.dark-theme .allergen-checkbox:checked ~ .checkmark {
+    background-color: #00bfa5;
+}
+
+.dark-theme .allergen-item:hover {
+    background-color: rgba(0, 150, 136, 0.1);
+    border-radius: 4px;
+}
+
+/* Focus styles */
+.allergen-checkbox:focus ~ .checkmark {
+    box-shadow: 0 0 0 2px rgba(0, 150, 136, 0.25);
+}
+
+.dark-theme .allergen-checkbox:focus ~ .checkmark {
+    box-shadow: 0 0 0 2px rgba(0, 191, 165, 0.25);
+}
+
+/* Card styles */
+.card {
+    border: none;
+    border-radius: 0.5rem;
+    overflow: hidden;
+}
+
+.card-header {
+    background-color: #009688;
+    padding: 1.5rem;
+}
+
+.card-header h2 {
+    margin: 0;
+    font-size: 1.75rem;
+    font-weight: bold;
+}
+
+.card-body {
+    background-color: rgba(255, 255, 255, 0.9);
+    padding: 2rem;
+}
+
+/* Form element styles */
+.form-label {
+    color: #009688;
+    font-weight: bold;
+    margin-bottom: 0.5rem;
+}
+
+.form-control, .form-select {
+    border: 1px solid #009688;
+    border-radius: 0.25rem;
+    padding: 0.5rem 0.75rem;
+    font-size: 1rem;
+    line-height: 1.5;
+}
+
+.form-control:focus, .form-select:focus {
+    border-color: #009688;
+    box-shadow: 0 0 0 0.2rem rgba(0, 150, 136, 0.25);
+}
+
+/* Error handling styles */
+.is-invalid {
+    border-color: #dc3545 !important;
+}
+
+.invalid-feedback {
+    color: #dc3545;
+    font-size: 0.875rem;
+    margin-top: 0.25rem;
+}
+
+/* Image container styles */
+.image-container {
+    border: 1px solid #dee2e6;
+    border-radius: 0.25rem;
+    padding: 0.5rem;
+    text-align: center;
+    background-color: #f8f9fa;
+}
+
+.image-container img {
+    max-height: 200px;
+    border-radius: 0.25rem;
+}
+
+/* Button styles */
+.btn-teal {
+    background-color: #009688;
+    color: white;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 0.25rem;
+    font-size: 1rem;
+    transition: background-color 0.3s ease;
+}
+
+.btn-teal:hover {
+    background-color: #00796b;
+    color: white;
+}
+
+.btn-outline-secondary {
+    border: 1px solid #6c757d;
+    color: #6c757d;
+    padding: 0.5rem 1rem;
+    border-radius: 0.25rem;
+    font-size: 1rem;
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.btn-outline-secondary:hover {
+    background-color: #6c757d;
+    color: white;
+}
+
+/* Allergens styles */
+.allergens-container {
+    border: 1px solid #dee2e6;
+    border-radius: 0.25rem;
+    padding: 1rem;
+    background-color: white;
+    max-height: 200px;
+    overflow-y: auto;
+}
+
+.allergens-container .form-check {
+    margin-bottom: 0.5rem;
+}
+
+.allergens-container .form-check-input {
+    margin-right: 0.5rem;
+    border-color: #009688;
+}
+
+.allergens-container .form-check-label {
+    color: #333;
+    font-size: 0.875rem;
+}
+
+/* Small text styles */
+.text-muted {
+    font-size: 0.875rem;
+    color: #6c757d !important;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .card-header h2 {
+        font-size: 1.5rem;
+    }
+
+    .card-body {
+        padding: 1.5rem;
+    }
+
+    .form-control, .form-select {
+        font-size: 0.875rem;
+    }
+
+    .btn-teal, .btn-outline-secondary {
+        font-size: 0.875rem;
+        padding: 0.4rem 0.8rem;
+    }
+}

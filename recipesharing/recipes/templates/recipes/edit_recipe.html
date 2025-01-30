@@ -13,6 +13,15 @@
             <form method="post" enctype="multipart/form-data">
                 {% csrf_token %}
 
+                <!-- Display form-level errors -->
+                {% if form.non_field_errors %}
+                    <div class="alert alert-danger">
+                        {% for error in form.non_field_errors %}
+                            {{ error }}
+                        {% endfor %}
+                    </div>
+                {% endif %}
+
                 <div class="row">
                     <!-- Left Column -->
                     <div class="col-md-8">
@@ -20,23 +29,70 @@
                         <div class="mb-4">
                             <label for="id_title" class="form-label fw-bold" style="color: #009688;">Title</label>
                             <input type="text" name="title" value="{{ form.title.value }}" 
-                                   class="form-control border-teal" id="id_title">
+                                   class="form-control border-teal {% if form.title.errors %}is-invalid{% endif %}" 
+                                   id="id_title" placeholder="Enter recipe title">
+                            {% if form.title.errors %}
+                                <div class="invalid-feedback">
+                                    {% for error in form.title.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
                         </div>
 
                         <!-- Description field -->
                         <div class="mb-4">
                             <label for="id_description" class="form-label fw-bold" style="color: #009688;">Description</label>
-                            <textarea name="description" class="form-control border-teal" 
-                                    id="id_description" rows="3">{{ form.description.value }}</textarea>
+                            <textarea name="description" class="form-control border-teal {% if form.description.errors %}is-invalid{% endif %}" 
+                                    id="id_description" rows="3" placeholder="Enter a brief description">{{ form.description.value }}</textarea>
+                            {% if form.description.errors %}
+                                <div class="invalid-feedback">
+                                    {% for error in form.description.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
                         </div>
 
                         <!-- Instructions field -->
                         <div class="mb-4">
                             <label for="id_instructions" class="form-label fw-bold" style="color: #009688;">Instructions</label>
-                            <textarea name="instructions" class="form-control border-teal" 
-                                    id="id_instructions" rows="6">{{ form.instructions.value }}</textarea>
+                            <textarea name="instructions" class="form-control border-teal {% if form.instructions.errors %}is-invalid{% endif %}" 
+                                    id="id_instructions" rows="6" placeholder="Enter step-by-step instructions">{{ form.instructions.value }}</textarea>
+                            {% if form.instructions.errors %}
+                                <div class="invalid-feedback">
+                                    {% for error in form.instructions.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
                         </div>
-                    </div>
+
+                       <!-- Allergens field -->
+<div class="mb-4">
+    <label class="form-label fw-bold" style="color: #009688;">Select allergens this recipe is free from</label>
+    <div class="allergens-container border rounded p-3">
+        {% for allergen in allergens %}
+            <div class="form-check">
+                <input type="checkbox" name="allergen_free" value="{{ allergen.id }}" 
+                       id="allergen_{{ allergen.id }}" 
+                       class="form-check-input" 
+                       {% if allergen in recipe.allergen_free.all %}checked{% endif %}>
+                <label for="allergen_{{ allergen.id }}" class="form-check-label">
+                    {{ allergen.name }}
+                </label>
+            </div>
+        {% endfor %}
+    </div>
+    {% if form.allergen_free.errors %}
+        <div class="text-danger">
+            {% for error in form.allergen_free.errors %}
+                {{ error }}
+            {% endfor %}
+        </div>
+    {% endif %}
+    <small class="text-muted">Check all allergens that do not apply to this recipe.</small>
+</div>
 
                     <!-- Right Column -->
                     <div class="col-md-4">
@@ -54,20 +110,49 @@
                         <!-- Image Upload Field -->
                         <div class="mb-4">
                             <label for="id_image" class="form-label fw-bold" style="color: #009688;">Change Image</label>
-                            <input type="file" name="image" class="form-control border-teal" id="id_image">
+                            <input type="file" name="image" class="form-control border-teal {% if form.image.errors %}is-invalid{% endif %}" 
+                                   id="id_image">
+                            {% if form.image.errors %}
+                                <div class="invalid-feedback">
+                                    {% for error in form.image.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
                         </div>
 
                         <!-- Category dropdown -->
                         <div class="mb-4">
                             <label for="id_category" class="form-label fw-bold" style="color: #009688;">Category</label>
-                            {{ form.category }}
+                            <select name="category" class="form-control border-teal {% if form.category.errors %}is-invalid{% endif %}" 
+                                    id="id_category">
+                                {% for value, label in form.category.field.choices %}
+                                    <option value="{{ value }}" {% if form.category.value == value %}selected{% endif %}>
+                                        {{ label }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                            {% if form.category.errors %}
+                                <div class="invalid-feedback">
+                                    {% for error in form.category.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
                         </div>
 
                         <!-- Ingredients field -->
                         <div class="mb-4">
                             <label for="id_ingredients" class="form-label fw-bold" style="color: #009688;">Ingredients</label>
-                            <textarea name="ingredients" class="form-control border-teal" 
-                                    id="id_ingredients" rows="6">{{ form.ingredients.value }}</textarea>
+                            <textarea name="ingredients" class="form-control border-teal {% if form.ingredients.errors %}is-invalid{% endif %}" 
+                                    id="id_ingredients" rows="6" placeholder="List all ingredients">{{ form.ingredients.value }}</textarea>
+                            {% if form.ingredients.errors %}
+                                <div class="invalid-feedback">
+                                    {% for error in form.ingredients.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
                         </div>
                     </div>
                 </div>
@@ -83,45 +168,4 @@
         </div>
     </div>
 </div>
-
-<style>
-    .border-teal {
-        border-color: #009688;
-    }
-
-    .form-control:focus, .form-select:focus {
-        border-color: #009688;
-        box-shadow: 0 0 0 0.25rem rgba(0, 150, 136, 0.25);
-    }
-
-    .btn-outline-secondary:hover {
-        background-color: #4CAF50;
-        border-color: #4CAF50;
-        color: white;
-    }
-
-    .btn[type="submit"]:hover {
-        background-color: #4CAF50 !important;
-        border-color: #4CAF50;
-    }
-
-    .image-container {
-        background-color: #f8f9fa;
-        border: 1px solid #dee2e6;
-    }
-
-    .card {
-        border: none;
-    }
-
-    /* Style for the category select */
-    select {
-        border-color: #009688 !important;
-        width: 100%;
-        padding: 0.375rem 0.75rem;
-        font-size: 1rem;
-        line-height: 1.5;
-        border-radius: 0.25rem;
-    }
-</style>
 {% endblock %}

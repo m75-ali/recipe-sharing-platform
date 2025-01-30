@@ -7,7 +7,7 @@ from django.contrib import messages
 from django.http import HttpResponseRedirect
 from django.urls import reverse
 from django.shortcuts import render
-from .models import Recipe
+from .models import Recipe , Allergen
 from .models import find_recipes_by_ingredients
 from .forms import IngredientSearchForm
 import random
@@ -124,26 +124,32 @@ def recipe_detail(request, recipe_id):
 # View to edit a recipe (login required)
 @login_required
 def edit_recipe(request, recipe_id):
-    # Fetch the recipe by ID or return a 404 error if not found
     recipe = get_object_or_404(Recipe, id=recipe_id)
 
-    # Ensure that the user editing the recipe is its creator
     if recipe.creator != request.user:
-        messages.error(request, "You cannot edit someone else's recipe.")  # Error message
-        return redirect('recipe_detail', recipe_id=recipe.id)  # Redirect to the recipe details page
+        messages.error(request, "You cannot edit someone else's recipe.")
+        return redirect('recipe_detail', recipe_id=recipe.id)
 
-    # Handle form submission
     if request.method == 'POST':
-        form = RecipeForm(request.POST, instance=recipe)
+        form = RecipeForm(request.POST, request.FILES, instance=recipe)
         if form.is_valid():
-            form.save()  # Save the updated recipe
-            messages.success(request, 'Recipe updated successfully.')  # Success message
-            return redirect('recipe_detail', recipe_id=recipe.id)  # Redirect to the recipe details page
+            recipe = form.save(commit=False)
+            recipe.save()
+            form.save_m2m()  # Save many-to-many data
+            messages.success(request, 'Recipe updated successfully.')
+            return redirect('recipe_detail', recipe_id=recipe.id)
+        else:
+            # Print form errors for debugging
+            print(form.errors)
     else:
-        form = RecipeForm(instance=recipe)  # Pre-fill the form with existing data
+        form = RecipeForm(instance=recipe)
 
-    # Render the edit recipe page with the form
-    return render(request, 'recipes/edit_recipe.html', {'form': form, 'recipe': recipe})
+    allergens = Allergen.objects.all()
+    return render(request, 'recipes/edit_recipe.html', {
+        'form': form,
+        'recipe': recipe,
+        'allergens': allergens,
+    })
     
 # View to delete a recipe (login required)
 @login_required

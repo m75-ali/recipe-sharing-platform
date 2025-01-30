@@ -1,11 +1,20 @@
 from django import forms
 from django.core.serializers.json import DjangoJSONEncoder
-from .models import Recipe, Category
+from .models import Recipe, Category, Allergen
 import json
 
 
 from django import forms
 from .models import Recipe
+
+# forms.py
+class RecipeForm(forms.ModelForm):
+    allergen_free = forms.ModelMultipleChoiceField(
+        queryset=Allergen.objects.all(),
+        widget=forms.CheckboxSelectMultiple,
+        required=False,
+        help_text="Select the allergens that this recipe does NOT contain"
+    )
 
 class RecipeForm(forms.ModelForm):
     ingredients = forms.CharField(
@@ -17,7 +26,7 @@ class RecipeForm(forms.ModelForm):
 
     class Meta:
         model = Recipe
-        fields = ['title', 'description', 'ingredients', 'instructions', 'category', 'image']
+        fields = ['title', 'description', 'ingredients', 'instructions', 'category', 'image', 'allergen_free']
 
     def save(self, commit=True):
         # Create the instance but don't save it yet

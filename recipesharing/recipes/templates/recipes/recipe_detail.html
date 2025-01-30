@@ -2,7 +2,6 @@
 
 {% block content %}
 <div class="container my-5 recipe-container">
-    <!-- Recipe Title Section -->
     <div class="card shadow-lg">
         <div class="card-header text-white recipe-header">
             <h1 class="display-5 mb-0 text-center">{{ recipe.title }}</h1>
@@ -20,22 +19,35 @@
             </div>
             {% else %}
             <div class="text-center mb-4 p-4 bg-light rounded shadow">
-            <p class="text-muted mb-0">No image available for this recipe</p>
+                <p class="text-muted mb-0">No image available for this recipe</p>
             </div>
             {% endif %}
 
             <!-- Quick Info Bar -->
-            <div class="recipe-info-bar">
+            <div class="recipe-info-bar mb-4">
                 <span><i class="fas fa-folder me-2"></i>Category: {{ recipe.category.name }}</span>
                 <span><i class="fas fa-star me-2"></i>Rating: {{ average_rating|floatformat:1 }} / 5</span>
                 <span><i class="fas fa-heart me-2"></i>Favorites: {{ recipe.total_favorites }}</span>
             </div>
 
-            <!-- Description Section -->
-            <div class="recipe-description">
-                <h4>Description</h4>
-                <p class="lead">{{ recipe.description }}</p>
+            <!-- Allergen Information -->
+            <div class="allergen-section mb-4">
+                <h4 class="allergen-title">
+                    <i class="fas fa-exclamation-circle me-2"></i>Allergen Information
+                </h4>
+                {% if recipe.allergen_free.all %}
+                    <div class="allergen-tags">
+                        {% for allergen in recipe.allergen_free.all %}
+                            <span class="allergen-tag">
+                                <i class="fas fa-check-circle me-1"></i>{{ allergen.name }} Free
+                            </span>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <p class="allergen-notice">No allergen information available for this recipe</p>
+                {% endif %}
             </div>
+
 
             <!-- Ingredients and Instructions -->
             <div class="row g-4">
@@ -241,5 +253,7 @@
     .card {
         border: none;
     }
+
+
 </style>
 {% endblock %}

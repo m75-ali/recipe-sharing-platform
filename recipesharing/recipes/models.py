@@ -8,6 +8,11 @@ class Category(models.Model):
     def __str__(self):
         return self.name
 
+class Allergen(models.Model):
+    name = models.CharField(max_length=100, unique=True)
+    
+    def __str__(self):
+        return self.name
 
 class Recipe(models.Model):
     title = models.CharField(max_length=200)
@@ -22,6 +27,8 @@ class Recipe(models.Model):
     )
     image = models.ImageField(upload_to='recipe_images/', null=True, blank=True)
     creator = models.ForeignKey(User, on_delete=models.CASCADE)
+    allergen_free = models.ManyToManyField(Allergen, blank=True, related_name='allergen_free_recipes')
+
 
     def get_ingredients_list(self):
         # Split the ingredients by newline and return them as a list
