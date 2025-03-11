@@ -1,25 +1,18 @@
 from django import forms
-from django.core.serializers.json import DjangoJSONEncoder
-from .models import Recipe, Category, Allergen
-import json
+from .models import Recipe, Allergen
 
-
-from django import forms
-from .models import Recipe
-
-# forms.py
 class RecipeForm(forms.ModelForm):
     allergen_free = forms.ModelMultipleChoiceField(
         queryset=Allergen.objects.all(),
         widget=forms.CheckboxSelectMultiple,
         required=False,
-        help_text="Select the allergens that this recipe does NOT contain"
+        help_text="Select the allergens that this recipe contains"
     )
 
-class RecipeForm(forms.ModelForm):
     ingredients = forms.CharField(
         widget=forms.Textarea(attrs={
-            'placeholder': 'e.g.\nbanana\napple\nmango\nmilk\nice'
+            'placeholder': 'e.g.\nbanana\napple\nmango\nmilk\nice',
+            'rows': 4  # Adjust rows for better UI
         }),
         help_text="Enter each ingredient on a new line."
     )
@@ -29,31 +22,23 @@ class RecipeForm(forms.ModelForm):
         fields = ['title', 'description', 'ingredients', 'instructions', 'category', 'image', 'allergen_free']
 
     def save(self, commit=True):
-        # Create the instance but don't save it yet
         instance = super().save(commit=False)
 
-        # Process the ingredients field: split by lines and strip unnecessary spaces
-        ingredients_list = [
-            line.strip()
-            for line in self.cleaned_data['ingredients'].splitlines()
-            if line.strip()
-        ]
-        
-        # Store the ingredients as plain-text string
+        # Process ingredients field: split by lines, strip unnecessary spaces
+        ingredients_list = [line.strip() for line in self.cleaned_data['ingredients'].splitlines() if line.strip()]
         instance.ingredients = "\n".join(ingredients_list)
-        
-        # Save the instance if commit=True
+
         if commit:
             instance.save()
-        
+            self.save_m2m()  # Save many-to-many relationships (allergens)
+
         return instance
 
     def clean_ingredients(self):
-        ingredients = self.cleaned_data.get('ingredients', '')
+        ingredients = self.cleaned_data.get('ingredients', '').strip()
         if not ingredients:
             raise forms.ValidationError("Ingredients field is required.")
         return ingredients
-
 
 class IngredientSearchForm(forms.Form):
     ingredients = forms.CharField(

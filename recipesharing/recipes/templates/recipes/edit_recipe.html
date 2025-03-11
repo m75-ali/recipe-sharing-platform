@@ -70,7 +70,7 @@
 
                        <!-- Allergens field -->
 <div class="mb-4">
-    <label class="form-label fw-bold" style="color: #009688;">Select allergens this recipe is free from</label>
+    <label class="form-label fw-bold" style="color: #009688;">Select allergens this recipe contains</label>
     <div class="allergens-container border rounded p-3">
         {% for allergen in allergens %}
             <div class="form-check">
@@ -91,7 +91,7 @@
             {% endfor %}
         </div>
     {% endif %}
-    <small class="text-muted">Check all allergens that do not apply to this recipe.</small>
+    <small class="text-muted">Check all allergens that apply to this recipe.</small>
 </div>
 
                     <!-- Right Column -->

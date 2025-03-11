@@ -1,25 +1,54 @@
-document.addEventListener('DOMContentLoaded', function () {
-    const form = document.getElementById('filter-form');
+// Wait for the DOM to be fully loaded
+document.addEventListener('DOMContentLoaded', function() {
+    const filterForm = document.getElementById('filter-form');
+    const categorySelect = document.getElementById('category-select');
+    const allergenSelect = document.getElementById('allergen-select');
     const recipesContainer = document.getElementById('recipes-container');
 
-    form.addEventListener('submit', function (event) {
-        event.preventDefault(); // Prevent full page reload
-
-        const formData = new FormData(form);
-        const category = formData.get('category');
-        const url = category ? `/recipes/?category=${category}` : '/recipes/';
-
-        // Perform the AJAX request
-        fetch(url, {
+    // Function to update recipes via AJAX
+    function updateRecipes() {
+        // Create form data from the form
+        const formData = new FormData(filterForm);
+        
+        // Convert form data to URL parameters
+        const params = new URLSearchParams(formData);
+        
+        // Make AJAX request
+        fetch(`${window.location.pathname}?${params.toString()}`, {
             headers: {
-                'x-requested-with': 'XMLHttpRequest', // Mark this as an AJAX request
-            },
+                'X-Requested-With': 'XMLHttpRequest'
+            }
         })
-            .then(response => response.json())
-            .then(data => {
-                // Update the recipe list with the returned HTML
-                recipesContainer.innerHTML = data.html;
-            })
-            .catch(error => console.error('Error fetching recipes:', error));
-    });
+        .then(response => response.json())
+        .then(data => {
+            recipesContainer.innerHTML = data.html;
+            
+            // Update URL with new parameters without reloading the page
+            const url = new URL(window.location);
+            
+            // Clear existing parameters
+            url.search = '';
+            
+            // Add new parameters
+            for (const [key, value] of params.entries()) {
+                url.searchParams.append(key, value);
+            }
+            
+            window.history.pushState({}, '', url);
+        })
+        .catch(error => console.error('Error:', error));
+    }
+
+    // Add event listeners to both select elements
+    if (categorySelect) {
+        categorySelect.addEventListener('change', function() {
+            updateRecipes();
+        });
+    }
+    
+    if (allergenSelect) {
+        allergenSelect.addEventListener('change', function() {
+            updateRecipes();
+        });
+    }
 });

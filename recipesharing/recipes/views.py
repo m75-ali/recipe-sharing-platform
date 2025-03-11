@@ -18,34 +18,50 @@ from difflib import get_close_matches
 from django.http import JsonResponse
 from django.template.loader import render_to_string
 
-def index(request):
-    # Get the selected category from the query parameters
-    selected_category = request.GET.get('category', None)
+from django.shortcuts import render
+from django.http import JsonResponse
+from django.db.models import Avg
+from django.template.loader import render_to_string
+from .models import Recipe, Category, Allergen
 
-    # Filter recipes by category or fetch all recipes
+def index(request):
+    # Get selected filters from query parameters
+    selected_category = request.GET.get('category', None)
+    selected_allergens = request.GET.getlist('allergens')  # Gets allergens as a list
+
+    # Start with all recipes
+    recipes = Recipe.objects.all()
+
+    # Filter by category if selected
     if selected_category:
-        recipes = Recipe.objects.filter(category__name=selected_category)
-    else:
-        recipes = Recipe.objects.all()
+        recipes = recipes.filter(category__name=selected_category)
+
+    # Exclude recipes that are allergen-free for selected allergens
+    if selected_allergens:
+        recipes = recipes.exclude(allergen_free__in=selected_allergens)
 
     # Calculate average rating for each recipe
     for recipe in recipes:
         average_rating = recipe.ratings.aggregate(Avg('rating'))['rating__avg']
         recipe.average_rating = average_rating if average_rating is not None else None
 
-    # Handle AJAX request
+    # Handle AJAX requests for dynamic filtering
     if request.headers.get('x-requested-with') == 'XMLHttpRequest':
         html = render_to_string('recipes/partials/recipe_list.html', {'recipes': recipes})
         return JsonResponse({'html': html})
 
-    # Fetch all categories for the dropdown
+    # Fetch categories and allergens for dropdowns
     categories = Category.objects.all()
+    allergens = Allergen.objects.all()
 
     return render(request, 'recipes/index.html', {
         'recipes': recipes,
         'categories': categories,
+        'allergens': allergens,
         'selected_category': selected_category,
+        'selected_allergens': selected_allergens,
     })
+
 
 # View to add a new recipe (login required)
 

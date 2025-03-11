@@ -12,27 +12,51 @@
       </div>
     {% endif %}
   
-  <!-- Floating "Surprise Me" Button -->
-    <a href="{% url 'random_recipe' %}" id="surpriseMeBtn" class="float-btn" data-tooltip="Click to get a random recipe from the existing recipes in the database!">
+    <!-- Floating "Surprise Me" Button -->
+    <a href="{% url 'random_recipe' %}" id="surpriseMeBtn" class="float-btn" data-tooltip="Click to get a random recipe!">
       Surprise Me
     </a>
 
-  <!-- Filter by Category Section -->
-  <form id="filter-form" method="GET" class="mb-4">
-    <div class="d-flex gap-3">
-    <div class="input-group" style="width: 200px;">
-      <select name="category" class="form-select border-teal" id="category-select">
-      <option value="" {% if not selected_category %}selected{% endif %}>All Categories</option>
-      {% for category in categories %}
-        <option value="{{ category.name }}" {% if selected_category == category.name %}selected{% endif %}>
-        {{ category.name }}
-        </option>
-      {% endfor %}
-      </select>
-    </div>
-    <button type="submit" class="btn" style="background-color: #009688; color: white; border: 1px solid #009688;">Sort</button>
+  <!-- Separated Filter Sections -->
+<div class="d-flex gap-4 flex-wrap mb-4">
+  <!-- Category Filter Section -->
+  <form id="category-filter-form" method="GET" class="filter-form">
+    <div class="filter-container">
+      <div class="input-group">
+        <select name="category" class="form-select border-teal" id="category-select">
+          <option value="" {% if not selected_category %}selected{% endif %}>All Categories</option>
+          {% for category in categories %}
+            <option value="{{ category.name }}" {% if selected_category == category.name %}selected{% endif %}>
+              {{ category.name }}
+            </option>
+          {% endfor %}
+        </select>
+      </div>
+      <button type="submit" class="filter-btn">Filter by Category</button>
     </div>
   </form>
+  
+  <!-- Allergen Filter Section -->
+  <form id="allergen-filter-form" method="GET" class="filter-form">
+    <div class="filter-container">
+      <div class="dropdown-check-list" tabindex="100">
+        <span class="anchor form-select border-teal">Select Allergens</span>
+        <ul class="items">
+          {% for allergen in allergens %}
+            <li>
+              <label>
+                <input type="checkbox" name="allergens" value="{{ allergen.id }}" 
+                  {% if allergen.id|stringformat:"i" in selected_allergens %}checked{% endif %}/>
+                {{ allergen.name }}
+              </label>
+            </li>
+          {% endfor %}
+        </ul>
+      </div>
+      <button type="submit" class="filter-btn">Filter by Allergens</button>
+    </div>
+  </form>
+</div>
 
     <!-- Recipes Container -->
     <div id="recipes-container">
@@ -40,42 +64,169 @@
     </div>
   </div>
 
-  <!-- Custom Styles -->
-  <style>
-    .border-teal {
-      border-color: #009688;
-    }
-
-    .border-teal:focus {
-      border-color: #009688;
-      box-shadow: 0 0 0 0.25rem rgba(0, 150, 136, 0.25);
-    }
-
-    .form-select:focus {
-      border-color: #009688;
-      box-shadow: 0 0 0 0.25rem rgba(0, 150, 136, 0.25);
-    }
-
-    .btn:hover {
-      background-color: #4CAF50 !important;
-      border-color: #4CAF50 !important;
-      color: white !important;
-    }
-
-    #recipes-container {
-      background-color: rgba(255, 255, 255, 0.9);
-      border-radius: 8px;
-      padding: 20px;
-      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    }
-  </style>
+<!-- Custom Styles -->
+<style>
+/* Filter form styles */
+.filter-form {
+  margin-bottom: 1rem;
+}
+.filter-container {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+}
+.input-group {
+  width: 200px;
+  flex-shrink: 0;
+}
+.filter-btn {
+  background-color: #009688;
+  color: white;
+  border: 1px solid #009688;
+  border-radius: 0.25rem;
+  padding: 0.375rem 0.75rem;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+.filter-btn:hover {
+  background-color: #00796b;
+}
+/* Dropdown checklist styles */
+.dropdown-check-list {
+  display: inline-block;
+  position: relative;
+  width: 250px;
+}
+.dropdown-check-list .anchor {
+  position: relative;
+  cursor: pointer;
+  display: inline-block;
+  padding: 0.375rem 0.75rem;
+  height: 38px;
+  line-height: 1.5;
+}
+/* Remove custom arrow */
+.dropdown-check-list .anchor:after {
+  content: none;
+}
+.dropdown-check-list .anchor:active:after {
+  content: none;
+}
+.dropdown-check-list ul.items {
+  padding: 0.5rem;
+  display: none;
+  margin: 0;
+  border: 1px solid #ccc;
+  border-radius: 0.25rem;
+  background-color: white;
+  position: absolute;
+  z-index: 1000;
+  width: 100%;
+  max-height: 200px;
+  overflow-y: auto;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+.dropdown-check-list ul.items li {
+  list-style: none;
+  padding: 0.25rem 0;
+}
+.dropdown-check-list.visible .items {
+  display: block;
+}
+.dropdown-check-list label {
+  display: block;
+  cursor: pointer;
+  padding: 0.25rem;
+  transition: background-color 0.2s;
+}
+.dropdown-check-list label:hover {
+  background-color: rgba(0, 150, 136, 0.1);
+}
+.dropdown-check-list input[type="checkbox"] {
+  margin-right: 0.5rem;
+}
+/* Override existing styles */
+.border-teal {
+  border-color: #009688 !important;
+}
+.border-teal:focus {
+  border-color: #009688 !important;
+  box-shadow: 0 0 0 0.25rem rgba(0, 150, 136, 0.25) !important;
+}
+/* Responsive styles */
+@media (max-width: 768px) {
+  .filter-container {
+    flex-direction: column;
+  }
   
-  <!-- Include JavaScript for AJAX Filtering -->
+  .input-group, .dropdown-check-list {
+    width: 100%;
+    margin-bottom: 10px;
+  }
+}
+</style>
+  
+
+  <!-- JavaScript for dropdown checklist -->
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    // Set up dropdown checklist
+    var checkList = document.querySelector('.dropdown-check-list');
+    var anchor = checkList.querySelector('.anchor');
+    
+    anchor.addEventListener('click', function(e) {
+      e.preventDefault();
+      if (checkList.classList.contains('visible')) {
+        checkList.classList.remove('visible');
+      } else {
+        checkList.classList.add('visible');
+      }
+    });
+    
+    // Close the dropdown when clicking outside
+    document.addEventListener('click', function(e) {
+      if (!checkList.contains(e.target)) {
+        checkList.classList.remove('visible');
+      }
+    });
+    
+    // Update the anchor text based on selections
+    var checkboxes = checkList.querySelectorAll('input[type="checkbox"]');
+    var updateAnchorText = function() {
+      var selectedItems = [];
+      checkboxes.forEach(function(checkbox) {
+        if (checkbox.checked) {
+          selectedItems.push(checkbox.parentNode.textContent.trim());
+        }
+      });
+      
+      if (selectedItems.length > 0) {
+        if (selectedItems.length > 2) {
+          anchor.textContent = selectedItems.length + ' allergens selected';
+        } else {
+          anchor.textContent = selectedItems.join(', ');
+        }
+      } else {
+        anchor.textContent = 'Select Allergens';
+      }
+    };
+    
+    // Initialize anchor text
+    updateAnchorText();
+    
+    // Update anchor text when checkboxes change
+    checkboxes.forEach(function(checkbox) {
+      checkbox.addEventListener('change', updateAnchorText);
+    });
+  });
+</script>
+
+  <!-- JavaScript for AJAX Filtering -->
   <script src="{% static 'recipes/js/filter.js' %}"></script>
   <script>
-    document.getElementById('surpriseMeBtn').addEventListener('click', function (e) {
-        // Optional: Scroll to the top when clicked
-        window.scrollTo({ top: 0, behavior: 'smooth' });
+    document.getElementById('surpriseMeBtn').addEventListener('click', function () {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     });
-</script>
+  </script>
 {% endblock %}
