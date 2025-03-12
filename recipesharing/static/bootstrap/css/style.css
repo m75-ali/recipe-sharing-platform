@@ -1546,3 +1546,163 @@ body.dark-theme .action-bar {
         font-size: 12pt !important;
     }
 }
+
+/* Custom cooking-themed loader */
+.custom-loader {
+    position: relative;
+    width: 100px;
+    height: 100px;
+    margin: 0 auto;
+}
+
+.pan {
+    position: absolute;
+    width: 60px;
+    height: 20px;
+    background-color: #a1a1a1;
+    border-radius: 0 0 20px 20px;
+    bottom: 35px;
+    left: 20px;
+    transform-origin: center bottom;
+    animation: flip 2s ease-in-out infinite;
+}
+
+.pan::before {
+    content: '';
+    position: absolute;
+    width: 60px;
+    height: 10px;
+    background-color: #d9d9d9;
+    border-radius: 20px 20px 0 0;
+    top: -10px;
+}
+
+.food {
+    position: absolute;
+    width: 40px;
+    height: 5px;
+    background-color: #FF9800;
+    border-radius: 5px;
+    top: 5px;
+    left: 10px;
+    transform-origin: center;
+    animation: jump 2s ease-in-out infinite;
+}
+
+.handle {
+    position: absolute;
+    width: 20px;
+    height: 10px;
+    background-color: #4a4a4a;
+    border-radius: 0 10px 10px 0;
+    bottom: 40px;
+    left: 80px;
+}
+
+.pan-shadow {
+    position: absolute;
+    width: 50px;
+    height: 10px;
+    background-color: rgba(0, 0, 0, 0.1);
+    border-radius: 50%;
+    bottom: 30px;
+    left: 25px;
+    animation: shadow 2s ease-in-out infinite;
+}
+
+@keyframes flip {
+    0%, 15% {
+        transform: rotate(0deg);
+    }
+    30%, 45% {
+        transform: rotate(-15deg);
+    }
+    60%, 75% {
+        transform: rotate(5deg);
+    }
+    90%, 100% {
+        transform: rotate(0deg);
+    }
+}
+
+@keyframes jump {
+    0%, 15% {
+        transform: translateY(0) rotate(0deg);
+    }
+    30% {
+        transform: translateY(-20px) rotate(90deg);
+    }
+    45% {
+        transform: translateY(0) rotate(180deg);
+    }
+    60%, 75% {
+        transform: translateY(0) rotate(180deg);
+    }
+    90%, 100% {
+        transform: translateY(0) rotate(360deg);
+    }
+}
+
+@keyframes shadow {
+    0%, 15% {
+        transform: scale(1);
+        opacity: 0.5;
+    }
+    30%, 45% {
+        transform: scale(0.8);
+        opacity: 0.3;
+    }
+    60%, 75% {
+        transform: scale(1.1);
+        opacity: 0.6;
+    }
+    90%, 100% {
+        transform: scale(1);
+        opacity: 0.5;
+    }
+}
+
+/* Dark theme adjustments for the loader */
+.dark-theme .custom-loader .pan {
+    background-color: #777;
+}
+
+.dark-theme .custom-loader .pan::before {
+    background-color: #999;
+}
+
+.dark-theme .custom-loader .handle {
+    background-color: #555;
+}
+
+.dark-theme .custom-loader .food {
+    background-color: #FF9800;
+}
+
+.dark-theme .custom-loader .pan-shadow {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+/* Style for loading message */
+#loading-message {
+    font-size: 1.1rem;
+    color: #009688;
+    font-style: italic;
+    animation: pulse 1.5s infinite;
+}
+
+.dark-theme #loading-message {
+    color: #4db6ac;
+}
+
+@keyframes pulse {
+    0% {
+        opacity: 0.6;
+    }
+    50% {
+        opacity: 1;
+    }
+    100% {
+        opacity: 0.6;
+    }
+}

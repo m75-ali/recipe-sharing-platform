@@ -106,6 +106,26 @@
         if (!generateRecipeBtn) console.error("Generate recipe button not found");
         if (!recipeContainer) console.error("Recipe container not found");
         
+        // Sync with current theme
+        function syncWithTheme() {
+            const isDarkMode = document.body.classList.contains('dark-theme');
+            console.log("Theme sync - Dark mode:", isDarkMode);
+        }
+        
+        // Initial theme sync
+        syncWithTheme();
+        
+        // Add observer for theme changes
+        const observer = new MutationObserver((mutations) => {
+            mutations.forEach((mutation) => {
+                if (mutation.attributeName === 'class') {
+                    syncWithTheme();
+                }
+            });
+        });
+        
+        observer.observe(document.body, {attributes: true});
+        
         let ingredients = [];
         
         // Add ingredient from input
