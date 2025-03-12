@@ -60,15 +60,19 @@
                 </div>
                 <div class="card-body">
                     <div id="loading-spinner" class="recipe-loading-spinner d-none py-5">
-                        <div class="spinner-border text-primary loading-pulse" role="status">
-                            <span class="visually-hidden">Loading...</span>
+                        <div class="custom-loader">
+                            <div class="pan">
+                                <div class="food"></div>
+                            </div>
+                            <div class="handle"></div>
+                            <div class="pan-shadow"></div>
                         </div>
-                        <p class="mt-2">Our AI chef is cooking up your recipe...</p>
+                        <p class="mt-3" id="loading-message">Dusting off grandma's secret recipe book...</p>
                     </div>
                     
                     <div id="recipe-container" class="recipe-result">
                         <!-- Recipe will be displayed here -->
-                        <div class="text-center text-muted py-5">
+                        <div class="text-center text-muted py-5" id="recipe-placeholder">
                             <i class="fas fa-utensils fa-3x mb-3"></i>
                             <p>Your recipe will appear here</p>
                             <p class="small">Add some ingredients and click "Generate Recipe"</p>
@@ -79,24 +83,34 @@
         </div>
     </div>
 </div>
-
 {% endblock %}
 
 {% block scripts %}
 <script>
     document.addEventListener('DOMContentLoaded', function() {
+        console.log("Recipe Generator Script Loaded");
+        
         const ingredientInput = document.getElementById('ingredient-input');
         const addIngredientBtn = document.getElementById('add-ingredient');
         const ingredientsContainer = document.getElementById('ingredients-container');
         const generateRecipeBtn = document.getElementById('generate-recipe');
         const recipeContainer = document.getElementById('recipe-container');
         const loadingSpinner = document.getElementById('loading-spinner');
+        const loadingMessage = document.getElementById('loading-message');
         const dietaryPreferences = document.getElementById('dietary-preferences');
+        
+        // Check if elements exist
+        if (!ingredientInput) console.error("Ingredient input not found");
+        if (!addIngredientBtn) console.error("Add ingredient button not found");
+        if (!ingredientsContainer) console.error("Ingredients container not found");
+        if (!generateRecipeBtn) console.error("Generate recipe button not found");
+        if (!recipeContainer) console.error("Recipe container not found");
         
         let ingredients = [];
         
         // Add ingredient from input
         function addIngredient() {
+            console.log("Add ingredient clicked");
             const ingredient = ingredientInput.value.trim();
             if (ingredient && !ingredients.includes(ingredient)) {
                 ingredients.push(ingredient);
@@ -108,6 +122,7 @@
         
         // Update the ingredients list in the UI
         function updateIngredientsList() {
+            console.log("Updating ingredients list", ingredients);
             ingredientsContainer.innerHTML = '';
             
             if (ingredients.length === 0) {
@@ -137,22 +152,81 @@
             });
         }
         
+        // Helper function to format recipe text
+        function formatRecipe(recipeText) {
+            // Detect if recipe is already in a structured format or free text
+            const hasTitle = recipeText.includes('**') || recipeText.includes('#');
+            
+            if (hasTitle) {
+                // Process markdown-style formatting
+                let formatted = recipeText;
+                
+                // Format headings and titles (** text ** or # text)
+                formatted = formatted.replace(/\*\*(.*?)\*\*/g, '<h3 class="recipe-title mb-3">$1</h3>');
+                formatted = formatted.replace(/^# (.*?)$/gm, '<h3 class="recipe-title mb-3">$1</h3>');
+                formatted = formatted.replace(/^\*\*\* (.*?):/gm, '<h4 class="recipe-section mt-4 mb-2">$1:</h4>');
+                
+                // Format lists (* text)
+                formatted = formatted.replace(/^\* (.*?)$/gm, '<li class="recipe-list-item">$1</li>');
+                
+                // Wrap lists in ul tags
+                formatted = formatted.replace(/<li class="recipe-list-item">(.*?)<\/li>\n<li class="recipe-list-item">/g, 
+                                            '<ul class="recipe-ingredients-list"><li class="recipe-list-item">$1</li><li class="recipe-list-item">');
+                formatted = formatted.replace(/<li class="recipe-list-item">(.*?)<\/li>\n(?!<li)/g, 
+                                            '<ul class="recipe-ingredients-list"><li class="recipe-list-item">$1</li></ul>');
+                
+                // Format numbered steps (1. text)
+                formatted = formatted.replace(/^(\d+)\.\s+(.*?)$/gm, '<div class="recipe-step"><span class="recipe-step-number">$1</span><span class="recipe-step-text">$2</span></div>');
+                
+                // Format sections like "Instructions:"
+                formatted = formatted.replace(/^\*\*(.*?):\*\*$/gm, '<h4 class="recipe-section mt-4 mb-2">$1:</h4>');
+                
+                return formatted;
+            } else {
+                // Simple formatting for free text
+                return `<div class="recipe-content-simple">${recipeText.replace(/\n/g, '<br>')}</div>`;
+            }
+        }
+        
         // Generate recipe
         async function generateRecipe() {
+            console.log("Generate recipe clicked", ingredients);
             if (ingredients.length === 0) {
                 alert('Please add at least one ingredient');
                 return;
             }
             
-            // Show loading spinner
+            // Show loading spinner with first message
             loadingSpinner.classList.remove('d-none');
+            document.getElementById('recipe-placeholder')?.remove();
             recipeContainer.innerHTML = '';
+            loadingMessage.textContent = "Dusting off grandma's secret recipe book...";
+            
+            // Setup loading messages in the sequence we want
+            const loadingMessages = [
+                "Dusting off grandma's secret recipe book...",
+                "Consulting with virtual Gordon Ramsay...",
+                "Running final flavor diagnostics..."
+            ];
             
             try {
-                const response = await fetch('{% url "generate_recipe_api" %}', {
+                // First loading message is already set
+                
+                // Send the request
+                console.log("Sending request to generate recipe API");
+                const apiUrl = '{% url "generate_recipe_api" %}';
+                
+                // Show second message
+                setTimeout(() => {
+                    loadingMessage.textContent = loadingMessages[1];
+                }, 800);
+                
+                // Send API request
+                const response = await fetch(apiUrl, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest',
                     },
                     body: JSON.stringify({
                         ingredients: ingredients,
@@ -160,37 +234,79 @@
                     }),
                 });
                 
-                const data = await response.json();
+                // Show third message right before processing response
+                setTimeout(() => {
+                    loadingMessage.textContent = loadingMessages[2];
+                }, 1600);
                 
-                if (response.ok) {
-                    // Format the recipe (replace newlines with <br> tags for HTML display)
-                    const formattedRecipe = data.recipe.replace(/\n/g, '<br>');
+                // Add a small delay to ensure the last message is seen
+                await new Promise(resolve => setTimeout(resolve, 500));
+                
+                console.log("Response received:", response.status);
+                const data = await response.json();
+                console.log("Data:", data);
+                
+                // Process the response after showing the final message
+                setTimeout(() => {
+                    if (response.ok) {
+                        // Format the recipe with better styling
+                        const formattedRecipe = formatRecipe(data.recipe);
+                        
+                        // Create recipe card with styled content
+                        recipeContainer.innerHTML = `
+                            <div class="recipe-content-card">
+                                ${formattedRecipe}
+                            </div>`;
+                        
+                        // Add action buttons
+                        const actionButtons = document.createElement('div');
+                        actionButtons.className = 'recipe-actions mt-4 d-flex gap-2';
+                        
+                        // Save button
+                        const saveButton = document.createElement('button');
+                        saveButton.className = 'btn save-recipe-btn';
+                        saveButton.innerHTML = '<i class="fas fa-save"></i> Save Recipe';
+                        saveButton.addEventListener('click', function() {
+                            alert('This feature will be implemented soon!');
+                        });
+                        
+                        // Print button
+                        const printButton = document.createElement('button');
+                        printButton.className = 'btn print-recipe-btn';
+                        printButton.innerHTML = '<i class="fas fa-print"></i> Print';
+                        printButton.addEventListener('click', function() {
+                            window.print();
+                        });
+                        
+                        actionButtons.appendChild(saveButton);
+                        actionButtons.appendChild(printButton);
+                        recipeContainer.appendChild(actionButtons);
+                        
+                    } else {
+                        // Display error
+                        recipeContainer.innerHTML = `<div class="alert alert-danger">${data.error || 'Failed to generate recipe'}</div>`;
+                    }
                     
-                    // Add some styling to the recipe
-                    recipeContainer.innerHTML = `<div class="recipe-content">${formattedRecipe}</div>`;
-                    
-                    // Add a "Save Recipe" button
-                    const saveButton = document.createElement('button');
-                    saveButton.className = 'btn save-recipe-btn mt-4';
-                    saveButton.innerHTML = '<i class="fas fa-save"></i> Save Recipe';
-                    saveButton.addEventListener('click', function() {
-                        alert('This feature will be implemented soon!');
-                        // You can implement saving to database here
-                    });
-                    recipeContainer.appendChild(saveButton);
-                } else {
-                    // Display error
-                    recipeContainer.innerHTML = `<div class="alert alert-danger">${data.error || 'Failed to generate recipe'}</div>`;
-                }
+                    // Hide loading spinner
+                    loadingSpinner.classList.add('d-none');
+                }, 1000);
+                
             } catch (error) {
-                recipeContainer.innerHTML = `<div class="alert alert-danger">Error: ${error.message}</div>`;
-            } finally {
-                // Hide loading spinner
-                loadingSpinner.classList.add('d-none');
+                console.error("Error generating recipe:", error);
+                
+                // Show final message before displaying error
+                loadingMessage.textContent = loadingMessages[2];
+                
+                // Small delay before showing error
+                setTimeout(() => {
+                    recipeContainer.innerHTML = `<div class="alert alert-danger">Error: ${error.message}</div>`;
+                    loadingSpinner.classList.add('d-none');
+                }, 1000);
             }
         }
         
-        // Event listeners
+        // Attach event listeners
+        console.log("Attaching event listeners");
         addIngredientBtn.addEventListener('click', addIngredient);
         ingredientInput.addEventListener('keypress', function(e) {
             if (e.key === 'Enter') {
@@ -201,29 +317,6 @@
         
         // Initialize the ingredients list
         updateIngredientsList();
-        
-        // Check for theme changes and update UI accordingly
-        function checkTheme() {
-            if (document.body.classList.contains('dark-theme')) {
-                // Apply dark theme specific adjustments if needed
-            } else {
-                // Apply light theme specific adjustments if needed
-            }
-        }
-        
-        // Initial theme check
-        checkTheme();
-        
-        // Listen for theme changes (if you have a theme toggle functionality)
-        const observer = new MutationObserver(function(mutations) {
-            mutations.forEach(function(mutation) {
-                if (mutation.attributeName === 'class') {
-                    checkTheme();
-                }
-            });
-        });
-        
-        observer.observe(document.body, { attributes: true });
     });
 </script>
 {% endblock %}

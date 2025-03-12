@@ -299,3 +299,7 @@ def generate_recipe_api(request):
             return JsonResponse({'error': str(e)}, status=500)
     
     return JsonResponse({'error': 'Only POST requests are supported'}, status=405)
+
+def recipe_generator_debug(request):
+    """Debug page for recipe generator"""
+    return render(request, 'recipes/recipe_generator_debug.html')

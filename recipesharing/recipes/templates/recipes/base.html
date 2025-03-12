@@ -16,6 +16,8 @@
     <link rel="stylesheet" href="{% static 'bootstrap/css/bootstrap.min.css' %}" />
     <link rel="stylesheet" href="{% static 'bootstrap/css/style.css' %}" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
     <style>
       /* Custom Color Scheme */
       body {
@@ -156,5 +158,35 @@
         });
     });
 </script>
+<!-- Bootstrap JS -->
+<script src="{% static 'bootstrap/js/bootstrap.bundle.min.js' %}"></script>
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const themeToggle = document.getElementById("theme-toggle");
+    const currentTheme = localStorage.getItem("theme") || "light";
+
+    // Set the initial theme
+    document.body.classList.add(`${currentTheme}-theme`);
+    themeToggle.textContent = currentTheme === "light" ? "☀️" : "🌙";
+
+    // Add click event to toggle theme
+    themeToggle.addEventListener("click", function () {
+        const isLight = document.body.classList.contains("light-theme");
+        document.body.classList.toggle("light-theme", !isLight);
+        document.body.classList.toggle("dark-theme", isLight);
+
+        // Update button text
+        themeToggle.textContent = isLight ? "☀️" : "🌙";
+
+        // Save the theme in localStorage
+        localStorage.setItem("theme", isLight ? "dark" : "light");
+    });
+});
+</script>
+
+<!-- Add this block to allow child templates to include their own scripts -->
+{% block scripts %}{% endblock %}
+</body>
+</html>
   </body>
 </html>
