@@ -7,220 +7,173 @@
 
     {% if user.is_authenticated %}
       <p class="text-muted text-center">Hello, {{ user.username }}!</p>
-      <div class="text-center mb-4">
-        <a href="{% url 'add_recipe' %}" class="btn" style="background-color: #009688; color: white;">Add New Recipe</a>
-      </div>
     {% endif %}
-  
-    <!-- Floating "Surprise Me" Button -->
-    <a href="{% url 'random_recipe' %}" id="surpriseMeBtn" class="float-btn" data-tooltip="Click to get a random recipe!">
-      Surprise Me
-    </a>
-
-  <!-- Separated Filter Sections -->
-<div class="d-flex gap-4 flex-wrap mb-4">
-  <!-- Category Filter Section -->
-  <form id="category-filter-form" method="GET" class="filter-form">
-    <div class="filter-container">
-      <div class="input-group">
-        <select name="category" class="form-select border-teal" id="category-select">
-          <option value="" {% if not selected_category %}selected{% endif %}>All Categories</option>
-          {% for category in categories %}
-            <option value="{{ category.name }}" {% if selected_category == category.name %}selected{% endif %}>
-              {{ category.name }}
-            </option>
-          {% endfor %}
-        </select>
+    
+    <!-- Features Section - Two Column Layout -->
+    <div class="row mt-4 mb-4">
+      <!-- AI Recipe Generator Feature Box -->
+      <div class="col-lg-6 mb-4">
+        <div class="feature-highlight h-100">
+          <div class="row align-items-center">
+            <div class="col-md-7">
+              <h2 class="feature-title">AI Recipe Generator</h2>
+              <p class="feature-description">Got ingredients but no recipe? Let our AI chef create a custom recipe for you!</p>
+              <ul class="feature-benefits">
+                <li><i class="fas fa-check-circle"></i> Generate recipes from any ingredients</li>
+                <li><i class="fas fa-check-circle"></i> Customize for dietary preferences</li>
+              </ul>
+              <a href="{% url 'recipe_generator_page' %}" class="btn feature-btn">Try AI Generator <i class="fas fa-arrow-right"></i></a>
+            </div>
+            <div class="col-md-5">
+              <div class="feature-image-container">
+                <img src="{% static 'images/ai-recipe-generator.jpg' %}" alt="AI Recipe Generator" class="feature-image">
+                <div class="feature-badge">NEW</div>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
-      <button type="submit" class="filter-btn">Filter by Category</button>
-    </div>
-  </form>
-  
-  <!-- Allergen Filter Section -->
-  <form id="allergen-filter-form" method="GET" class="filter-form">
-    <div class="filter-container">
-      <div class="dropdown-check-list" tabindex="100">
-        <span class="anchor form-select border-teal">Select Allergens</span>
-        <ul class="items">
-          {% for allergen in allergens %}
-            <li>
-              <label>
-                <input type="checkbox" name="allergens" value="{{ allergen.id }}" 
-                  {% if allergen.id|stringformat:"i" in selected_allergens %}checked{% endif %}/>
-                {{ allergen.name }}
-              </label>
-            </li>
-          {% endfor %}
-        </ul>
+      
+      <!-- Ingredient Search Feature Box -->
+      <div class="col-lg-6 mb-4">
+  <div class="feature-highlight h-100">
+    <div class="row align-items-center">
+      <div class="col-md-7">
+        <h2 class="feature-title">Find by Ingredients</h2>
+        <p class="feature-description">Simple way to search recipes using ingredients you have.</p>
+        
+        <p>Enter the ingredients you have, and we'll show you recipes that match.</p>
+        
+        <div class="mb-4"><!-- Spacer to match height --></div>
+        
+        <a href="{% url 'ingredient_search' %}" class="btn feature-btn">Search Recipes <i class="fas fa-arrow-right"></i></a>
       </div>
-      <button type="submit" class="filter-btn">Filter by Allergens</button>
+      <div class="col-md-5">
+        <div class="feature-image-container feature-image-fixed">
+          <img src="{% static 'images/ingredientlook.png' %}" alt="Ingredient Search" class="feature-image">
+          <div class="feature-badge">SEARCH</div>
+        </div>
+      </div>
     </div>
-  </form>
+  </div>
 </div>
+    
+    <!-- User Actions and Filters Section -->
+    <div class="action-bar mb-4">
+      <div class="row align-items-center">
+        <div class="col-md-4 mb-3 mb-md-0">
+          {% if user.is_authenticated %}
+          <a href="{% url 'add_recipe' %}" class="btn btn-primary w-100"><i class="fas fa-plus-circle me-2"></i>Add New Recipe</a>
+          {% endif %}
+        </div>
+        <div class="col-md-8">
+          <div class="d-flex gap-4 flex-wrap justify-content-md-end">
+            <!-- Category Filter Section -->
+            <form id="category-filter-form" method="GET" class="filter-form">
+              <div class="filter-container">
+                <div class="input-group">
+                  <select name="category" class="form-select border-teal" id="category-select">
+                    <option value="" {% if not selected_category %}selected{% endif %}>All Categories</option>
+                    {% for category in categories %}
+                      <option value="{{ category.name }}" {% if selected_category == category.name %}selected{% endif %}>
+                        {{ category.name }}
+                      </option>
+                    {% endfor %}
+                  </select>
+                </div>
+                <button type="submit" class="filter-btn">Filter</button>
+              </div>
+            </form>
+            
+            <!-- Allergen Filter Section -->
+            <form id="allergen-filter-form" method="GET" class="filter-form">
+              <div class="filter-container">
+                <div class="dropdown-check-list" tabindex="100">
+                  <span class="anchor form-select border-teal">Select Allergens</span>
+                  <ul class="items">
+                    {% for allergen in allergens %}
+                      <li>
+                        <label>
+                          <input type="checkbox" name="allergens" value="{{ allergen.id }}" 
+                            {% if allergen.id|stringformat:"i" in selected_allergens %}checked{% endif %}/>
+                          {{ allergen.name }}
+                        </label>
+                      </li>
+                    {% endfor %}
+                  </ul>
+                </div>
+                <button type="submit" class="filter-btn">Filter</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
 
     <!-- Recipes Container -->
-    <div id="recipes-container">
+    <div id="recipes-container" class="mb-5">
       {% include 'recipes/partials/recipe_list.html' %}
     </div>
   </div>
 
-<!-- Custom Styles -->
-<style>
-/* Filter form styles */
-.filter-form {
-  margin-bottom: 1rem;
-}
-.filter-container {
-  display: flex;
-  gap: 10px;
-  align-items: flex-start;
-}
-.input-group {
-  width: 200px;
-  flex-shrink: 0;
-}
-.filter-btn {
-  background-color: #009688;
-  color: white;
-  border: 1px solid #009688;
-  border-radius: 0.25rem;
-  padding: 0.375rem 0.75rem;
-  font-size: 1rem;
-  cursor: pointer;
-  transition: background-color 0.3s;
-}
-.filter-btn:hover {
-  background-color: #00796b;
-}
-/* Dropdown checklist styles */
-.dropdown-check-list {
-  display: inline-block;
-  position: relative;
-  width: 250px;
-}
-.dropdown-check-list .anchor {
-  position: relative;
-  cursor: pointer;
-  display: inline-block;
-  padding: 0.375rem 0.75rem;
-  height: 38px;
-  line-height: 1.5;
-}
-/* Remove custom arrow */
-.dropdown-check-list .anchor:after {
-  content: none;
-}
-.dropdown-check-list .anchor:active:after {
-  content: none;
-}
-.dropdown-check-list ul.items {
-  padding: 0.5rem;
-  display: none;
-  margin: 0;
-  border: 1px solid #ccc;
-  border-radius: 0.25rem;
-  background-color: white;
-  position: absolute;
-  z-index: 1000;
-  width: 100%;
-  max-height: 200px;
-  overflow-y: auto;
-  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-}
-.dropdown-check-list ul.items li {
-  list-style: none;
-  padding: 0.25rem 0;
-}
-.dropdown-check-list.visible .items {
-  display: block;
-}
-.dropdown-check-list label {
-  display: block;
-  cursor: pointer;
-  padding: 0.25rem;
-  transition: background-color 0.2s;
-}
-.dropdown-check-list label:hover {
-  background-color: rgba(0, 150, 136, 0.1);
-}
-.dropdown-check-list input[type="checkbox"] {
-  margin-right: 0.5rem;
-}
-/* Override existing styles */
-.border-teal {
-  border-color: #009688 !important;
-}
-.border-teal:focus {
-  border-color: #009688 !important;
-  box-shadow: 0 0 0 0.25rem rgba(0, 150, 136, 0.25) !important;
-}
-/* Responsive styles */
-@media (max-width: 768px) {
-  .filter-container {
-    flex-direction: column;
-  }
-  
-  .input-group, .dropdown-check-list {
-    width: 100%;
-    margin-bottom: 10px;
-  }
-}
-</style>
-  
+  <!-- Floating "Surprise Me" Button -->
+  <a href="{% url 'random_recipe' %}" id="surpriseMeBtn" class="float-btn surprise-btn-adjusted" data-tooltip="Click to get a random recipe!">
+    Surprise Me
+  </a>
 
   <!-- JavaScript for dropdown checklist -->
-<script>
-  document.addEventListener('DOMContentLoaded', function() {
-    // Set up dropdown checklist
-    var checkList = document.querySelector('.dropdown-check-list');
-    var anchor = checkList.querySelector('.anchor');
-    
-    anchor.addEventListener('click', function(e) {
-      e.preventDefault();
-      if (checkList.classList.contains('visible')) {
-        checkList.classList.remove('visible');
-      } else {
-        checkList.classList.add('visible');
-      }
-    });
-    
-    // Close the dropdown when clicking outside
-    document.addEventListener('click', function(e) {
-      if (!checkList.contains(e.target)) {
-        checkList.classList.remove('visible');
-      }
-    });
-    
-    // Update the anchor text based on selections
-    var checkboxes = checkList.querySelectorAll('input[type="checkbox"]');
-    var updateAnchorText = function() {
-      var selectedItems = [];
-      checkboxes.forEach(function(checkbox) {
-        if (checkbox.checked) {
-          selectedItems.push(checkbox.parentNode.textContent.trim());
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      // Set up dropdown checklist
+      var checkList = document.querySelector('.dropdown-check-list');
+      var anchor = checkList.querySelector('.anchor');
+      
+      anchor.addEventListener('click', function(e) {
+        e.preventDefault();
+        if (checkList.classList.contains('visible')) {
+          checkList.classList.remove('visible');
+        } else {
+          checkList.classList.add('visible');
         }
       });
       
-      if (selectedItems.length > 0) {
-        if (selectedItems.length > 2) {
-          anchor.textContent = selectedItems.length + ' allergens selected';
-        } else {
-          anchor.textContent = selectedItems.join(', ');
+      // Close the dropdown when clicking outside
+      document.addEventListener('click', function(e) {
+        if (!checkList.contains(e.target)) {
+          checkList.classList.remove('visible');
         }
-      } else {
-        anchor.textContent = 'Select Allergens';
-      }
-    };
-    
-    // Initialize anchor text
-    updateAnchorText();
-    
-    // Update anchor text when checkboxes change
-    checkboxes.forEach(function(checkbox) {
-      checkbox.addEventListener('change', updateAnchorText);
+      });
+      
+      // Update the anchor text based on selections
+      var checkboxes = checkList.querySelectorAll('input[type="checkbox"]');
+      var updateAnchorText = function() {
+        var selectedItems = [];
+        checkboxes.forEach(function(checkbox) {
+          if (checkbox.checked) {
+            selectedItems.push(checkbox.parentNode.textContent.trim());
+          }
+        });
+        
+        if (selectedItems.length > 0) {
+          if (selectedItems.length > 2) {
+            anchor.textContent = selectedItems.length + ' allergens selected';
+          } else {
+            anchor.textContent = selectedItems.join(', ');
+          }
+        } else {
+          anchor.textContent = 'Select Allergens';
+        }
+      };
+      
+      // Initialize anchor text
+      updateAnchorText();
+      
+      // Update anchor text when checkboxes change
+      checkboxes.forEach(function(checkbox) {
+        checkbox.addEventListener('change', updateAnchorText);
+      });
     });
-  });
-</script>
+  </script>
 
   <!-- JavaScript for AJAX Filtering -->
   <script src="{% static 'recipes/js/filter.js' %}"></script>

@@ -1,0 +1,229 @@
+{% extends "recipes/base.html" %}
+{% load static %}
+
+{% block title %}AI Recipe Generator{% endblock %}
+
+{% block content %}
+<div class="container mt-5 mb-5 recipe-generator-container">
+    <div class="row">
+        <div class="col-md-12 text-center mb-4">
+            <h1 class="display-4">AI Recipe Generator</h1>
+            <p class="lead">Enter ingredients you have, and let AI create a delicious recipe for you!</p>
+        </div>
+    </div>
+    
+    <div class="row">
+        <div class="col-md-6">
+            <div class="card recipe-generator-card shadow-sm">
+                <div class="card-header">
+                    <h3 class="mb-0">Your Ingredients</h3>
+                </div>
+                <div class="card-body">
+                    <div class="recipe-generator-form">
+                        <div class="input-group mb-3">
+                            <input type="text" id="ingredient-input" class="form-control" placeholder="Enter an ingredient">
+                            <div class="input-group-append">
+                                <button class="btn recipe-generator-btn" id="add-ingredient">Add</button>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="dietary-preferences" class="form-label">Dietary Preferences (Optional)</label>
+                            <select id="dietary-preferences" class="form-select">
+                                <option value="">None</option>
+                                <option value="vegetarian">Vegetarian</option>
+                                <option value="vegan">Vegan</option>
+                                <option value="gluten-free">Gluten-Free</option>
+                                <option value="dairy-free">Dairy-Free</option>
+                                <option value="keto">Keto</option>
+                                <option value="low-carb">Low-Carb</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="ingredients-list mb-3">
+                        <h4>Your Ingredients:</h4>
+                        <ul id="ingredients-container" class="list-group">
+                            <!-- Ingredients will be added here dynamically -->
+                        </ul>
+                    </div>
+                    
+                    <button id="generate-recipe" class="btn recipe-generator-btn generate-btn btn-lg w-100">Generate Recipe</button>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-6">
+            <div class="card recipe-generator-card shadow-sm">
+                <div class="card-header">
+                    <h3 class="mb-0">Your Recipe</h3>
+                </div>
+                <div class="card-body">
+                    <div id="loading-spinner" class="recipe-loading-spinner d-none py-5">
+                        <div class="spinner-border text-primary loading-pulse" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                        <p class="mt-2">Our AI chef is cooking up your recipe...</p>
+                    </div>
+                    
+                    <div id="recipe-container" class="recipe-result">
+                        <!-- Recipe will be displayed here -->
+                        <div class="text-center text-muted py-5">
+                            <i class="fas fa-utensils fa-3x mb-3"></i>
+                            <p>Your recipe will appear here</p>
+                            <p class="small">Add some ingredients and click "Generate Recipe"</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const ingredientInput = document.getElementById('ingredient-input');
+        const addIngredientBtn = document.getElementById('add-ingredient');
+        const ingredientsContainer = document.getElementById('ingredients-container');
+        const generateRecipeBtn = document.getElementById('generate-recipe');
+        const recipeContainer = document.getElementById('recipe-container');
+        const loadingSpinner = document.getElementById('loading-spinner');
+        const dietaryPreferences = document.getElementById('dietary-preferences');
+        
+        let ingredients = [];
+        
+        // Add ingredient from input
+        function addIngredient() {
+            const ingredient = ingredientInput.value.trim();
+            if (ingredient && !ingredients.includes(ingredient)) {
+                ingredients.push(ingredient);
+                updateIngredientsList();
+                ingredientInput.value = '';
+            }
+            ingredientInput.focus();
+        }
+        
+        // Update the ingredients list in the UI
+        function updateIngredientsList() {
+            ingredientsContainer.innerHTML = '';
+            
+            if (ingredients.length === 0) {
+                ingredientsContainer.innerHTML = '<li class="list-group-item text-muted">No ingredients added yet</li>';
+                return;
+            }
+            
+            ingredients.forEach((ingredient, index) => {
+                const li = document.createElement('li');
+                li.className = 'list-group-item d-flex justify-content-between align-items-center';
+                li.innerHTML = `
+                    ${ingredient}
+                    <button type="button" class="btn btn-sm btn-danger" data-index="${index}">
+                        <i class="fas fa-times"></i> Remove
+                    </button>
+                `;
+                ingredientsContainer.appendChild(li);
+            });
+            
+            // Add event listeners to remove buttons
+            document.querySelectorAll('[data-index]').forEach(button => {
+                button.addEventListener('click', function() {
+                    const index = parseInt(this.getAttribute('data-index'));
+                    ingredients.splice(index, 1);
+                    updateIngredientsList();
+                });
+            });
+        }
+        
+        // Generate recipe
+        async function generateRecipe() {
+            if (ingredients.length === 0) {
+                alert('Please add at least one ingredient');
+                return;
+            }
+            
+            // Show loading spinner
+            loadingSpinner.classList.remove('d-none');
+            recipeContainer.innerHTML = '';
+            
+            try {
+                const response = await fetch('{% url "generate_recipe_api" %}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        ingredients: ingredients,
+                        dietary_preferences: dietaryPreferences.value
+                    }),
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    // Format the recipe (replace newlines with <br> tags for HTML display)
+                    const formattedRecipe = data.recipe.replace(/\n/g, '<br>');
+                    
+                    // Add some styling to the recipe
+                    recipeContainer.innerHTML = `<div class="recipe-content">${formattedRecipe}</div>`;
+                    
+                    // Add a "Save Recipe" button
+                    const saveButton = document.createElement('button');
+                    saveButton.className = 'btn save-recipe-btn mt-4';
+                    saveButton.innerHTML = '<i class="fas fa-save"></i> Save Recipe';
+                    saveButton.addEventListener('click', function() {
+                        alert('This feature will be implemented soon!');
+                        // You can implement saving to database here
+                    });
+                    recipeContainer.appendChild(saveButton);
+                } else {
+                    // Display error
+                    recipeContainer.innerHTML = `<div class="alert alert-danger">${data.error || 'Failed to generate recipe'}</div>`;
+                }
+            } catch (error) {
+                recipeContainer.innerHTML = `<div class="alert alert-danger">Error: ${error.message}</div>`;
+            } finally {
+                // Hide loading spinner
+                loadingSpinner.classList.add('d-none');
+            }
+        }
+        
+        // Event listeners
+        addIngredientBtn.addEventListener('click', addIngredient);
+        ingredientInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                addIngredient();
+            }
+        });
+        generateRecipeBtn.addEventListener('click', generateRecipe);
+        
+        // Initialize the ingredients list
+        updateIngredientsList();
+        
+        // Check for theme changes and update UI accordingly
+        function checkTheme() {
+            if (document.body.classList.contains('dark-theme')) {
+                // Apply dark theme specific adjustments if needed
+            } else {
+                // Apply light theme specific adjustments if needed
+            }
+        }
+        
+        // Initial theme check
+        checkTheme();
+        
+        // Listen for theme changes (if you have a theme toggle functionality)
+        const observer = new MutationObserver(function(mutations) {
+            mutations.forEach(function(mutation) {
+                if (mutation.attributeName === 'class') {
+                    checkTheme();
+                }
+            });
+        });
+        
+        observer.observe(document.body, { attributes: true });
+    });
+</script>
+{% endblock %}

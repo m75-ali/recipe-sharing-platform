@@ -33,4 +33,8 @@ urlpatterns = [
     
     # URL for generating random recipes, handled by the random_recipe view
     path('random-recipe/', views.random_recipe, name='random_recipe'),
+
+    # Recipe Generator URLs
+    path('ai-recipe-generator/', views.recipe_generator_page, name='recipe_generator_page'),
+    path('api/generate-recipe/', views.generate_recipe_api, name='generate_recipe_api'),
 ]

@@ -1,5 +1,6 @@
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, get_object_or_404, redirect
+from django.views.decorators.csrf import csrf_exempt  # Add this import
 from .forms import RecipeForm
 from .models import Recipe, Rating, Category
 from django.db.models import Avg
@@ -7,7 +8,7 @@ from django.contrib import messages
 from django.http import HttpResponseRedirect
 from django.urls import reverse
 from django.shortcuts import render
-from .models import Recipe , Allergen
+from .models import Recipe, Allergen
 from .models import find_recipes_by_ingredients
 from .forms import IngredientSearchForm
 import random
@@ -17,12 +18,16 @@ from django.db.models import Q
 from difflib import get_close_matches
 from django.http import JsonResponse
 from django.template.loader import render_to_string
+from django.shortcuts import render
+from django.http import JsonResponse
+import json
+from .groq_integration import generate_recipe
 
 from django.shortcuts import render
 from django.http import JsonResponse
 from django.db.models import Avg
 from django.template.loader import render_to_string
-from .models import Recipe, Category, Allergen
+from .models import Recipe, Category, Allergen, Rating
 
 def index(request):
     # Get selected filters from query parameters
@@ -258,3 +263,39 @@ def random_recipe(request):
         recipe = get_object_or_404(Recipe, id=random_id)
         return render(request, 'recipes/recipe_detail.html', {'recipe': recipe})  # Adjust template name
     return render(request, 'index.html', {'error': 'No recipes available'})  # Fallback if no recipes exist
+
+
+def recipe_generator_page(request):
+    """Render the recipe generator page"""
+    return render(request, 'recipes/recipe_generator.html')
+
+@csrf_exempt
+def generate_recipe_api(request):
+    """API endpoint to generate a recipe"""
+    if request.method == 'POST':
+        try:
+            # Parse the JSON data from the request
+            data = json.loads(request.body)
+            
+            # Extract ingredients and dietary preferences
+            ingredients = data.get('ingredients', [])
+            dietary_preferences = data.get('dietary_preferences', None)
+            
+            # Validate ingredients
+            if not ingredients or not isinstance(ingredients, list):
+                return JsonResponse({'error': 'Please provide a valid list of ingredients'}, status=400)
+            
+            # Generate the recipe
+            result = generate_recipe(ingredients, dietary_preferences)
+            
+            if result.get('success', False):
+                return JsonResponse({'recipe': result.get('recipe')})
+            else:
+                return JsonResponse({'error': result.get('error', 'Unknown error')}, status=500)
+                
+        except json.JSONDecodeError:
+            return JsonResponse({'error': 'Invalid JSON data'}, status=400)
+        except Exception as e:
+            return JsonResponse({'error': str(e)}, status=500)
+    
+    return JsonResponse({'error': 'Only POST requests are supported'}, status=405)

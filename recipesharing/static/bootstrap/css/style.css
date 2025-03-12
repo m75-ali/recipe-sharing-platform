@@ -790,3 +790,597 @@ body.dark-theme .recipe-description h4 {
         padding: 0.4rem 0.8rem;
     }
 }
+/* AI Recipe Generator Styles */
+
+/* Recipe Generator Container */
+.recipe-generator-container {
+    border-radius: 12px !important;
+    overflow: hidden;
+    margin-bottom: 2rem;
+}
+
+/* Recipe Result Container */
+.recipe-result {
+    min-height: 300px;
+    transition: background-color 0.3s ease, color 0.3s ease !important;
+}
+
+.recipe-content {
+    white-space: pre-line;
+    font-family: 'Arial', sans-serif;
+}
+
+/* Recipe Content Formatting */
+.recipe-content h1, 
+.recipe-content h2, 
+.recipe-content h3 {
+    margin-top: 1.5rem;
+    margin-bottom: 0.75rem;
+    color: #009688;
+}
+
+.recipe-content ul, 
+.recipe-content ol {
+    padding-left: 1.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.recipe-content hr {
+    margin: 1.5rem 0;
+    border-color: #dee2e6;
+}
+
+.recipe-content strong {
+    color: #009688;
+    font-weight: bold;
+}
+
+.recipe-content em {
+    color: #6c757d;
+}
+
+/* Ingredient Tag Styling */
+.ingredient-tag {
+    display: inline-block;
+    background-color: #e9ecef;
+    padding: 0.25rem 0.5rem;
+    margin-right: 0.5rem;
+    margin-bottom: 0.5rem;
+    border-radius: 0.25rem;
+    transition: background-color 0.3s ease;
+}
+
+/* Card Styling for Recipe Generator */
+.recipe-generator-card {
+    border-radius: 12px !important;
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15) !important;
+    background-color: #ffffff !important;
+    transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out !important;
+    margin-bottom: 1.5rem;
+}
+
+.recipe-generator-card:hover {
+    transform: translateY(-5px) !important;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2) !important;
+}
+
+/* Card Header for Recipe Generator */
+.recipe-generator-card .card-header {
+    background-color: #009688 !important;
+    color: white !important;
+    padding: 1.25rem !important;
+    font-weight: 500 !important;
+    border-bottom: none !important;
+}
+
+/* Card Body for Recipe Generator */
+.recipe-generator-card .card-body {
+    background-color: rgba(255, 255, 255, 0.9) !important;
+    padding: 1.5rem !important;
+}
+
+/* Recipe Generator Buttons */
+.recipe-generator-btn {
+    background-color: #009688 !important;
+    color: white !important;
+    border: none !important;
+    border-radius: 6px !important;
+    padding: 0.6rem 1.2rem !important;
+    font-weight: 500 !important;
+    transition: background-color 0.3s ease, transform 0.2s ease !important;
+}
+
+.recipe-generator-btn:hover {
+    background-color: #4caf50 !important;
+    transform: translateY(-2px) !important;
+    box-shadow: 0 4px 8px rgba(0, 150, 136, 0.2) !important;
+}
+
+.recipe-generator-btn.generate-btn {
+    background-color: #4caf50 !important;
+    font-size: 1.1rem !important;
+}
+
+.recipe-generator-btn.generate-btn:hover {
+    background-color: #43a047 !important;
+}
+
+/* Form Elements */
+.recipe-generator-form .form-control,
+.recipe-generator-form .form-select {
+    border: 1px solid rgba(0, 150, 136, 0.3) !important;
+    border-radius: 6px !important;
+    padding: 0.6rem 0.8rem !important;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease !important;
+}
+
+.recipe-generator-form .form-control:focus,
+.recipe-generator-form .form-select:focus {
+    border-color: #009688 !important;
+    box-shadow: 0 0 0 0.25rem rgba(0, 150, 136, 0.25) !important;
+}
+
+.recipe-generator-form .form-label {
+    color: #009688 !important;
+    font-weight: 500 !important;
+    margin-bottom: 0.5rem !important;
+}
+
+/* Ingredients List */
+.ingredients-list {
+    margin-top: 1.5rem !important;
+}
+
+.ingredients-list h4 {
+    color: #009688 !important;
+    font-size: 1.1rem !important;
+    margin-bottom: 0.75rem !important;
+}
+
+.ingredients-list .list-group-item {
+    background-color: rgba(255, 255, 255, 0.8) !important;
+    border-color: rgba(0, 150, 136, 0.2) !important;
+    transition: background-color 0.3s ease !important;
+}
+
+/* Loading Spinner */
+.recipe-loading-spinner {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
+    min-height: 200px !important;
+}
+
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+    100% { transform: scale(1); }
+}
+
+.loading-pulse {
+    animation: pulse 1.5s infinite !important;
+}
+
+/* Save Recipe Button */
+.save-recipe-btn {
+    background-color: #009688 !important;
+    color: white !important;
+    border: none !important;
+    padding: 0.6rem 1.2rem !important;
+    border-radius: 6px !important;
+    margin-top: 1.5rem !important;
+    transition: background-color 0.3s ease, transform 0.2s ease !important;
+}
+
+.save-recipe-btn:hover {
+    background-color: #00796b !important;
+    transform: translateY(-2px) !important;
+}
+
+/* Feature highlight styles */
+.feature-highlight {
+    background-color: rgba(255, 255, 255, 0.9);
+    border-radius: 12px;
+    padding: 2rem;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+    position: relative;
+    overflow: hidden;
+    margin-top: 1.5rem;
+    border: 1px solid rgba(0, 150, 136, 0.2);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    z-index: 1; /* Ensure proper stacking context */
+}
+
+.feature-highlight:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+}
+
+.feature-title {
+    color: #009688;
+    font-weight: bold;
+    margin-bottom: 1rem;
+    position: relative;
+}
+
+.feature-description {
+    font-size: 1.1rem;
+    margin-bottom: 1.5rem;
+    color: #444;
+}
+
+.feature-benefits {
+    list-style: none;
+    padding-left: 0;
+    margin-bottom: 1.5rem;
+}
+
+.feature-benefits li {
+    margin-bottom: 0.75rem;
+    display: flex;
+    align-items: center;
+}
+
+.feature-benefits i {
+    color: #4CAF50;
+    margin-right: 0.5rem;
+    font-size: 1.2rem;
+}
+
+.feature-btn {
+    background-color: #009688;
+    color: white;
+    border: none;
+    padding: 0.75rem 1.5rem;
+    font-size: 1.1rem;
+    border-radius: 50px;
+    transition: all 0.3s ease;
+    font-weight: 500;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.feature-btn:hover {
+    background-color: #4CAF50;
+    transform: scale(1.05);
+    color: white;
+    box-shadow: 0 5px 15px rgba(0, 150, 136, 0.3);
+}
+
+.feature-image-container {
+    position: relative;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+    height: 250px;
+}
+
+/* Image styles */
+.feature-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 10px;
+    transition: transform 0.5s ease;
+}
+
+.feature-image-container:hover .feature-image {
+    transform: scale(1.05);
+}
+
+.feature-badge {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background-color: #FF5722;
+    color: white;
+    padding: 0.25rem 0.75rem;
+    border-radius: 50px;
+    font-weight: bold;
+    font-size: 0.85rem;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+}
+
+/* Fix for the "Surprise Me" button */
+.surprise-btn-adjusted {
+    position: fixed;
+    bottom: 140px !important; /* Moved higher to avoid overlap */
+    right: 20px;
+    z-index: 50; /* Lower z-index than the feature box */
+}
+
+/* Dark Mode Styles */
+.dark-theme .recipe-generator-card {
+    background-color: #1a1a1a !important;
+}
+
+.dark-theme .recipe-generator-card .card-header {
+    background-color: #00796b !important;
+}
+
+.dark-theme .recipe-generator-card .card-body {
+    background-color: #242424 !important;
+    color: #e0e0e0 !important;
+}
+
+.dark-theme .ingredients-list h4,
+.dark-theme .recipe-generator-form .form-label {
+    color: #4db6ac !important;
+}
+
+.dark-theme .recipe-content h1,
+.dark-theme .recipe-content h2,
+.dark-theme .recipe-content h3 {
+    color: #4db6ac !important;
+}
+
+.dark-theme .recipe-content strong {
+    color: #4db6ac !important;
+}
+
+.dark-theme .ingredients-list .list-group-item {
+    background-color: #333 !important;
+    border-color: rgba(0, 150, 136, 0.5) !important;
+    color: #e0e0e0 !important;
+}
+
+.dark-theme .recipe-generator-form .form-control,
+.dark-theme .recipe-generator-form .form-select {
+    background-color: #333 !important;
+    border-color: #00796b !important;
+    color: #ffffff !important;
+}
+
+.dark-theme .recipe-generator-form .form-control:focus,
+.dark-theme .recipe-generator-form .form-select:focus {
+    background-color: #404040 !important;
+    border-color: #009688 !important;
+    box-shadow: 0 0 0 0.25rem rgba(0, 150, 136, 0.25) !important;
+}
+
+.dark-theme .recipe-generator-form .form-control::placeholder {
+    color: #888 !important;
+}
+
+.dark-theme .ingredient-tag {
+    background-color: #333 !important;
+    color: #e0e0e0 !important;
+}
+
+/* Recipe Result Output in Dark Mode */
+.dark-theme .recipe-result {
+    color: #e0e0e0 !important;
+}
+
+/* Dark mode styles for feature highlight */
+.dark-theme .feature-highlight {
+    background-color: #1a1a1a;
+    border-color: rgba(0, 150, 136, 0.4);
+}
+
+.dark-theme .feature-title {
+    color: #4db6ac;
+}
+
+.dark-theme .feature-description {
+    color: #e0e0e0;
+}
+
+.dark-theme .feature-benefits li {
+    color: #e0e0e0;
+}
+
+.dark-theme .feature-btn {
+    background-color: #00796b;
+}
+
+.dark-theme .feature-btn:hover {
+    background-color: #00897b;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+    .recipe-generator-card {
+        margin-bottom: 1rem !important;
+    }
+    
+    .recipe-generator-card .card-header {
+        padding: 1rem !important;
+    }
+    
+    .recipe-generator-card .card-body {
+        padding: 1.25rem !important;
+    }
+    
+    .recipe-generator-btn {
+        font-size: 0.9rem !important;
+        padding: 0.5rem 1rem !important;
+    }
+    
+    .feature-highlight {
+        padding: 1.5rem;
+    }
+    
+    .feature-image-container {
+        margin-top: 1.5rem;
+        height: 200px;
+    }
+    
+    .feature-btn {
+        width: 100%;
+        justify-content: center;
+    }
+    
+    .surprise-btn-adjusted {
+        bottom: 160px !important; /* Even higher on mobile */
+    }
+}
+
+/* Action Bar Styles */
+.action-bar {
+    background-color: rgba(255, 255, 255, 0.9);
+    border-radius: 12px;
+    padding: 1.25rem;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    border: 1px solid rgba(0, 150, 136, 0.2);
+    margin-top: 1rem;
+    margin-bottom: 1rem;
+}
+
+body.dark-theme .action-bar {
+    background-color: #1a1a1a;
+    border-color: rgba(0, 150, 136, 0.4);
+}
+
+/* Equal height feature boxes */
+.feature-highlight {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+.feature-highlight .row {
+    flex: 1;
+}
+
+/* Ingredient Search Section Styles */
+.ingredient-search-form .form-control {
+    border: 1px solid rgba(0, 150, 136, 0.3);
+    border-radius: 6px 0 0 6px;
+    padding: 0.6rem 1rem;
+    font-size: 1rem;
+    height: 46px;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.ingredient-search-form .form-control:focus {
+    border-color: #009688;
+    box-shadow: 0 0 0 0.25rem rgba(0, 150, 136, 0.25);
+}
+
+.ingredient-search-form .feature-btn {
+    border-radius: 0 6px 6px 0;
+    height: 46px;
+    padding-left: 1.5rem;
+    padding-right: 1.5rem;
+}
+
+.ingredient-search-form .form-text {
+    color: #6c757d;
+    font-size: 0.875rem;
+}
+
+.outline-btn {
+    background-color: transparent;
+    color: #009688;
+    border: 1px solid #009688;
+    padding: 0.6rem 1.2rem;
+    border-radius: 6px;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.outline-btn:hover {
+    background-color: rgba(0, 150, 136, 0.1);
+    color: #00796b;
+    transform: translateY(-2px);
+}
+
+.outline-btn i {
+    font-size: 0.9rem;
+}
+
+/* Improve filter buttons and layout */
+.filter-form {
+    margin-bottom: 0.5rem;
+}
+
+.filter-container {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
+.filter-btn {
+    height: 38px;
+    padding: 0 0.75rem;
+    white-space: nowrap;
+}
+
+/* Dark Mode Adjustments */
+.dark-theme .ingredient-search-form .form-control {
+    background-color: #333;
+    border-color: #00796b;
+    color: #ffffff;
+}
+
+.dark-theme .ingredient-search-form .form-control:focus {
+    background-color: #404040;
+    border-color: #009688;
+    box-shadow: 0 0 0 0.25rem rgba(0, 150, 136, 0.25);
+}
+
+.dark-theme .ingredient-search-form .form-text {
+    color: #adb5bd;
+}
+
+.dark-theme .outline-btn {
+    color: #4db6ac;
+    border-color: #4db6ac;
+}
+
+.dark-theme .outline-btn:hover {
+    background-color: rgba(0, 150, 136, 0.2);
+    color: #80cbc4;
+}
+
+/* Responsive adjustments */
+@media (max-width: 991.98px) {
+    .feature-image-container {
+        height: 180px;
+    }
+}
+
+@media (max-width: 767.98px) {
+    .feature-highlight {
+        padding: 1.5rem;
+    }
+    
+    .feature-image-container {
+        margin-top: 1rem;
+        height: 160px;
+    }
+}
+/* Fix for ingredient search image size */
+.feature-image-fixed {
+    height: 250px;
+    width: 100%;
+}
+
+.feature-image-fixed img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+/* Add spacing to balance boxes */
+@media (min-width: 768px) {
+    .feature-highlight .row {
+        min-height: 300px;
+    }
+}
+
+/* Make sure both feature boxes are the same height */
+@media (min-width: 992px) {
+    .row > .col-lg-6 {
+        display: flex;
+    }
+    
+    .feature-highlight {
+        width: 100%;
+    }
+}
