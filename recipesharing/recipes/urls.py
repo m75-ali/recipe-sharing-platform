@@ -1,6 +1,8 @@
 from django.urls import path
 from django.contrib.auth import views as auth_views
 from . import views  # Import views from the current app
+# Add this at the top of your urls.py file with your other imports
+from .views import save_recipe_api
 
 # Define the URL patterns for the recipes app
 urlpatterns = [
@@ -37,4 +39,7 @@ urlpatterns = [
     # Recipe Generator URLs
     path('ai-recipe-generator/', views.recipe_generator_page, name='recipe_generator_page'),
     path('api/generate-recipe/', views.generate_recipe_api, name='generate_recipe_api'),
+    path('save-recipe-api/', views.save_recipe_api, name='save_recipe_api'),
+    path('recipes/<int:recipe_id>/', views.recipe_detail, name='recipe_detail'),
+
 ]

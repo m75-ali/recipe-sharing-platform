@@ -172,6 +172,40 @@
             });
         }
         
+        // Function to remove introductory text from AI-generated recipes
+        function removeIntroText(recipeText) {
+            // Common intro phrases that should be removed
+            const introPatterns = [
+                /^What an interesting combination!.*?(?=\n)/i,
+                /^Here['']s a recipe.*?(?=\n)/i,
+                /^I['']ve created.*?(?=\n)/i,
+                /^I['']ll create.*?(?=\n)/i,
+                /^Let me create.*?(?=\n)/i,
+                /^Let['']s create.*?(?=\n)/i, 
+                /^You can make.*?(?=\n)/i,
+                /^This recipe.*?(?=\n)/i,
+                /^Here['']s how.*?(?=\n)/i,
+                /^Using these ingredients.*?(?=\n)/i,
+                /^With these ingredients.*?(?=\n)/i,
+                /^Based on your ingredients.*?(?=\n)/i,
+                /^Absolutely!.*?(?=\n)/i,
+                /^Of course!.*?(?=\n)/i,
+                /^Certainly!.*?(?=\n)/i,
+                /^Sure!.*?(?=\n)/i
+            ];
+            
+            // Remove intro text from the beginning of the recipe
+            let cleanedText = recipeText;
+            for (const pattern of introPatterns) {
+                cleanedText = cleanedText.replace(pattern, '');
+            }
+            
+            // Also remove any leading empty lines after intro text is removed
+            cleanedText = cleanedText.replace(/^\s*\n+/g, '');
+            
+            return cleanedText;
+        }
+        
         // Helper function to format recipe text
         function formatRecipe(recipeText) {
             // Detect if recipe is already in a structured format or free text
@@ -269,8 +303,11 @@
                 // Process the response after showing the final message
                 setTimeout(() => {
                     if (response.ok) {
+                        // Remove introductory text from the recipe
+                        const cleanedRecipeText = removeIntroText(data.recipe);
+                        
                         // Format the recipe with better styling
-                        const formattedRecipe = formatRecipe(data.recipe);
+                        const formattedRecipe = formatRecipe(cleanedRecipeText);
                         
                         // Create recipe card with styled content
                         recipeContainer.innerHTML = `
@@ -286,9 +323,125 @@
                         const saveButton = document.createElement('button');
                         saveButton.className = 'btn save-recipe-btn';
                         saveButton.innerHTML = '<i class="fas fa-save"></i> Save Recipe';
-                        saveButton.addEventListener('click', function() {
-                            alert('This feature will be implemented soon!');
-                        });
+                        // Update the save button event listener - make sure the URL is correct
+saveButton.addEventListener('click', async function() {
+    try {
+        // Show saving indicator
+        saveButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
+        saveButton.disabled = true;
+        
+        // Extract recipe title from the formatted recipe
+        let recipeTitle = 'Recipe with ' + ingredients.join(', ');
+        const titleElement = recipeContainer.querySelector('.recipe-title');
+        if (titleElement) {
+            recipeTitle = titleElement.textContent.trim();
+        }
+        
+        // Get the recipe content - either formatted HTML or raw text
+        const recipeCard = recipeContainer.querySelector('.recipe-content-card');
+        const recipeContent = recipeCard ? recipeCard.innerHTML : recipeContainer.innerHTML;
+        
+        // Process recipe content to extract readable text for database
+        // This converts HTML to plain text while preserving structure
+        const tempDiv = document.createElement('div');
+        tempDiv.innerHTML = recipeContent;
+        let rawText = tempDiv.innerText || tempDiv.textContent;
+        
+        // Ensure any intro text is removed from the raw text as well
+        rawText = removeIntroText(rawText);
+        
+        // Send save request to the API
+        const apiUrl = '{% url "save_recipe_api" %}';
+        const response = await fetch(apiUrl, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest',
+                'X-CSRFToken': getCookie('csrftoken')
+            },
+            body: JSON.stringify({
+                title: recipeTitle,
+                content: rawText,
+                ingredients: ingredients,
+                dietary_preference: dietaryPreferences.value
+            }),
+        });
+        
+        const data = await response.json();
+        
+        if (response.ok) {
+            // Show success message
+            saveButton.classList.remove('save-recipe-btn');
+            saveButton.classList.add('btn-success');
+            saveButton.innerHTML = '<i class="fas fa-check"></i> Saved';
+            
+            // Add link to view the saved recipe - FIXED URL PATH
+            if (data.recipe_id) {
+                const viewLink = document.createElement('a');
+                viewLink.href = `/recipes/${data.recipe_id}/`;  // IMPORTANT: Use /recipes/ not /recipe/
+                viewLink.className = 'btn view-recipe-btn ms-2';
+                viewLink.innerHTML = '<i class="fas fa-eye"></i> View Saved Recipe';
+                saveButton.parentNode.appendChild(viewLink);
+            }
+            
+            // Keep button disabled to prevent multiple saves of same recipe
+        } else {
+            // If not logged in, show a special message
+            if (response.status === 403) {
+                throw new Error('Please log in to save recipes');
+            } else {
+                throw new Error(data.error || 'Failed to save recipe');
+            }
+        }
+    } catch (error) {
+        console.error("Error saving recipe:", error);
+        
+        // Handle authentication errors specially
+        if (error.message.includes('log in')) {
+            saveButton.innerHTML = '<i class="fas fa-user"></i> Login Required';
+            
+            // Create login link
+            const loginLink = document.createElement('a');
+            loginLink.href = '/accounts/login/?next=/recipe-generator/';
+            loginLink.className = 'btn btn-primary ms-2';
+            loginLink.innerHTML = 'Login to Save';
+            saveButton.parentNode.appendChild(loginLink);
+        } else {
+            // General error handling
+            saveButton.innerHTML = '<i class="fas fa-exclamation-triangle"></i> Error';
+            saveButton.classList.add('btn-danger');
+            
+            // Show error message
+            const errorToast = document.createElement('div');
+            errorToast.className = 'alert alert-danger mt-2';
+            errorToast.textContent = `Failed to save: ${error.message}`;
+            saveButton.parentNode.appendChild(errorToast);
+            
+            // Reset button after a delay
+            setTimeout(() => {
+                saveButton.innerHTML = '<i class="fas fa-save"></i> Try Again';
+                saveButton.disabled = false;
+                saveButton.classList.remove('btn-danger');
+            }, 3000);
+        }
+    }
+});
+
+// Helper function to get CSRF token from cookies
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
                         
                         // Print button
                         const printButton = document.createElement('button');
