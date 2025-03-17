@@ -129,13 +129,64 @@ def recipe_detail(request, recipe_id):
             ingredients = [ingredient.strip() for ingredient in recipe.ingredients.split(',') if ingredient.strip()]
     else:
         ingredients = []  # In case the ingredients are empty
-        
-        
-    # Process instructions
+    
+    # Process instructions - more thorough cleaning
     if recipe.instructions:
-        # Split by lines and remove pre-existing numbering like "1.", "2."
-        raw_steps = recipe.instructions.splitlines()
-        instructions = [re.sub(r'^\d+\.\s*|\d+\.\s*$', '', step).strip() for step in raw_steps]
+        # Use the parser to clean the instructions if there's any metadata
+        parsed_data = parse_ai_recipe_content(recipe.instructions)
+        clean_instructions = parsed_data['clean_content']
+        
+        # Find the instructions section - look for a line with "Instructions:" or similar
+        lines = clean_instructions.splitlines()
+        instruction_start_idx = -1
+        
+        for i, line in enumerate(lines):
+            if re.search(r'^\*?\*?Instructions:?\*?\*?$|^\*?\*?Steps:?\*?\*?$|^\*?\*?Directions:?\*?\*?$', 
+                        line.strip(), re.IGNORECASE):
+                instruction_start_idx = i + 1  # Start after this line
+                break
+        
+        # If we can't find an explicit "Instructions" header, try to find where ingredients end
+        if instruction_start_idx == -1:
+            for i, line in enumerate(lines):
+                if re.search(r'^\*?\*?Ingredients:?\*?\*?$', line.strip(), re.IGNORECASE):
+                    # Find where ingredients section ends
+                    for j in range(i+1, len(lines)):
+                        # If line is empty or looks like a header, it might be the end of ingredients
+                        if not lines[j].strip() or re.search(r'^\*?\*?.*:\*?\*?$', lines[j].strip()):
+                            instruction_start_idx = j
+                            # If it's an empty line, move to the next line
+                            if not lines[j].strip():
+                                instruction_start_idx += 1
+                            break
+        
+        # If we still can't find a clear start, use the entire content
+        if instruction_start_idx == -1 or instruction_start_idx >= len(lines):
+            instruction_start_idx = 0
+        
+        # Extract just the instruction steps
+        instruction_lines = lines[instruction_start_idx:]
+        instructions = []
+        
+        for line in instruction_lines:
+            line = line.strip()
+            
+            # Skip empty lines, section headers, or ingredient lines
+            if not line or re.search(r'^\*?\*?.*:\*?\*?$', line) or "Ingredient" in line:
+                continue
+            
+            # Completely remove any numbering, including numbers at the beginning
+            clean_line = re.sub(r'^\d+[\.\)\-]?\s*', '', line)
+            
+            # Remove "Step X:" patterns
+            clean_line = re.sub(r'^Step\s+\d+:?\s*', '', clean_line, re.IGNORECASE)
+            
+            # Skip if the line became empty or is just a single character
+            if len(clean_line) <= 1:
+                continue
+                
+            # Add to instructions if not empty
+            instructions.append(clean_line)
     else:
         instructions = []
 
@@ -390,200 +441,248 @@ def save_recipe_api(request):
 
 def parse_ai_recipe_content(content):
     """
-    Parse AI-generated recipe content to extract structured information
+    Parse AI-generated recipe content and extract metadata while removing it from the final display
     
     Args:
         content (str): The raw AI-generated recipe text
         
     Returns:
-        dict: Dictionary with title, description, instructions
+        dict: Dictionary with title, clean content, category, and allergens
     """
     import re
     
-    lines = [line.strip() for line in content.split('\n') if line.strip()]
+    # Initialize results dictionary
     result = {
         'title': '',
-        'description': '',
-        'instructions': content  # Default to full content
+        'category': 'Other',
+        'allergens': [],
+        'prep_time': '',
+        'cook_time': '',
+        'difficulty': '',
+        'servings': '',
+        'clean_content': ''
     }
     
-    # If we have no lines, return default values
-    if not lines:
-        result['title'] = "Delicious Recipe"
-        return result
+    # Extract title - look for **TITLE** format
+    title_match = re.search(r'\*\*(.*?)\*\*', content)
+    if title_match:
+        result['title'] = title_match.group(1).strip()
     
-    # First, check if the first line is an introduction
-    intro_patterns = [
-        r"what an interesting combination", 
-        r"here'?s a recipe", 
-        r"i've created", 
-        r"i'll create",
-        r"let me create",
-        r"let's create",
-        r"you can make",
-        r"this recipe",
-        r"here'?s how",
-        r"delicious way",
-        r"brings these"
-    ]
+    # Find metadata section boundaries
+    metadata_pattern = re.compile(r'\*\*METADATA\*\*(.*?)(?=\*\*Ingredients|\*\*INGREDIENTS|\Z)', re.DOTALL | re.IGNORECASE)
+    metadata_match = metadata_pattern.search(content)
     
-    is_first_line_intro = any(re.search(pattern, lines[0].lower()) for pattern in intro_patterns)
-    
-    # If the first line is an introduction, look for a title in the next few lines
-    if is_first_line_intro and len(lines) > 1:
-        # The best candidate for a title is often the line immediately after the intro
-        title_candidate = lines[1]
+    if metadata_match:
+        # We found a clearly marked metadata section
+        metadata_text = metadata_match.group(1).strip()
+        metadata_start = content.find('**METADATA**')
+        metadata_end = metadata_start + len('**METADATA**') + len(metadata_text)
         
-        # Check if this looks like a valid title (not too long, not a regular sentence)
-        if len(title_candidate) < 80 and not title_candidate.endswith('.'):
-            result['title'] = title_candidate
-        else:
-            # If the second line doesn't look like a title, look at the next few lines
-            for i in range(2, min(5, len(lines))):
-                line = lines[i]
-                # Stop if we hit a section header
-                if any(section in line.lower() for section in ['ingredients:', 'instructions:', 'preparation:']):
-                    break
-                    
-                # Check if this line looks like a title
-                if len(line) < 80 and not line.endswith('.') and not line.lower().startswith('this'):
-                    result['title'] = line
-                    break
+        # Extract metadata fields
+        category_match = re.search(r'Category:\s*(.*?)(?:\n|$)', metadata_text, re.IGNORECASE)
+        if category_match:
+            result['category'] = category_match.group(1).strip()
+        
+        allergens_match = re.search(r'Allergens:\s*(.*?)(?:\n|$)', metadata_text, re.IGNORECASE)
+        if allergens_match:
+            allergens_text = allergens_match.group(1).strip()
+            if allergens_text.lower() not in ['none', 'n/a']:
+                allergens = re.split(r',|\sand\s|;', allergens_text)
+                result['allergens'] = [a.strip() for a in allergens if a.strip()]
+        
+        prep_time_match = re.search(r'Prep Time:\s*(.*?)(?:\n|$)', metadata_text, re.IGNORECASE)
+        if prep_time_match:
+            result['prep_time'] = prep_time_match.group(1).strip()
             
-            # If we still don't have a title, use a fallback
-            if not result['title']:
-                # Create a title from ingredients if intro mentions them
-                if "ingredients" in lines[0].lower():
-                    result['title'] = "Recipe with " + ", ".join(lines[0].lower().split("ingredients")[1].strip().split(", ")[:3])
-                else:
-                    # Use a shortened version of the intro as title
-                    words = lines[0].split()
-                    if len(words) > 5:
-                        result['title'] = " ".join(words[:5]) + "..."
-                    else:
-                        result['title'] = "Delicious Recipe"
+        cook_time_match = re.search(r'Cook Time:\s*(.*?)(?:\n|$)', metadata_text, re.IGNORECASE)
+        if cook_time_match:
+            result['cook_time'] = cook_time_match.group(1).strip()
+            
+        difficulty_match = re.search(r'Difficulty:\s*(.*?)(?:\n|$)', metadata_text, re.IGNORECASE)
+        if difficulty_match:
+            result['difficulty'] = difficulty_match.group(1).strip()
+            
+        servings_match = re.search(r'Servings:\s*(.*?)(?:\n|$)', metadata_text, re.IGNORECASE)
+        if servings_match:
+            result['servings'] = servings_match.group(1).strip()
+        
+        # Remove the entire metadata section from content
+        content_before = content[:metadata_start].strip()
+        content_after = content[metadata_end:].strip()
+        
+        # Combine parts ensuring proper spacing
+        if content_before and content_after:
+            result['clean_content'] = content_before + "\n\n" + content_after
+        elif content_after:
+            result['clean_content'] = content_after
+        else:
+            result['clean_content'] = content_before
     else:
-        # If the first line is not an intro, it might be the title
-        if len(lines[0]) < 80 and not lines[0].endswith('.'):
-            result['title'] = lines[0]
+        # No clearly marked metadata section, look for individual metadata lines
+        lines = content.split('\n')
+        metadata_lines = []
+        
+        for i, line in enumerate(lines):
+            # Check for common metadata patterns
+            if re.search(r'^Category:', line, re.IGNORECASE):
+                metadata_lines.append(i)
+                category_value = line.split(':', 1)[1].strip()
+                result['category'] = category_value
+            elif re.search(r'^Allergens:', line, re.IGNORECASE):
+                metadata_lines.append(i)
+                allergens_text = line.split(':', 1)[1].strip()
+                if allergens_text.lower() not in ['none', 'n/a']:
+                    allergens = re.split(r',|\sand\s|;', allergens_text)
+                    result['allergens'] = [a.strip() for a in allergens if a.strip()]
+            elif re.search(r'^Prep Time:', line, re.IGNORECASE):
+                metadata_lines.append(i)
+                result['prep_time'] = line.split(':', 1)[1].strip()
+            elif re.search(r'^Cook Time:', line, re.IGNORECASE):
+                metadata_lines.append(i)
+                result['cook_time'] = line.split(':', 1)[1].strip()
+            elif re.search(r'^Difficulty:', line, re.IGNORECASE):
+                metadata_lines.append(i)
+                result['difficulty'] = line.split(':', 1)[1].strip()
+            elif re.search(r'^Servings:', line, re.IGNORECASE):
+                metadata_lines.append(i)
+                result['servings'] = line.split(':', 1)[1].strip()
+        
+        # Remove metadata lines from content
+        if metadata_lines:
+            clean_lines = [line for i, line in enumerate(lines) if i not in metadata_lines]
+            result['clean_content'] = '\n'.join(clean_lines)
         else:
-            # Look for a title in the next few lines
-            title_found = False
-            for i in range(1, min(5, len(lines))):
-                line = lines[i]
-                # Stop if we hit a section header
-                if any(section in line.lower() for section in ['ingredients:', 'instructions:', 'preparation:']):
-                    break
-                    
-                # Check if this line looks like a title
-                if len(line) < 80 and not line.endswith('.'):
-                    result['title'] = line
-                    title_found = True
-                    break
-            
-            if not title_found:
-                # We couldn't find a good title, use the first line (shortened if needed)
-                if len(lines[0]) > 50:
-                    result['title'] = " ".join(lines[0].split()[:7]) + "..."
-                else:
-                    result['title'] = lines[0]
+            # If no metadata found, use original content
+            result['clean_content'] = content
     
-    # Clean up the title
-    # Remove any leading indicators like "Recipe: "
-    result['title'] = re.sub(r'^(recipe|dish|meal):\s*', '', result['title'], flags=re.IGNORECASE)
-    # Remove any trailing punctuation
-    result['title'] = re.sub(r'[.:!?]+$', '', result['title'])
-    
-    # Rest of the function for description and instructions stays the same
-    # Try to identify description (usually a paragraph after the title line)
-    description_lines = []
-    description_started = False
-    instruction_markers = ['ingredients:', 'instructions:', 'steps:', 'directions:']
-    
-    title_line_idx = -1
-    for i, line in enumerate(lines):
-        if line == result['title']:
-            title_line_idx = i
-            break
-    
-    # Start looking for description after the title line
-    start_idx = title_line_idx + 1 if title_line_idx >= 0 else 1
-    
-    for i in range(start_idx, len(lines)):
-        line_lower = lines[i].lower()
-        
-        # Stop collecting description if we hit a section header
-        if any(marker in line_lower for pattern in instruction_markers for marker in [pattern, pattern.title()]):
-            break
-            
-        # Start collecting description
-        if not description_started:
-            description_started = True
-            
-        # Collect description lines
-        if description_started:
-            description_lines.append(lines[i])
-            # Stop at empty line or if line is too short to be part of description
-            if not lines[i] or len(lines[i]) < 5:
-                break
-    
-    if description_lines:
-        result['description'] = ' '.join(description_lines)
-    
-    # Try to extract just the instructions part
-    instructions_part = []
-    ingredients_started = False
-    instructions_started = False
-    tips_started = False
-    
-    for line in content.split('\n'):
-        line_lower = line.lower().strip()
-        
-        # Check for ingredients section
-        if not ingredients_started and any(marker in line_lower for marker in ['ingredients:', 'ingredients']):
-            ingredients_started = True
-            instructions_part.append(line)
-            continue
-            
-        # Check for instructions section
-        if ingredients_started and not instructions_started and any(marker in line_lower for marker in ['instructions:', 'steps:', 'directions:', 'method:', 'instructions']):
-            instructions_started = True
-            instructions_part.append(line)
-            continue
-            
-        # Check for tips section
-        if instructions_started and any(marker in line_lower for marker in ['tips:', 'variations:', 'tips and variations']):
-            tips_started = True
-            instructions_part.append("Tips and Variations:")
-            continue
-        
-        # Format tip lines without bullet points
-        if tips_started:
-            if line.strip() and line.strip()[0] in ['•', '*', '-']:
-                tip_text = line.strip()[1:].strip()
-                instructions_part.append(tip_text)
-            elif line.strip():
-                instructions_part.append(line.strip())
-            continue
-            
-        # Add line to instructions if in relevant section
-        if ingredients_started:
-            instructions_part.append(line)
-    
-    # If we found instructions section, use it
-    if instructions_part:
-        result['instructions'] = '\n'.join(instructions_part)
+    # If still no clean content, use original
+    if not result['clean_content']:
+        result['clean_content'] = content
     
     return result
+    
 
-# Then, the complete save_recipe_api function
+def map_category_to_db_category(category_name):
+    """
+    Maps an AI-generated category to one of the fixed categories in the database
+    
+    Args:
+        category_name (str): Category name from the AI
+        
+    Returns:
+        str: Mapped category name matching one in the database
+    """
+    category_name = category_name.lower().strip()
+    
+    # Direct matches for common categories
+    category_mapping = {
+        'breakfast': 'Breakfast',
+        'brunch': 'Breakfast',
+        'lunch': 'Lunch',
+        'dinner': 'Dinner',
+        'main': 'Dinner',
+        'main course': 'Dinner',
+        'main dish': 'Dinner',
+        'dessert': 'Dessert',
+        'appetizer': 'Appetizer',
+        'starter': 'Appetizer',
+        'snack': 'Snack',
+        'side': 'Side',
+        'side dish': 'Side'
+    }
+    
+    # Check for direct matches
+    for key, value in category_mapping.items():
+        if key == category_name:
+            return value
+    
+    # Check for partial matches
+    for key, value in category_mapping.items():
+        if key in category_name:
+            return value
+    
+    # Default to 'Other' if no match
+    return 'Other'
+
+def map_allergens_to_db_allergens(allergens_list):
+    """
+    Maps AI-identified allergens to database allergen names
+    
+    Args:
+        allergens_list (list): List of allergen strings from AI
+        
+    Returns:
+        list: List of standardized allergen names
+    """
+    # Common allergen mappings to standardized names
+    allergen_mapping = {
+        'milk': 'Milk',
+        'dairy': 'Milk',
+        'lactose': 'Milk',
+        
+        'eggs': 'Eggs',
+        'egg': 'Eggs',
+        
+        'fish': 'Fish',
+        
+        'shellfish': 'Shellfish',
+        'shrimp': 'Shellfish',
+        'crab': 'Shellfish',
+        'lobster': 'Shellfish',
+        
+        'tree nuts': 'Tree nuts',
+        'nuts': 'Tree nuts',
+        'almonds': 'Tree nuts',
+        'walnuts': 'Tree nuts',
+        'cashews': 'Tree nuts',
+        'pecans': 'Tree nuts',
+        'pistachios': 'Tree nuts',
+        
+        'peanuts': 'Peanuts',
+        'peanut': 'Peanuts',
+        
+        'wheat': 'Wheat',
+        'gluten': 'Wheat',
+        
+        'soybeans': 'Soybeans',
+        'soy': 'Soybeans',
+        
+        'sesame': 'Sesame',
+        'sesame seeds': 'Sesame'
+    }
+    
+    standardized_allergens = []
+    
+    for allergen in allergens_list:
+        allergen_lower = allergen.lower().strip()
+        matched = False
+        
+        # Check exact match first
+        if allergen_lower in allergen_mapping:
+            standardized_allergens.append(allergen_mapping[allergen_lower])
+            matched = True
+        else:
+            # Check for partial matches
+            for key, value in allergen_mapping.items():
+                if key in allergen_lower:
+                    standardized_allergens.append(value)
+                    matched = True
+                    break
+        
+        # If no match found, use original with first letter capitalized
+        if not matched and allergen.strip():
+            standardized_allergens.append(allergen.strip().capitalize())
+    
+    # Remove duplicates and return
+    return list(set(standardized_allergens))
+
+
 @login_required
 @csrf_exempt
 def save_recipe_api(request):
-    """API endpoint to save a generated recipe to the database"""
     if request.method == 'POST':
         try:
-            # Parse the JSON data from the request
+            # Parse request data
             data = json.loads(request.body)
             
             # Extract recipe data
@@ -592,133 +691,92 @@ def save_recipe_api(request):
             ingredients_list = data.get('ingredients', [])
             dietary_preference = data.get('dietary_preference', '')
             
-            # Parse the AI-generated content to extract structured information
-            parsed_content = parse_ai_recipe_content(recipe_content)
+            # Parse metadata and clean content
+            parsed_data = parse_ai_recipe_content(recipe_content)
+            if parsed_data['title']:
+                recipe_title = parsed_data['title']
             
-            # Use parsed content or fallback to provided data
-            if parsed_content['title']:
-                recipe_title = parsed_content['title']
-                
-            description = parsed_content['description']
-            if not description:
-                description = f"AI-generated recipe using {', '.join(ingredients_list[:3])}"
-                if len(ingredients_list) > 3:
-                    description += f" and {len(ingredients_list) - 3} more ingredients"
+            # Use clean content (metadata removed)
+            clean_content = parsed_data['clean_content']
             
-            # Use the parsed instructions or the full content as fallback
-            instructions = parsed_content['instructions']
+            # Basic description
+            description = f"Recipe using {', '.join(ingredients_list[:3])}"
+            if len(ingredients_list) > 3:
+                description += f" and more"
             
-            # Convert ingredients list to newline-separated string as expected by your model
-            # Make sure each ingredient is on its own line
-            # Replace this part in your save_recipe_api function:
-
-            # Convert ingredients list to newline-separated string as expected by your model
-            # Make sure each ingredient is on its own line
-            ingredients = ""
-            if ingredients_list:
-                # First check if ingredients is a proper list of separate items
-                if len(ingredients_list) > 1:
-                    # Add each ingredient on its own line
-                    ingredients = "\n".join(ingredient.strip() for ingredient in ingredients_list if ingredient.strip())
-                else:
-                    # If there's only one item, it might be a space-separated or comma-separated string
-                    # Try to split it properly
-                    single_item = ingredients_list[0] if ingredients_list else ""
-                    if "," in single_item:
-                        # Split by commas
-                        split_ingredients = [i.strip() for i in single_item.split(",") if i.strip()]
-                        ingredients = "\n".join(split_ingredients)
-                    elif len(single_item.split()) > 2:
-                        # It's probably multiple ingredients in one string - try to extract from content
-                        ingredients = ""  # We'll extract from content below
-                    else:
-                        # It's a single ingredient
-                        ingredients = single_item
-
-                # If we still don't have proper ingredients, try to extract from content
-                if not ingredients or (len(ingredients.split("\n")) <= 1 and len(ingredients.split()) > 3):
-                    import re
-
-                    # Try to find ingredients section in the content
-                    content_lower = recipe_content.lower()
-                    ingredients_idx = content_lower.find("ingredients")
-                    instructions_idx = content_lower.find("instructions")
-
-                    if ingredients_idx != -1:
-                        # Extract text between "ingredients" and "instructions"
-                        start_idx = content_lower.find("\n", ingredients_idx) + 1  # Start after "ingredients" heading
-                        if start_idx <= 0:  # If newline not found, use the "ingredients" line length
-                            start_idx = ingredients_idx + len("ingredients") + 1
-
-                        end_idx = instructions_idx if instructions_idx != -1 else len(recipe_content)
-
-                        # Extract and clean ingredient items
-                        ingredient_section = recipe_content[start_idx:end_idx].strip()
-
-                        # Look for list items (numbered or bulleted)
-                        ingredient_lines = []
-                        for line in ingredient_section.split('\n'):
-                            line = line.strip()
-                            if not line:
-                                continue
-
-                            # Handle bulleted or numbered lists
-                            if line.startswith('*') or line.startswith('-') or re.match(r'^\d+\.?\s', line):
-                                # Extract the ingredient name without the bullet/number
-                                ingredient_text = re.sub(r'^[\*\-\d\.\)]+\s*', '', line)
-                                ingredient_lines.append(ingredient_text.strip())
-                            elif not line.endswith(':') and not any(section in line.lower() for section in ['ingredients', 'instructions', 'directions', 'steps']):
-                                ingredient_lines.append(line)
-
-                        if ingredient_lines:
-                            ingredients = "\n".join(ingredient_lines)
-                    
-            # Get default category (you might want to add logic to determine the right category)
-            try:
+            # Format ingredients
+            ingredients = "\n".join(ingredients_list)
+            
+            # Determine category - focus on specific keywords
+            category_lower = parsed_data['category'].lower()
+            
+            # Simple direct matching
+            if "breakfast" in category_lower:
+                category = Category.objects.get(name="Breakfast")
+            elif "lunch" in category_lower:
+                category = Category.objects.get(name="Lunch")
+            elif "dinner" in category_lower or "main" in category_lower:
+                category = Category.objects.get(name="Dinner")
+            elif "dessert" in category_lower:
+                category = Category.objects.get(name="Dessert")
+            elif "snack" in category_lower:
+                category = Category.objects.get(name="Snack")
+            else:
                 category = Category.objects.get(name="Other")
-            except Category.DoesNotExist:
-                # Create a default category if it doesn't exist
-                category = Category.objects.create(name="Other")
-                
-            # Create a new Recipe instance
+            
+            # Create recipe
             recipe = Recipe(
                 title=recipe_title,
                 description=description,
                 ingredients=ingredients,
-                instructions=instructions,
+                instructions=clean_content,
                 category=category,
                 creator=request.user,
-                # No image for AI-generated recipes by default
             )
-            
-            # Save the recipe
             recipe.save()
             
-            # Handle allergens based on dietary preference if needed
-            if dietary_preference:
-                if dietary_preference == "gluten-free":
-                    try:
-                        gluten_allergen = Allergen.objects.get(name="Gluten")
-                        recipe.allergen_free.add(gluten_allergen)
-                    except Allergen.DoesNotExist:
-                        pass
-                elif dietary_preference == "dairy-free":
-                    try:
-                        dairy_allergen = Allergen.objects.get(name="Dairy")
-                        recipe.allergen_free.add(dairy_allergen)
-                    except Allergen.DoesNotExist:
-                        pass
-                # Add similar handlers for other dietary preferences
+            # Simple, direct allergen check based on parsed allergens
+            recipe_allergens = [a.lower() for a in parsed_data['allergens']]
             
+            # Only set specific allergen-free flags when we know for sure
+            allergen_map = {
+                "milk": ["milk", "dairy"],
+                "eggs": ["egg", "eggs"],
+                "fish": ["fish"],
+                "shellfish": ["shellfish", "crab", "shrimp", "lobster"],
+                "tree nuts": ["tree nuts", "nuts", "almond", "walnut"],
+                "peanuts": ["peanut", "peanuts"],
+                "wheat": ["wheat", "gluten"],
+                "soybeans": ["soy", "soybeans"],
+                "sesame": ["sesame"]
+            }
+            
+            # Get all available allergens
+            all_allergens = Allergen.objects.all()
+            
+            # Only mark allergens as "free from" if they're not in the ingredients or metadata
+            for allergen in all_allergens:
+                # Check if this allergen is mentioned in the recipe's allergens
+                is_in_recipe = False
+                for term in allergen_map.get(allergen.name.lower(), []):
+                    if any(term in a_item for a_item in recipe_allergens):
+                        is_in_recipe = True
+                        break
+                
+                # If the allergen is not in the recipe, mark as allergen-free
+                if not is_in_recipe:
+                    recipe.allergen_free.add(allergen)
+            
+            # Return success
             return JsonResponse({
                 'success': True, 
                 'message': 'Recipe saved successfully',
                 'recipe_id': recipe.id
             })
                 
-        except json.JSONDecodeError:
-            return JsonResponse({'error': 'Invalid JSON data'}, status=400)
         except Exception as e:
+            import traceback
+            traceback.print_exc()
             return JsonResponse({'error': str(e)}, status=500)
     
     return JsonResponse({'error': 'Only POST requests are supported'}, status=405)

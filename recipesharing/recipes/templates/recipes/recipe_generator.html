@@ -88,408 +88,537 @@
 {% block scripts %}
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-        console.log("Recipe Generator Script Loaded");
-        
-        const ingredientInput = document.getElementById('ingredient-input');
-        const addIngredientBtn = document.getElementById('add-ingredient');
-        const ingredientsContainer = document.getElementById('ingredients-container');
-        const generateRecipeBtn = document.getElementById('generate-recipe');
-        const recipeContainer = document.getElementById('recipe-container');
-        const loadingSpinner = document.getElementById('loading-spinner');
-        const loadingMessage = document.getElementById('loading-message');
-        const dietaryPreferences = document.getElementById('dietary-preferences');
-        
-        // Check if elements exist
-        if (!ingredientInput) console.error("Ingredient input not found");
-        if (!addIngredientBtn) console.error("Add ingredient button not found");
-        if (!ingredientsContainer) console.error("Ingredients container not found");
-        if (!generateRecipeBtn) console.error("Generate recipe button not found");
-        if (!recipeContainer) console.error("Recipe container not found");
-        
-        // Sync with current theme
-        function syncWithTheme() {
-            const isDarkMode = document.body.classList.contains('dark-theme');
-            console.log("Theme sync - Dark mode:", isDarkMode);
-        }
-        
-        // Initial theme sync
-        syncWithTheme();
-        
-        // Add observer for theme changes
-        const observer = new MutationObserver((mutations) => {
-            mutations.forEach((mutation) => {
-                if (mutation.attributeName === 'class') {
-                    syncWithTheme();
-                }
-            });
-        });
-        
-        observer.observe(document.body, {attributes: true});
-        
-        let ingredients = [];
-        
-        // Add ingredient from input
-        function addIngredient() {
-            console.log("Add ingredient clicked");
-            const ingredient = ingredientInput.value.trim();
-            if (ingredient && !ingredients.includes(ingredient)) {
-                ingredients.push(ingredient);
-                updateIngredientsList();
-                ingredientInput.value = '';
-            }
-            ingredientInput.focus();
-        }
-        
-        // Update the ingredients list in the UI
-        function updateIngredientsList() {
-            console.log("Updating ingredients list", ingredients);
-            ingredientsContainer.innerHTML = '';
-            
-            if (ingredients.length === 0) {
-                ingredientsContainer.innerHTML = '<li class="list-group-item text-muted">No ingredients added yet</li>';
-                return;
-            }
-            
-            ingredients.forEach((ingredient, index) => {
-                const li = document.createElement('li');
-                li.className = 'list-group-item d-flex justify-content-between align-items-center';
-                li.innerHTML = `
-                    ${ingredient}
-                    <button type="button" class="btn btn-sm btn-danger" data-index="${index}">
-                        <i class="fas fa-times"></i> Remove
-                    </button>
-                `;
-                ingredientsContainer.appendChild(li);
-            });
-            
-            // Add event listeners to remove buttons
-            document.querySelectorAll('[data-index]').forEach(button => {
-                button.addEventListener('click', function() {
-                    const index = parseInt(this.getAttribute('data-index'));
-                    ingredients.splice(index, 1);
-                    updateIngredientsList();
-                });
-            });
-        }
-        
-        // Function to remove introductory text from AI-generated recipes
-        function removeIntroText(recipeText) {
-            // Common intro phrases that should be removed
-            const introPatterns = [
-                /^What an interesting combination!.*?(?=\n)/i,
-                /^Here['']s a recipe.*?(?=\n)/i,
-                /^I['']ve created.*?(?=\n)/i,
-                /^I['']ll create.*?(?=\n)/i,
-                /^Let me create.*?(?=\n)/i,
-                /^Let['']s create.*?(?=\n)/i, 
-                /^You can make.*?(?=\n)/i,
-                /^This recipe.*?(?=\n)/i,
-                /^Here['']s how.*?(?=\n)/i,
-                /^Using these ingredients.*?(?=\n)/i,
-                /^With these ingredients.*?(?=\n)/i,
-                /^Based on your ingredients.*?(?=\n)/i,
-                /^Absolutely!.*?(?=\n)/i,
-                /^Of course!.*?(?=\n)/i,
-                /^Certainly!.*?(?=\n)/i,
-                /^Sure!.*?(?=\n)/i
-            ];
-            
-            // Remove intro text from the beginning of the recipe
-            let cleanedText = recipeText;
-            for (const pattern of introPatterns) {
-                cleanedText = cleanedText.replace(pattern, '');
-            }
-            
-            // Also remove any leading empty lines after intro text is removed
-            cleanedText = cleanedText.replace(/^\s*\n+/g, '');
-            
-            return cleanedText;
-        }
-        
-        // Helper function to format recipe text
-        function formatRecipe(recipeText) {
-            // Detect if recipe is already in a structured format or free text
-            const hasTitle = recipeText.includes('**') || recipeText.includes('#');
-            
-            if (hasTitle) {
-                // Process markdown-style formatting
-                let formatted = recipeText;
-                
-                // Format headings and titles (** text ** or # text)
-                formatted = formatted.replace(/\*\*(.*?)\*\*/g, '<h3 class="recipe-title mb-3">$1</h3>');
-                formatted = formatted.replace(/^# (.*?)$/gm, '<h3 class="recipe-title mb-3">$1</h3>');
-                formatted = formatted.replace(/^\*\*\* (.*?):/gm, '<h4 class="recipe-section mt-4 mb-2">$1:</h4>');
-                
-                // Format lists (* text)
-                formatted = formatted.replace(/^\* (.*?)$/gm, '<li class="recipe-list-item">$1</li>');
-                
-                // Wrap lists in ul tags
-                formatted = formatted.replace(/<li class="recipe-list-item">(.*?)<\/li>\n<li class="recipe-list-item">/g, 
-                                            '<ul class="recipe-ingredients-list"><li class="recipe-list-item">$1</li><li class="recipe-list-item">');
-                formatted = formatted.replace(/<li class="recipe-list-item">(.*?)<\/li>\n(?!<li)/g, 
-                                            '<ul class="recipe-ingredients-list"><li class="recipe-list-item">$1</li></ul>');
-                
-                // Format numbered steps (1. text)
-                formatted = formatted.replace(/^(\d+)\.\s+(.*?)$/gm, '<div class="recipe-step"><span class="recipe-step-number">$1</span><span class="recipe-step-text">$2</span></div>');
-                
-                // Format sections like "Instructions:"
-                formatted = formatted.replace(/^\*\*(.*?):\*\*$/gm, '<h4 class="recipe-section mt-4 mb-2">$1:</h4>');
-                
-                return formatted;
-            } else {
-                // Simple formatting for free text
-                return `<div class="recipe-content-simple">${recipeText.replace(/\n/g, '<br>')}</div>`;
-            }
-        }
-        
-        // Generate recipe
-        async function generateRecipe() {
-            console.log("Generate recipe clicked", ingredients);
-            if (ingredients.length === 0) {
-                alert('Please add at least one ingredient');
-                return;
-            }
-            
-            // Show loading spinner with first message
-            loadingSpinner.classList.remove('d-none');
-            document.getElementById('recipe-placeholder')?.remove();
-            recipeContainer.innerHTML = '';
-            loadingMessage.textContent = "Dusting off grandma's secret recipe book...";
-            
-            // Setup loading messages in the sequence we want
-            const loadingMessages = [
-                "Dusting off grandma's secret recipe book...",
-                "Consulting with virtual Gordon Ramsay...",
-                "Running final flavor diagnostics..."
-            ];
-            
-            try {
-                // First loading message is already set
-                
-                // Send the request
-                console.log("Sending request to generate recipe API");
-                const apiUrl = '{% url "generate_recipe_api" %}';
-                
-                // Show second message
-                setTimeout(() => {
-                    loadingMessage.textContent = loadingMessages[1];
-                }, 800);
-                
-                // Send API request
-                const response = await fetch(apiUrl, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-Requested-With': 'XMLHttpRequest',
-                    },
-                    body: JSON.stringify({
-                        ingredients: ingredients,
-                        dietary_preferences: dietaryPreferences.value
-                    }),
-                });
-                
-                // Show third message right before processing response
-                setTimeout(() => {
-                    loadingMessage.textContent = loadingMessages[2];
-                }, 1600);
-                
-                // Add a small delay to ensure the last message is seen
-                await new Promise(resolve => setTimeout(resolve, 500));
-                
-                console.log("Response received:", response.status);
-                const data = await response.json();
-                console.log("Data:", data);
-                
-                // Process the response after showing the final message
-                setTimeout(() => {
-                    if (response.ok) {
-                        // Remove introductory text from the recipe
-                        const cleanedRecipeText = removeIntroText(data.recipe);
-                        
-                        // Format the recipe with better styling
-                        const formattedRecipe = formatRecipe(cleanedRecipeText);
-                        
-                        // Create recipe card with styled content
-                        recipeContainer.innerHTML = `
-                            <div class="recipe-content-card">
-                                ${formattedRecipe}
-                            </div>`;
-                        
-                        // Add action buttons
-                        const actionButtons = document.createElement('div');
-                        actionButtons.className = 'recipe-actions mt-4 d-flex gap-2';
-                        
-                        // Save button
-                        const saveButton = document.createElement('button');
-                        saveButton.className = 'btn save-recipe-btn';
-                        saveButton.innerHTML = '<i class="fas fa-save"></i> Save Recipe';
-                        // Update the save button event listener - make sure the URL is correct
-saveButton.addEventListener('click', async function() {
-    try {
-        // Show saving indicator
-        saveButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
-        saveButton.disabled = true;
-        
-        // Extract recipe title from the formatted recipe
-        let recipeTitle = 'Recipe with ' + ingredients.join(', ');
-        const titleElement = recipeContainer.querySelector('.recipe-title');
-        if (titleElement) {
-            recipeTitle = titleElement.textContent.trim();
-        }
-        
-        // Get the recipe content - either formatted HTML or raw text
-        const recipeCard = recipeContainer.querySelector('.recipe-content-card');
-        const recipeContent = recipeCard ? recipeCard.innerHTML : recipeContainer.innerHTML;
-        
-        // Process recipe content to extract readable text for database
-        // This converts HTML to plain text while preserving structure
-        const tempDiv = document.createElement('div');
-        tempDiv.innerHTML = recipeContent;
-        let rawText = tempDiv.innerText || tempDiv.textContent;
-        
-        // Ensure any intro text is removed from the raw text as well
-        rawText = removeIntroText(rawText);
-        
-        // Send save request to the API
-        const apiUrl = '{% url "save_recipe_api" %}';
-        const response = await fetch(apiUrl, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-Requested-With': 'XMLHttpRequest',
-                'X-CSRFToken': getCookie('csrftoken')
-            },
-            body: JSON.stringify({
-                title: recipeTitle,
-                content: rawText,
-                ingredients: ingredients,
-                dietary_preference: dietaryPreferences.value
-            }),
-        });
-        
-        const data = await response.json();
-        
-        if (response.ok) {
-            // Show success message
-            saveButton.classList.remove('save-recipe-btn');
-            saveButton.classList.add('btn-success');
-            saveButton.innerHTML = '<i class="fas fa-check"></i> Saved';
-            
-            // Add link to view the saved recipe - FIXED URL PATH
-            if (data.recipe_id) {
-                const viewLink = document.createElement('a');
-                viewLink.href = `/recipes/${data.recipe_id}/`;  // IMPORTANT: Use /recipes/ not /recipe/
-                viewLink.className = 'btn view-recipe-btn ms-2';
-                viewLink.innerHTML = '<i class="fas fa-eye"></i> View Saved Recipe';
-                saveButton.parentNode.appendChild(viewLink);
-            }
-            
-            // Keep button disabled to prevent multiple saves of same recipe
-        } else {
-            // If not logged in, show a special message
-            if (response.status === 403) {
-                throw new Error('Please log in to save recipes');
-            } else {
-                throw new Error(data.error || 'Failed to save recipe');
-            }
-        }
-    } catch (error) {
-        console.error("Error saving recipe:", error);
-        
-        // Handle authentication errors specially
-        if (error.message.includes('log in')) {
-            saveButton.innerHTML = '<i class="fas fa-user"></i> Login Required';
-            
-            // Create login link
-            const loginLink = document.createElement('a');
-            loginLink.href = '/accounts/login/?next=/recipe-generator/';
-            loginLink.className = 'btn btn-primary ms-2';
-            loginLink.innerHTML = 'Login to Save';
-            saveButton.parentNode.appendChild(loginLink);
-        } else {
-            // General error handling
-            saveButton.innerHTML = '<i class="fas fa-exclamation-triangle"></i> Error';
-            saveButton.classList.add('btn-danger');
-            
-            // Show error message
-            const errorToast = document.createElement('div');
-            errorToast.className = 'alert alert-danger mt-2';
-            errorToast.textContent = `Failed to save: ${error.message}`;
-            saveButton.parentNode.appendChild(errorToast);
-            
-            // Reset button after a delay
-            setTimeout(() => {
-                saveButton.innerHTML = '<i class="fas fa-save"></i> Try Again';
-                saveButton.disabled = false;
-                saveButton.classList.remove('btn-danger');
-            }, 3000);
-        }
+    console.log("Recipe Generator Script Loaded");
+    
+    const ingredientInput = document.getElementById('ingredient-input');
+    const addIngredientBtn = document.getElementById('add-ingredient');
+    const ingredientsContainer = document.getElementById('ingredients-container');
+    const generateRecipeBtn = document.getElementById('generate-recipe');
+    const recipeContainer = document.getElementById('recipe-container');
+    const loadingSpinner = document.getElementById('loading-spinner');
+    const loadingMessage = document.getElementById('loading-message');
+    const dietaryPreferences = document.getElementById('dietary-preferences');
+    
+    // Check if elements exist
+    if (!ingredientInput) console.error("Ingredient input not found");
+    if (!addIngredientBtn) console.error("Add ingredient button not found");
+    if (!ingredientsContainer) console.error("Ingredients container not found");
+    if (!generateRecipeBtn) console.error("Generate recipe button not found");
+    if (!recipeContainer) console.error("Recipe container not found");
+    
+    // Use sessionStorage instead of localStorage to ensure data is cleared when the browser is closed
+    const PAGE_KEY = 'recipePageUrl';
+    const DATA_KEY = 'recipeGeneratorData';
+    const currentPage = window.location.pathname; // Using pathname instead of full URL to avoid query param issues
+    
+    // Check if this is a refresh or new navigation
+    const savedPage = sessionStorage.getItem(PAGE_KEY);
+    const isRefresh = savedPage === currentPage;
+    
+    // Store current page pathname for future refresh detection
+    sessionStorage.setItem(PAGE_KEY, currentPage);
+    
+    // If not a refresh, clear previous data
+    if (!isRefresh) {
+        console.log("New page navigation - clearing previous data");
+        sessionStorage.removeItem(DATA_KEY);
+    } else {
+        console.log("Page refresh detected - keeping saved data");
     }
-});
+    
+    let ingredients = [];
+    
+    // Function to save the current state
+    function saveState() {
+        // Save all data in a single object
+        const stateData = {
+            ingredients: ingredients,
+            dietaryPreference: dietaryPreferences.value,
+            content: null
+        };
+        
+        // Save recipe content if available
+        const recipeCard = document.querySelector('.recipe-content-card');
+        if (recipeCard) {
+            stateData.content = recipeCard.innerHTML;
+        }
+        
+        sessionStorage.setItem(DATA_KEY, JSON.stringify(stateData));
+    }
 
-// Helper function to get CSRF token from cookies
-function getCookie(name) {
-    let cookieValue = null;
-    if (document.cookie && document.cookie !== '') {
-        const cookies = document.cookie.split(';');
-        for (let i = 0; i < cookies.length; i++) {
-            const cookie = cookies[i].trim();
-            if (cookie.substring(0, name.length + 1) === (name + '=')) {
-                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                break;
+    // Function to restore the previous state
+    function restoreState() {
+        const savedData = sessionStorage.getItem(DATA_KEY);
+        if (!savedData) return;
+        
+        try {
+            const stateData = JSON.parse(savedData);
+            
+            // Restore ingredients
+            if (stateData.ingredients && Array.isArray(stateData.ingredients)) {
+                ingredients = stateData.ingredients;
+                updateIngredientsList();
             }
+            
+            // Restore dietary preference
+            if (stateData.dietaryPreference) {
+                dietaryPreferences.value = stateData.dietaryPreference;
+            }
+            
+            // Restore recipe content
+            if (stateData.content) {
+                // Remove placeholder
+                document.getElementById('recipe-placeholder')?.remove();
+                
+                // Create recipe card with saved content
+                recipeContainer.innerHTML = `
+                    <div class="recipe-content-card">
+                        ${stateData.content}
+                    </div>`;
+                
+                // Add action buttons again
+                const actionButtons = document.createElement('div');
+                actionButtons.className = 'recipe-actions mt-4 d-flex gap-2';
+                
+                // Save button - commented out as requested
+                const saveButton = document.createElement('button');
+                saveButton.className = 'btn btn-secondary save-recipe-btn disabled';
+                saveButton.innerHTML = '<i class="fas fa-save"></i> This feature will be implemented soon';
+                // saveButton.addEventListener('click', saveRecipeHandler);
+                
+                // Print button
+                const printButton = document.createElement('button');
+                printButton.className = 'btn print-recipe-btn';
+                printButton.innerHTML = '<i class="fas fa-print"></i> Print';
+                printButton.addEventListener('click', function() {
+                    window.print();
+                });
+                
+                // Clear button to reset everything
+                const clearButton = document.createElement('button');
+                clearButton.className = 'btn btn-outline-secondary ms-auto';
+                clearButton.innerHTML = '<i class="fas fa-trash"></i> New Recipe';
+                clearButton.addEventListener('click', function() {
+                    if (confirm('Clear this recipe and start fresh?')) {
+                        sessionStorage.removeItem(DATA_KEY);
+                        window.location.reload();
+                    }
+                });
+                
+                actionButtons.appendChild(saveButton);
+                actionButtons.appendChild(printButton);
+                actionButtons.appendChild(clearButton);
+                recipeContainer.appendChild(actionButtons);
+            }
+        } catch (error) {
+            console.error("Error restoring state:", error);
+            sessionStorage.removeItem(DATA_KEY);
         }
     }
-    return cookieValue;
-}
-                        
-                        // Print button
-                        const printButton = document.createElement('button');
-                        printButton.className = 'btn print-recipe-btn';
-                        printButton.innerHTML = '<i class="fas fa-print"></i> Print';
-                        printButton.addEventListener('click', function() {
-                            window.print();
-                        });
-                        
-                        actionButtons.appendChild(saveButton);
-                        actionButtons.appendChild(printButton);
-                        recipeContainer.appendChild(actionButtons);
-                        
-                    } else {
-                        // Display error
-                        recipeContainer.innerHTML = `<div class="alert alert-danger">${data.error || 'Failed to generate recipe'}</div>`;
-                    }
-                    
-                    // Hide loading spinner
-                    loadingSpinner.classList.add('d-none');
-                }, 1000);
-                
-            } catch (error) {
-                console.error("Error generating recipe:", error);
-                
-                // Show final message before displaying error
-                loadingMessage.textContent = loadingMessages[2];
-                
-                // Small delay before showing error
-                setTimeout(() => {
-                    recipeContainer.innerHTML = `<div class="alert alert-danger">Error: ${error.message}</div>`;
-                    loadingSpinner.classList.add('d-none');
-                }, 1000);
-            }
-        }
-        
-        // Attach event listeners
-        console.log("Attaching event listeners");
-        addIngredientBtn.addEventListener('click', addIngredient);
-        ingredientInput.addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') {
-                addIngredient();
+    
+    // Sync with current theme
+    function syncWithTheme() {
+        const isDarkMode = document.body.classList.contains('dark-theme');
+        console.log("Theme sync - Dark mode:", isDarkMode);
+    }
+    
+    // Initial theme sync
+    syncWithTheme();
+    
+    // Add observer for theme changes
+    const observer = new MutationObserver((mutations) => {
+        mutations.forEach((mutation) => {
+            if (mutation.attributeName === 'class') {
+                syncWithTheme();
             }
         });
-        generateRecipeBtn.addEventListener('click', generateRecipe);
-        
-        // Initialize the ingredients list
-        updateIngredientsList();
     });
+    
+    observer.observe(document.body, {attributes: true});
+    
+    // Add ingredient from input
+    function addIngredient() {
+        console.log("Add ingredient clicked");
+        const ingredient = ingredientInput.value.trim();
+        if (ingredient && !ingredients.includes(ingredient)) {
+            ingredients.push(ingredient);
+            updateIngredientsList();
+            ingredientInput.value = '';
+            // Save state when ingredients change
+            saveState();
+        }
+        ingredientInput.focus();
+    }
+    
+    // Update the ingredients list in the UI
+    function updateIngredientsList() {
+        console.log("Updating ingredients list", ingredients);
+        ingredientsContainer.innerHTML = '';
+        
+        if (ingredients.length === 0) {
+            ingredientsContainer.innerHTML = '<li class="list-group-item text-muted">No ingredients added yet</li>';
+            return;
+        }
+        
+        ingredients.forEach((ingredient, index) => {
+            const li = document.createElement('li');
+            li.className = 'list-group-item d-flex justify-content-between align-items-center';
+            li.innerHTML = `
+                ${ingredient}
+                <button type="button" class="btn btn-sm btn-danger" data-index="${index}">
+                    <i class="fas fa-times"></i> Remove
+                </button>
+            `;
+            ingredientsContainer.appendChild(li);
+        });
+        
+        // Add event listeners to remove buttons
+        document.querySelectorAll('[data-index]').forEach(button => {
+            button.addEventListener('click', function() {
+                const index = parseInt(this.getAttribute('data-index'));
+                ingredients.splice(index, 1);
+                updateIngredientsList();
+                // Save state when ingredients change
+                saveState();
+            });
+        });
+    }
+    
+    // Function to remove introductory text from AI-generated recipes
+    function removeIntroText(recipeText) {
+        // Common intro phrases that should be removed
+        const introPatterns = [
+            /^What an interesting combination!.*?(?=\n)/i,
+            /^Here['']s a recipe.*?(?=\n)/i,
+            /^I['']ve created.*?(?=\n)/i,
+            /^I['']ll create.*?(?=\n)/i,
+            /^Let me create.*?(?=\n)/i,
+            /^Let['']s create.*?(?=\n)/i, 
+            /^You can make.*?(?=\n)/i,
+            /^This recipe.*?(?=\n)/i,
+            /^Here['']s how.*?(?=\n)/i,
+            /^Using these ingredients.*?(?=\n)/i,
+            /^With these ingredients.*?(?=\n)/i,
+            /^Based on your ingredients.*?(?=\n)/i,
+            /^Absolutely!.*?(?=\n)/i,
+            /^Of course!.*?(?=\n)/i,
+            /^Certainly!.*?(?=\n)/i,
+            /^Sure!.*?(?=\n)/i
+        ];
+        
+        // Remove intro text from the beginning of the recipe
+        let cleanedText = recipeText;
+        for (const pattern of introPatterns) {
+            cleanedText = cleanedText.replace(pattern, '');
+        }
+        
+        // Also remove any leading empty lines after intro text is removed
+        cleanedText = cleanedText.replace(/^\s*\n+/g, '');
+        
+        // Also remove any metadata-like lines that might not be in a proper metadata section
+        cleanedText = cleanedText.replace(/^Category:.*?\n/gmi, '');
+        cleanedText = cleanedText.replace(/^Allergens:.*?\n/gmi, '');
+        cleanedText = cleanedText.replace(/^Prep Time:.*?\n/gmi, '');
+        cleanedText = cleanedText.replace(/^Cook Time:.*?\n/gmi, '');
+        cleanedText = cleanedText.replace(/^Difficulty:.*?\n/gmi, '');
+        cleanedText = cleanedText.replace(/^Servings:.*?\n/gmi, '');
+        
+        return cleanedText;
+    }
+    
+    // Helper function to format recipe text
+    function formatRecipe(recipeText) {
+        // Detect if recipe is already in a structured format or free text
+        const hasTitle = recipeText.includes('**') || recipeText.includes('#');
+        
+        if (hasTitle) {
+            // Process markdown-style formatting
+            let formatted = recipeText;
+            
+            // Format headings and titles (** text ** or # text)
+            formatted = formatted.replace(/\*\*(.*?)\*\*/g, '<h3 class="recipe-title mb-3">$1</h3>');
+            formatted = formatted.replace(/^# (.*?)$/gm, '<h3 class="recipe-title mb-3">$1</h3>');
+            formatted = formatted.replace(/^\*\*\* (.*?):/gm, '<h4 class="recipe-section mt-4 mb-2">$1:</h4>');
+            
+            // Format lists (* text)
+            formatted = formatted.replace(/^\* (.*?)$/gm, '<li class="recipe-list-item">$1</li>');
+            
+            // Wrap lists in ul tags
+            formatted = formatted.replace(/<li class="recipe-list-item">(.*?)<\/li>\n<li class="recipe-list-item">/g, 
+                                        '<ul class="recipe-ingredients-list"><li class="recipe-list-item">$1</li><li class="recipe-list-item">');
+            formatted = formatted.replace(/<li class="recipe-list-item">(.*?)<\/li>\n(?!<li)/g, 
+                                        '<ul class="recipe-ingredients-list"><li class="recipe-list-item">$1</li></ul>');
+            
+            // Format numbered steps (1. text)
+            formatted = formatted.replace(/^(\d+)\.\s+(.*?)$/gm, '<div class="recipe-step"><span class="recipe-step-number">$1</span><span class="recipe-step-text">$2</span></div>');
+            
+            // Format sections like "Instructions:"
+            formatted = formatted.replace(/^\*\*(.*?):\*\*$/gm, '<h4 class="recipe-section mt-4 mb-2">$1:</h4>');
+            
+            return formatted;
+        } else {
+            // Simple formatting for free text
+            return `<div class="recipe-content-simple">${recipeText.replace(/\n/g, '<br>')}</div>`;
+        }
+    }
+    
+    // Save recipe handler function - commented out but kept for future implementation
+    /*
+    function saveRecipeHandler() {
+        try {
+            // Show saving indicator
+            this.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
+            this.disabled = true;
+            
+            // Extract recipe title from the formatted recipe
+            let recipeTitle = 'Recipe with ' + ingredients.join(', ');
+            const titleElement = recipeContainer.querySelector('.recipe-title');
+            if (titleElement) {
+                recipeTitle = titleElement.textContent.trim();
+            }
+            
+            // Get the recipe content - either formatted HTML or raw text
+            const recipeCard = recipeContainer.querySelector('.recipe-content-card');
+            const recipeContent = recipeCard ? recipeCard.innerHTML : recipeContainer.innerHTML;
+            
+            // Process recipe content to extract readable text for database
+            // This converts HTML to plain text while preserving structure
+            const tempDiv = document.createElement('div');
+            tempDiv.innerHTML = recipeContent;
+            let rawText = tempDiv.innerText || tempDiv.textContent;
+            
+            // Ensure any intro text is removed from the raw text as well
+            rawText = removeIntroText(rawText);
+            
+            // Send save request to the API
+            const apiUrl = '{% url "save_recipe_api" %}';
+            fetch(apiUrl, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'X-CSRFToken': getCookie('csrftoken')
+                },
+                body: JSON.stringify({
+                    title: recipeTitle,
+                    content: rawText,
+                    ingredients: ingredients,
+                    dietary_preference: dietaryPreferences.value
+                }),
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Show success message
+                    this.classList.remove('save-recipe-btn');
+                    this.classList.add('btn-success');
+                    this.innerHTML = '<i class="fas fa-check"></i> Saved';
+                    
+                    // Add link to view the saved recipe
+                    if (data.recipe_id) {
+                        const viewLink = document.createElement('a');
+                        viewLink.href = `/recipes/${data.recipe_id}/`;  // Use correct URL
+                        viewLink.className = 'btn view-recipe-btn ms-2';
+                        viewLink.innerHTML = '<i class="fas fa-eye"></i> View Saved Recipe';
+                        this.parentNode.appendChild(viewLink);
+                    }
+                } else {
+                    throw new Error(data.error || 'Failed to save recipe');
+                }
+            })
+            .catch(error => {
+                console.error("Error saving recipe:", error);
+                
+                // General error handling
+                this.innerHTML = '<i class="fas fa-exclamation-triangle"></i> Error';
+                this.classList.add('btn-danger');
+                
+                // Show error message
+                const errorToast = document.createElement('div');
+                errorToast.className = 'alert alert-danger mt-2';
+                errorToast.textContent = `Failed to save: ${error.message}`;
+                this.parentNode.appendChild(errorToast);
+                
+                // Reset button after a delay
+                setTimeout(() => {
+                    this.innerHTML = '<i class="fas fa-save"></i> Try Again';
+                    this.disabled = false;
+                    this.classList.remove('btn-danger');
+                }, 3000);
+            });
+        } catch (error) {
+            console.error("Error in save handler:", error);
+        }
+    }
+    */
+    
+    // Helper function to get CSRF token from cookies
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+    
+    // Generate recipe
+    async function generateRecipe() {
+        console.log("Generate recipe clicked", ingredients);
+        if (ingredients.length === 0) {
+            alert('Please add at least one ingredient');
+            return;
+        }
+        
+        // Show loading spinner with first message
+        loadingSpinner.classList.remove('d-none');
+        document.getElementById('recipe-placeholder')?.remove();
+        recipeContainer.innerHTML = '';
+        loadingMessage.textContent = "Dusting off grandma's secret recipe book...";
+        
+        // Setup loading messages in the sequence we want
+        const loadingMessages = [
+            "Dusting off grandma's secret recipe book...",
+            "Consulting with virtual Gordon Ramsay...",
+            "Running final flavor diagnostics..."
+        ];
+        
+        try {
+            // First loading message is already set
+            
+            // Send the request
+            console.log("Sending request to generate recipe API");
+            const apiUrl = '{% url "generate_recipe_api" %}';
+            
+            // Show second message
+            setTimeout(() => {
+                loadingMessage.textContent = loadingMessages[1];
+            }, 800);
+            
+            // Send API request
+            const response = await fetch(apiUrl, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'X-CSRFToken': getCookie('csrftoken')
+                },
+                body: JSON.stringify({
+                    ingredients: ingredients,
+                    dietary_preferences: dietaryPreferences.value
+                }),
+            });
+            
+            // Show third message right before processing response
+            setTimeout(() => {
+                loadingMessage.textContent = loadingMessages[2];
+            }, 1600);
+            
+            // Add a small delay to ensure the last message is seen
+            await new Promise(resolve => setTimeout(resolve, 500));
+            
+            console.log("Response received:", response.status);
+            const data = await response.json();
+            console.log("Data:", data);
+            
+            // Process the response after showing the final message
+            setTimeout(() => {
+                if (response.ok) {
+                    // First remove introductory text
+                    const textWithoutIntro = removeIntroText(data.recipe);
+                    
+                    // Then remove metadata section using regex
+                    const metadataRegex = /\*\*METADATA\*\*([\s\S]*?)(?=\*\*Ingredients|\*\*INSTRUCTIONS|\*\*Instructions|\Z)/i;
+                    const cleanedRecipeText = textWithoutIntro.replace(metadataRegex, '');
+                    
+                    // Format the recipe with better styling
+                    const formattedRecipe = formatRecipe(cleanedRecipeText);
+                    
+                    // Create recipe card with styled content
+                    recipeContainer.innerHTML = `
+                        <div class="recipe-content-card">
+                            ${formattedRecipe}
+                        </div>`;
+                    
+                    // Add action buttons
+                    const actionButtons = document.createElement('div');
+                    actionButtons.className = 'recipe-actions mt-4 d-flex gap-2';
+                    
+                    // Save button - commented out as requested and replaced with message
+                    const saveButton = document.createElement('button');
+                    saveButton.className = 'btn btn-secondary save-recipe-btn disabled';
+                    saveButton.innerHTML = '<i class="fas fa-save"></i> This feature will be implemented soon';
+                    // saveButton.addEventListener('click', saveRecipeHandler);
+                    
+                    // Print button
+                    const printButton = document.createElement('button');
+                    printButton.className = 'btn print-recipe-btn';
+                    printButton.innerHTML = '<i class="fas fa-print"></i> Print';
+                    printButton.addEventListener('click', function() {
+                        window.print();
+                    });
+                    
+                    // Clear button to reset everything
+                    const clearButton = document.createElement('button');
+                    clearButton.className = 'btn btn-outline-secondary ms-auto';
+                    clearButton.innerHTML = '<i class="fas fa-trash"></i> New Recipe';
+                    clearButton.addEventListener('click', function() {
+                        if (confirm('Clear this recipe and start fresh?')) {
+                            sessionStorage.removeItem(DATA_KEY);
+                            window.location.reload();
+                        }
+                    });
+                    
+                    actionButtons.appendChild(saveButton);
+                    actionButtons.appendChild(printButton);
+                    actionButtons.appendChild(clearButton);
+                    recipeContainer.appendChild(actionButtons);
+                    
+                    // Save the current state
+                    saveState();
+                    
+                } else {
+                    // Display error
+                    recipeContainer.innerHTML = `<div class="alert alert-danger">${data.error || 'Failed to generate recipe'}</div>`;
+                }
+                
+                // Hide loading spinner
+                loadingSpinner.classList.add('d-none');
+            }, 1000);
+            
+        } catch (error) {
+            console.error("Error generating recipe:", error);
+            
+            // Show final message before displaying error
+            loadingMessage.textContent = loadingMessages[2];
+            
+            // Small delay before showing error
+            setTimeout(() => {
+                recipeContainer.innerHTML = `<div class="alert alert-danger">Error: ${error.message}</div>`;
+                loadingSpinner.classList.add('d-none');
+            }, 1000);
+        }
+    }
+    
+    // Attach event listeners
+    console.log("Attaching event listeners");
+    addIngredientBtn.addEventListener('click', addIngredient);
+    ingredientInput.addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+            addIngredient();
+        }
+    });
+    generateRecipeBtn.addEventListener('click', generateRecipe);
+    
+    // Initialize the ingredients list and restore state
+    updateIngredientsList();
+    restoreState();
+});
 </script>
 {% endblock %}
