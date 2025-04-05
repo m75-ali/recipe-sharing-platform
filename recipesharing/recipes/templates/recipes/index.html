@@ -69,40 +69,38 @@
         <div class="col-md-8">
           <div class="d-flex gap-4 flex-wrap justify-content-md-end">
             <!-- Category Filter Section -->
-            <form id="category-filter-form" method="GET" class="filter-form">
-              <div class="filter-container">
-                <div class="input-group">
-                  <select name="category" class="form-select border-teal" id="category-select">
-                    <option value="" {% if not selected_category %}selected{% endif %}>All Categories</option>
-                    {% for category in categories %}
-                      <option value="{{ category.name }}" {% if selected_category == category.name %}selected{% endif %}>
-                        {{ category.name }}
-                      </option>
-                    {% endfor %}
-                  </select>
-                </div>
-                <button type="submit" class="filter-btn">Filter</button>
+            <div class="filter-container">
+              <div class="input-group">
+                <select name="category" class="form-select border-teal" id="category-select" style="appearance: none; background-image: none; padding-right: 10px;">
+                  <option value="" {% if not selected_category %}selected{% endif %}>All Categories</option>
+                  {% for category in categories %}
+                    <option value="{{ category.name }}" {% if selected_category == category.name %}selected{% endif %}>
+                      {{ category.name }}
+                    </option>
+                  {% endfor %}
+                </select>
               </div>
-            </form>
+            </div>
             
             <!-- Allergen Filter Section -->
-            <form id="allergen-filter-form" method="GET" class="filter-form">
+            <form id="allergen-filter-form" class="filter-form">
               <div class="filter-container">
                 <div class="dropdown-check-list" tabindex="100">
-                  <span class="anchor form-select border-teal">Select Allergens</span>
+                  <span class="anchor form-select border-teal" style="background-image: none; padding-right: 15px;">Select Allergens to Exclude</span>
                   <ul class="items">
                     {% for allergen in allergens %}
                       <li>
-                        <label>
-                          <input type="checkbox" name="allergens" value="{{ allergen.id }}" 
+                        <label style="display: flex; align-items: center; gap: 8px; position: relative;">
+                          <input type="checkbox" name="allergens" value="{{ allergen.id }}" class="allergen-checkbox"
+                            style="width: 18px; height: 18px; visibility: visible !important; opacity: 1 !important; position: relative; z-index: 1;"
                             {% if allergen.id|stringformat:"i" in selected_allergens %}checked{% endif %}/>
-                          {{ allergen.name }}
+                          <span style="display: inline-block; margin-left: 8px; position: relative; z-index: 2;">{{ allergen.name }}</span>
                         </label>
                       </li>
                     {% endfor %}
                   </ul>
                 </div>
-                <button type="submit" class="filter-btn">Filter</button>
+                <button type="button" id="apply-allergens-btn" class="filter-btn">Apply Filters</button>
               </div>
             </form>
           </div>
@@ -121,7 +119,68 @@
     Surprise Me
   </a>
 
-  <!-- JavaScript for dropdown checklist -->
+  <!-- Custom CSS for allergen dropdown -->
+  <style>
+    .dropdown-check-list {
+      position: relative;
+    }
+
+    .dropdown-check-list .items {
+      display: none;
+      margin: 0;
+      padding: 0;
+      border: 1px solid #ccc;
+      border-top: none;
+      position: absolute;
+      z-index: 1000;
+      background: white;
+      width: 100%;
+      max-height: 300px;
+      overflow-y: auto;
+      box-shadow: 0 3px 6px rgba(0,0,0,0.16);
+    }
+
+    .dropdown-check-list.visible .items {
+      display: block;
+    }
+
+    .dropdown-check-list .items li {
+      list-style: none;
+      padding: 8px 12px;
+      border-bottom: 1px solid #f0f0f0;
+    }
+
+    .dropdown-check-list .items li:hover {
+      background-color: #f9f9f9;
+    }
+
+    .dropdown-check-list .items li label {
+      margin: 0;
+      cursor: pointer;
+      width: 100%;
+      display: flex !important;
+      align-items: center !important;
+    }
+    
+    .dropdown-check-list .items li label span {
+      padding-left: 8px;
+      display: inline-block;
+    }
+
+    .allergen-checkbox {
+      cursor: pointer;
+      min-width: 18px !important;
+      min-height: 18px !important;
+      margin-right: 10px !important;
+      position: relative !important;
+      z-index: 5 !important;
+      -webkit-appearance: checkbox !important;
+      -moz-appearance: checkbox !important;
+      appearance: checkbox !important;
+    }
+  </style>
+  
+  <!-- JavaScript for dropdown checklist and filtering -->
   <script>
     document.addEventListener('DOMContentLoaded', function() {
       // Set up dropdown checklist
@@ -145,25 +204,32 @@
       });
       
       // Update the anchor text based on selections
-      var checkboxes = checkList.querySelectorAll('input[type="checkbox"]');
+      var checkboxes = document.querySelectorAll('.allergen-checkbox');
       var updateAnchorText = function() {
         var selectedItems = [];
         checkboxes.forEach(function(checkbox) {
           if (checkbox.checked) {
-            selectedItems.push(checkbox.parentNode.textContent.trim());
+            selectedItems.push(checkbox.nextElementSibling.textContent.trim());
           }
         });
         
         if (selectedItems.length > 0) {
           if (selectedItems.length > 2) {
-            anchor.textContent = selectedItems.length + ' allergens selected';
+            anchor.textContent = selectedItems.length + ' allergens excluded';
           } else {
-            anchor.textContent = selectedItems.join(', ');
+            anchor.textContent = 'Excluding: ' + selectedItems.join(', ');
           }
         } else {
-          anchor.textContent = 'Select Allergens';
+          anchor.textContent = 'Select Allergens to Exclude';
         }
       };
+      
+      // Toggle state of checkboxes when clicked
+      checkboxes.forEach(function(checkbox) {
+        checkbox.addEventListener('click', function(e) {
+          e.stopPropagation(); // Prevent dropdown from closing when clicking checkbox
+        });
+      });
       
       // Initialize anchor text
       updateAnchorText();
@@ -172,11 +238,56 @@
       checkboxes.forEach(function(checkbox) {
         checkbox.addEventListener('change', updateAnchorText);
       });
+      
+      // Combined AJAX filtering for both category and allergens
+      document.getElementById('category-select').addEventListener('change', function() {
+        filterRecipes();
+      });
+      
+      document.getElementById('apply-allergens-btn').addEventListener('click', function(e) {
+        e.preventDefault();
+        filterRecipes();
+      });
+      
+      function filterRecipes() {
+        // Get current category selection
+        var category = document.getElementById('category-select').value;
+        
+        // Get selected allergens
+        var selectedAllergens = [];
+        document.querySelectorAll('.allergen-checkbox:checked').forEach(function(checkbox) {
+          selectedAllergens.push(checkbox.value);
+        });
+        
+        // Build query string
+        var queryParams = new URLSearchParams();
+        if (category) {
+          queryParams.append('category', category);
+        }
+        
+        selectedAllergens.forEach(function(allergenId) {
+          queryParams.append('allergens', allergenId);
+        });
+        
+        var url = window.location.pathname + '?' + queryParams.toString();
+        
+        // Update URL without refreshing page (for browser history)
+        window.history.pushState({}, '', url);
+        
+        // Fetch filtered recipes
+        fetch(url)
+          .then(response => response.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(html, 'text/html');
+            const newRecipes = doc.getElementById('recipes-container').innerHTML;
+            document.getElementById('recipes-container').innerHTML = newRecipes;
+          })
+          .catch(error => console.error('Error:', error));
+      }
     });
   </script>
 
-  <!-- JavaScript for AJAX Filtering -->
-  <script src="{% static 'recipes/js/filter.js' %}"></script>
   <script>
     document.getElementById('surpriseMeBtn').addEventListener('click', function () {
       window.scrollTo({ top: 0, behavior: 'smooth' });
