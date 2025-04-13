@@ -1,0 +1,2 @@
+
+gunicorn recipesharing.wsgi --log-file -
