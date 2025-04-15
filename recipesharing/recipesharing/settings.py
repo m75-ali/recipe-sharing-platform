@@ -7,9 +7,11 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 # Security
 SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', 'your-default-insecure-key')
-DEBUG = os.environ.get('DEBUG', 'False').lower() == 'true'
+DEBUG = os.environ.get('DEBUG', 'True').lower() == 'true'
 
-ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', 'localhost 127.0.0.1').split()
+ALLOWED_HOSTS = ['recipe-sharing-platform-1w5u.onrender.com', 'localhost', '127.0.0.1']
+
+# Also ensure you have this for CSRF protection
 CSRF_TRUSTED_ORIGINS = [
     'https://recipe-sharing-platform-1w5u.onrender.com',
 ]
@@ -36,6 +38,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'recipesharing.middleware.DebugMiddleware',  # Custom middleware for debugging
 ]
 
 ROOT_URLCONF = 'recipesharing.urls'
@@ -106,3 +109,10 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 LOGIN_REDIRECT_URL = 'recipe_index'
 LOGOUT_REDIRECT_URL = 'recipe_index'
 LOGIN_URL = 'login'
+
+
+# Cookie settings
+SESSION_COOKIE_SECURE = True
+CSRF_COOKIE_SECURE = True
+SESSION_COOKIE_SAMESITE = 'None'  # Try 'Lax' if this doesn't work
+CSRF_COOKIE_SAMESITE = 'None'     # Try 'Lax' if this doesn't work
