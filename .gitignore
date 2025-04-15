@@ -56,7 +56,6 @@ htmlcov/
 # Ignore custom secrets or sensitive configuration files
 secrets.json
 
-media/uploads/
 
 # Ignore build and dist directories
 build/
