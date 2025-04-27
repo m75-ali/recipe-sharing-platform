@@ -1,53 +1,175 @@
 {% extends 'recipes/base.html' %}
 
 {% block content %}
-    <!-- Main container for the registration page -->
-    <div class="container mt-5">
-        <!-- Button to go back to the home page -->
-        <div class="mb-4">
-            <a href="{% url 'recipe_index' %}" class="btn btn-secondary">Home</a>
-        </div>
-
-        <!-- Heading for the registration page -->
-        <h1 class="text-center mb-4">Register</h1>
-
-        <!-- Display success/error messages -->
-        {% if messages %}
-            <div class="mb-4">
-                {% for message in messages %}
-                    <!-- Each message is styled based on its type (success, error, etc.) -->
-                    <div class="alert alert-{{ message.tags }}">
-                        {{ message }}
-                    </div>
-                {% endfor %}
-            </div>
-        {% endif %}
-
-        <!-- Registration form -->
-        <form method="post">
-            {% csrf_token %}  <!-- CSRF protection token -->
-
-            <!-- Render form fields with Bootstrap's styling -->
-            <div class="form-group">
-                {{ form.as_p }}  <!-- Renders the form fields wrapped in <p> tags -->
-            </div>
-
-            <!-- Privacy Policy checkbox -->
-            <div class="form-check">
-                <input type="checkbox" class="form-check-input" id="agreeToPrivacyPolicy" required>
-                <label class="form-check-label" for="agreeToPrivacyPolicy">
-                    I agree to the <a href="{% url 'privacy_policy' %}" target="_blank">Privacy Policy</a>
-                </label>
-            </div> 
-
-            <!-- Submit button for the registration form -->
-            <button type="submit" class="btn btn-primary mt-3 w-100">Register</button>
-        </form>
-
-        <!-- Link to the login page for users who already have an account -->
-        <div class="mt-3 text-center">
-            <p>Already have an account?</p>
-            <a href="{% url 'login' %}" class="btn btn-link">Go to Login</a>
+<div class="container py-5">
+    <!-- Back to home button at the top -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <a href="{% url 'recipe_index' %}" class="btn btn-outline-secondary">
+                <i class="bi bi-house-door-fill me-1"></i> Back to Home
+            </a>
         </div>
     </div>
+    
+    <div class="row justify-content-center">
+        <div class="col-md-10 col-lg-8">
+            <!-- Card container for the form -->
+            <div class="card shadow-sm border-0 rounded-lg">
+                <div class="card-header text-center py-3">
+                    <h2 class="mb-0 fs-4">Create an Account</h2>
+                </div>
+                <div class="card-body p-4">
+                    <!-- Display messages -->
+                    {% if messages %}
+                        {% for message in messages %}
+                            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                                {{ message }}
+                                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+
+                    <!-- Registration form -->
+                    <form method="post" class="needs-validation" novalidate>
+                        {% csrf_token %}
+                        
+                        <!-- Username field -->
+                        <div class="mb-3">
+                            <label for="{{ form.username.id_for_label }}" class="form-label fw-bold">Username</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="bi bi-person-fill"></i></span>
+                                <input type="text" name="{{ form.username.name }}" id="{{ form.username.id_for_label }}" class="form-control {% if form.username.errors %}is-invalid{% endif %}" 
+                                       placeholder="Choose a username" required>
+                                {% if form.username.errors %}
+                                    <div class="invalid-feedback">
+                                        {% for error in form.username.errors %}
+                                            {{ error }}
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <!-- Email field -->
+                        <div class="mb-3">
+                            <label for="{{ form.email.id_for_label }}" class="form-label fw-bold">Email Address</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="bi bi-envelope-fill"></i></span>
+                                <input type="email" name="{{ form.email.name }}" id="{{ form.email.id_for_label }}" class="form-control {% if form.email.errors %}is-invalid{% endif %}" required>
+                                {% if form.email.errors %}
+                                    <div class="invalid-feedback">
+                                        {% for error in form.email.errors %}
+                                            {{ error }}
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <!-- Password field -->
+                        <div class="mb-3">
+                            <label for="{{ form.password1.id_for_label }}" class="form-label fw-bold">Password</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="bi bi-lock-fill"></i></span>
+                                <input type="password" name="{{ form.password1.name }}" id="{{ form.password1.id_for_label }}" 
+                                       class="form-control {% if form.password1.errors %}is-invalid{% endif %}"
+                                       placeholder="Create a secure password" required>
+                                {% if form.password1.errors %}
+                                    <div class="invalid-feedback">
+                                        {% for error in form.password1.errors %}
+                                            {{ error }}
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <!-- Confirm Password field -->
+                        <div class="mb-3">
+                            <label for="{{ form.password2.id_for_label }}" class="form-label fw-bold">Confirm Password</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="bi bi-shield-lock-fill"></i></span>
+                                <input type="password" name="{{ form.password2.name }}" id="{{ form.password2.id_for_label }}" 
+                                       class="form-control {% if form.password2.errors %}is-invalid{% endif %}"
+                                       placeholder="Confirm your password" required>
+                                {% if form.password2.errors %}
+                                    <div class="invalid-feedback">
+                                        {% for error in form.password2.errors %}
+                                            {{ error }}
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <!-- Privacy Policy checkbox -->
+                        <div class="mb-4">
+                            <div class="form-check">
+                                <input type="checkbox" class="form-check-input" id="agreeToPrivacyPolicy" required>
+                                <label class="form-check-label" for="agreeToPrivacyPolicy">
+                                    I agree to the <a href="{% url 'privacy_policy' %}" target="_blank" class="text-decoration-none">Privacy Policy</a>
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <!-- Submit button -->
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-success btn-lg">Create Account</button>
+                        </div>
+                    </form>
+                </div>
+                
+                <!-- Card footer with login link -->
+                <div class="card-footer text-center py-3">
+                    <div class="small">
+                        Already have an account? <a href="{% url 'login' %}">Sign in</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<!-- Add Bootstrap Icons -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+<style>
+    /* Custom styles */
+    .card {
+        border-radius: 0.5rem;
+        box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+    }
+    .card-header {
+        border-top-left-radius: 0.5rem;
+        border-top-right-radius: 0.5rem;
+        background-color: #f8f9fa;
+    }
+    .card-footer {
+        border-bottom-left-radius: 0.5rem;
+        border-bottom-right-radius: 0.5rem;
+        background-color: #f8f9fa;
+    }
+    .input-group-text {
+        background-color: #f8f9fa;
+    }
+    /* These can be replaced with your application's colors */
+    .btn-success {
+        background-color: #28a745;
+        border-color: #28a745;
+    }
+    .btn-success:hover {
+        background-color: #218838;
+        border-color: #1e7e34;
+    }
+    .btn-outline-secondary {
+        color: #6c757d;
+        border-color: #6c757d;
+    }
+    .btn-outline-secondary:hover {
+        color: #fff;
+        background-color: #6c757d;
+        border-color: #6c757d;
+    }
+</style>
 {% endblock %}
